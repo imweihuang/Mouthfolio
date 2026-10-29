@@ -49,16 +49,20 @@ export async function checkServiceOnly(browser, basePath = "") {
     syntheticPayload.observations = Array.from({ length: 21 }, (_, index) => ({
       ...fixture.observations[0], id: `fictional-metric-${index}`, version_id: `fictional-version-${index}`,
       label: `Fictional measure ${index + 1}`,
+      period: index < 16 ? { label: "Fictional earlier period", start: "2025-01-01", end: "2025-12-31" } :
+        { label: "Fictional latest period", start: "2026-01-01", end: "2026-06-30" },
     }));
     await page.goto(origin + "/companies/aster-compute");
     await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
-    assert.equal(await page.locator(".metric-card").count(), 4);
+    assert.equal(await page.locator(".metric-card").count(), 5);
     assert.equal(await page.locator("tbody tr").count(), 21);
+    assert.match(await page.locator(".summary-note").textContent(), /Latest reporting date: 2026-06-30/);
+    assert.equal(await page.locator(".metric-card").getByText("Fictional earlier period", { exact: false }).count(), 0);
     assert.equal(await page.locator("blockquote").count(), 0);
     assert.ok(await page.getByText("See original source", { exact: true }).isVisible());
     await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
     await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
-    console.log("Authorized-mode synthetic transport passed: 21 exact table rows, 4 summary cards, plain view text, absent qualifiers and unavailable source copy.");
+    console.log("Authorized-mode synthetic transport passed: 21 exact table rows, 5 latest-date summary cards, plain view text, absent qualifiers and unavailable source copy.");
     console.log("Service-only mode passed: Anthropic home, no demo adapter through company or voice routes, missing service stays unavailable.");
   } finally {
     await page?.close();
