@@ -1,17 +1,17 @@
 {
-  "schema_version": "asof.mouthfolio.research.v0.1",
+  "schema_version": "asof.mouthfolio.research.v0.2",
   "source_repository": "imweihuang/AsOf",
-  "source_revision": "9d09e80e78f7f6b7b1946a6b4ad824fc0049f6e4",
+  "source_revision": "f2e42220ee681105a60f83c7eb47bcc9190acc88",
   "source_paths": {
-    "contracts/mouthfolio-research.v0.1.schema.json": "docs/contracts/mouthfolio-research.v0.1.schema.json",
-    "contracts/types.ts": "docs/contracts/mouthfolio-research.v0.1.ts",
-    "fixtures/initial.json": "docs/contracts/examples/mouthfolio-initial.json",
-    "fixtures/corrected.json": "docs/contracts/examples/mouthfolio-corrected.json"
+    "contracts/mouthfolio-research.v0.2.schema.json": "docs/contracts/mouthfolio-research.v0.2.schema.json",
+    "contracts/types.ts": "docs/contracts/mouthfolio-research.v0.2.ts",
+    "fixtures/initial.json": "docs/contracts/examples/mouthfolio-v0.2-initial.json",
+    "fixtures/corrected.json": "docs/contracts/examples/mouthfolio-v0.2-corrected.json"
   },
   "files": {
-    "contracts/mouthfolio-research.v0.1.schema.json": "9a07d5762055aca983593182e96da887c453a918434bfec2c8150bac46501c52",
-    "contracts/types.ts": "69c0935da5a02bac678d128fd72885bc4500f012298ddb3f2fd88f770f7f900c",
-    "fixtures/initial.json": "3ff298e07495b875ebc830f307114e77fb2457b5027e5005a037ebe3c3f81d8a",
-    "fixtures/corrected.json": "250ac03199da740d67bb21abbd3e8e93db40c4ae9fc90c5b520deacbd6e86552"
+    "contracts/mouthfolio-research.v0.2.schema.json": "a4cbe41c61b5ef9c040f9e909f4069c9474640e8c16044cf45e0d8eada4e21df",
+    "contracts/types.ts": "0d9d09c6f2774bbe24d3084d0f1635f6bc0696a0085d8864d4bae67d872ad91c",
+    "fixtures/initial.json": "ff1b2139e8d483e7caa999edf65c5b81c4b23187b6a06d6ad9fbabba1c811a41",
+    "fixtures/corrected.json": "fbafe1349dac2491792f4653076624c620797def2fae25c1dd7c1a4bf7c4e502"
   }
 }

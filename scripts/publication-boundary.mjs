@@ -9,8 +9,13 @@ export const UPSTREAM = "imweihuang/mouthfolio";
 export const UPSTREAM_ID = 1437778933;
 const LIMIT = 2 * 1024 * 1024;
 // Reviewed browser smoke deliberately requests these routes and requires 404.
-// Only this exact file version may contain the route strings; other rules apply.
-const ROUTE_PROBE_SHA256 = "c5b6da5315a5b2534448688651f814b0d875f18eb8d948cf19c7f448cb269ad5";
+// Only these exact reviewed versions may contain route strings; other rules apply.
+// Retain published versions so complete-history scans continue to verify ancestors.
+const ROUTE_PROBE_SHA256 = new Set([
+  "c0d8fe6dd3b1447247a42da66e887372229f4db257ad210e0e1f02f8f4da3b42",
+  "c5b6da5315a5b2534448688651f814b0d875f18eb8d948cf19c7f448cb269ad5",
+  "1591649404ff44f7e97787dd1964591107d807a54300c4afa05cfdcb1dd6f020",
+]);
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const forbidden = /(^|\/)(?:\.env(?:\..*)?|\.netrc|\.pypirc|\.git-credentials|\.delegate|\.claude|\.codex|\.aws|id_rsa(?:\..*)?|id_ed25519(?:\..*)?|id_ecdsa(?:\..*)?|secrets?(?:\.[^/]*)?|credentials(?:\.[^/]*)?|service[-_]account(?:\.[^/]*)?|\.gitmodules|backend|deploy|private|operator|credentials|archives|backups|raw-data|output)(?:\/|$)|\.(?:pem|key|p12|pfx|sqlite3?|db|dump|zip|tar|gz|bundle)$/i;
 const privateDocs = /(^|\/)(?:DECISIONS(?:[^/]*)|REPO_STATE|OWNER_OVERVIEW|JOURNAL|DEPLOYMENT|BACKUP_RUNBOOK)\.(?:md|json|html)$/i;
@@ -182,7 +187,7 @@ export function scan(source, { requireMetadata = true } = {}) {
       continue;
     }
     const contentErrors = inspectText(text, file);
-    errors.push(...contentErrors.filter(error => !(file === "scripts/browser-smoke.mjs" && sha256(bytes) === ROUTE_PROBE_SHA256 && error === `${file}: private route`)));
+    errors.push(...contentErrors.filter(error => !(file === "scripts/browser-smoke.mjs" && ROUTE_PROBE_SHA256.has(sha256(bytes)) && error === `${file}: private route`)));
     if (file.startsWith("fixtures/") && file.endsWith(".json")) {
       try { if (JSON.parse(text).data_mode !== "synthetic") errors.push(`${file}: non-synthetic fixture`); }
       catch { errors.push(`${file}: invalid fixture JSON`); }

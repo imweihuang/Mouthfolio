@@ -1,6 +1,6 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import schema from "../contracts/mouthfolio-research.v0.1.schema.json" with { type: "json" };
+import schema from "../contracts/mouthfolio-research.v0.2.schema.json" with { type: "json" };
 import type { MouthfolioResearch } from "../contracts/types.ts";
 
 export type ResearchQuery = { companyId: string; asOf: string; window: "all" };
@@ -36,17 +36,17 @@ export function decodeResearch(raw: unknown, query: ResearchQuery,
   const data = raw;
   if (data.company.id !== query.companyId || data.window !== query.window ||
       data.data_mode !== mode || instant(data.as_of) !== instant(query.asOf)) return fail();
-  const groups = [data.questions, data.voices, data.views, data.observations, data.receipts];
+  const groups = [data.questions, data.voices, data.views, data.mentions, data.observations, data.receipts];
   if (groups.some(group => new Set(group.map(item => item.id)).size !== group.length)) return fail();
   if (data.status !== "ready") {
     if (groups.some(group => group.length > 0)) return fail();
     return data;
   }
-  if (data.questions.length === 0 || data.receipts.length === 0) return fail();
+  if (data.receipts.length === 0) return fail();
   const cutoff = instant(query.asOf);
   const receipts = new Map(data.receipts.map(item => [item.id, item]));
   const voices = new Set(data.voices.map(item => item.id));
-  const rows = [...data.questions, ...data.views, ...data.observations];
+  const rows = [...data.questions, ...data.views, ...data.mentions, ...data.observations];
   if (new Set(rows.map(row => row.version_id)).size !== rows.length) return fail();
   for (const receipt of data.receipts) {
     if (instant(receipt.ingested_at) > instant(receipt.available_at) ||
@@ -72,7 +72,7 @@ export function decodeResearch(raw: unknown, query: ResearchQuery,
     if ("company_id" in row && row.company_id !== data.company.id) return fail();
     if ("supersedes" in row && row.supersedes === row.version_id) return fail();
   }
-  for (const view of data.views) {
+  for (const view of [...data.views, ...data.mentions]) {
     if (!voices.has(view.voice_id)) return fail();
     instant(view.published_at);
   }
@@ -85,7 +85,7 @@ export function decodeResearch(raw: unknown, query: ResearchQuery,
 }
 
 export function formatAmount(amount: string | null, unit: string): string {
-  if (amount === null) return "Not disclosed";
+  if (amount === null) return "No value";
   // Preserve decimal strings; financial values never round through a JS float.
   const [whole, fraction] = amount.split(".");
   return whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +

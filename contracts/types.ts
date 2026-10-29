@@ -1,4 +1,4 @@
-// Generated from mouthfolio-research.v0.1.schema.json. Do not edit.
+// Generated from mouthfolio-research.v0.2.schema.json. Do not edit.
 export type Company = {
   "id": string;
   "name": string;
@@ -42,6 +42,7 @@ export type Observation = {
   "receipt_id": string;
   "revision_kind": "initial" | "correction";
   "supersedes": string | null;
+  "basis": string;
 };
 
 export type Question = {
@@ -74,8 +75,18 @@ export type Coverage = {
   "note": string;
 };
 
+export type Mention = {
+  "id": string;
+  "version_id": string;
+  "voice_id": string;
+  "company_id": string;
+  "published_at": string;
+  "available_at": string;
+  "receipt_id": string;
+};
+
 export type MouthfolioResearch = {
-  "schema_version": "asof.mouthfolio.research.v0.1";
+  "schema_version": "asof.mouthfolio.research.v0.2";
   "data_mode": "synthetic" | "authorized";
   "status": "ready" | "no_record_found" | "revoked" | "unavailable";
   "as_of": string;
@@ -87,4 +98,5 @@ export type MouthfolioResearch = {
   "views": Array<AttributedView>;
   "observations": Array<Observation>;
   "receipts": Array<Receipt>;
+  "mentions": Array<Mention>;
 };

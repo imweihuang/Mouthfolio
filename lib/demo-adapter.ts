@@ -19,7 +19,7 @@ export function createDemoAdapter(scenario: DemoScenario = "available"): Researc
     // Current revocation is checked even for an earlier historical cutoff.
     if (scenario !== "available" || cutoff < instant(INITIAL_AS_OF) || query.companyId !== DEMO_COMPANY) {
       data.status = scenario === "available" ? "no_record_found" : scenario;
-      data.questions = []; data.voices = []; data.views = []; data.observations = []; data.receipts = [];
+      data.questions = []; data.voices = []; data.views = []; data.mentions = []; data.observations = []; data.receipts = [];
       data.coverage = { state: "partial", note: "This synthetic example has no displayable records for this request." };
     }
     return decodeResearch(data, query, "synthetic");

@@ -19,13 +19,14 @@ does not connect to that service or provide real research.
 
 | Included in the fictional local demo | Planned |
 |---|---|
-| A small example linking a company, research question, commentator's view and source | The full company dashboard, filing reader and navigation between companies and voices |
+| Connected company, voice and source pages with reported metrics, distinct views/mentions and an evidence inspector | A complete filing reader and broader company coverage |
 | Dated sources, a later correction and visible missing-data and error states | A complete research journey, tested with readers |
-| Fictional data that works locally | An authorized connection to hosted ASOF Data |
+| Fictional data that works locally, plus a server adapter that fails closed without an authorized service | Hosted ASOF Data qualification |
 
 For contributors, the repository also includes selected visual foundations, a
 versioned client-service interface and automated checks. The connection code has
-been tested locally, but the demo is not connected to a hosted service.
+been tested locally. The default demo remains offline; see the [journey guide](docs/JOURNEY.md)
+for the separate service route and deployment-time connection.
 
 Interfaces and presentation may change during the alpha. There is no stable API
 or production-support commitment. Publishing this source is separate from

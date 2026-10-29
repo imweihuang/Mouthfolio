@@ -209,3 +209,12 @@ test("fork installation requires an explicit numeric identity and preserves it",
   const hook = readFileSync(path.join(root, ".git/hooks/pre-push"), "utf8"), revision = /\/mouthfolio-guards\/([0-9a-f]{64})\//.exec(hook)[1];
   assert.equal(JSON.parse(readFileSync(path.join(root, ".git/mouthfolio-guards", revision, "policy.json"))).repositoryId, 17);
 });
+
+test("browser route probes are accepted only at reviewed exact hashes", t => {
+  const root = fixture(t);
+  const reviewed = readFileSync(path.join(scripts, "browser-smoke.mjs"), "utf8");
+  put(root, "scripts/browser-smoke.mjs", reviewed);
+  assert.doesNotThrow(() => scan(snapshot(root, "worktree")));
+  put(root, "scripts/browser-smoke.mjs", reviewed + "\n// Changed probe must be reviewed again.\n");
+  assert.throws(() => scan(snapshot(root, "worktree")), /private route/);
+});
