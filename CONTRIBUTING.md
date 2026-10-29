@@ -1,9 +1,9 @@
 # Contributing
 
-Mouthfolio is an early-alpha client with a small runnable synthetic demo. The full
-company and filing experiences remain separate feature imports described in
-[the development handoff](docs/DEVELOPMENT.md). No private service or sibling
-checkout is needed to contribute to this repository.
+Mouthfolio is an early-alpha research client with a runnable synthetic demo.
+See [README](README.md) for current capabilities and [progress](docs/PROGRESS.md)
+for remaining work. No private service or sibling checkout is needed to contribute.
+For copy changes, use the three [writing principles](AGENTS.md#writing-principles).
 
 Open a [GitHub issue](https://github.com/imweihuang/Mouthfolio/issues) for a bug or
 proposal. Include the revision, Node/npm versions and a minimal synthetic example.
@@ -79,6 +79,6 @@ UI changes need browser evidence, accessible keyboard interaction and coverage
 of missing/error states. Verify dates, units, filters, chart headlines and source
 receipts together. Keep demo and service adapters on the same documented contract.
 
-The service adapter accepts an injected server transport and is exercised by
-tests. This repo does not implement or connect to the proposed hosted endpoint.
-Do not add a browser token or import the local AsOf database to make it work.
+The service adapter uses a server transport and is exercised by tests. See the
+[journey guide](docs/JOURNEY.md) for the service route. Keep service credentials
+on the server and use synthetic data for local work.

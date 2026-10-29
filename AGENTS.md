@@ -18,6 +18,23 @@ licensed assets, pinned consumer exports and clearly synthetic examples. Import
 only reviewed exports with provenance; do not copy a private canon wholesale.
 CLAUDE.md imports this file so the two instruction entry points stay consistent.
 
+## Writing principles
+
+1. **Aspire loudly. Stay honest and truth-seeking.** Be ambitious about what we
+   are building and accurate about what exists. Acknowledge meaningful uncertainty,
+   learn from evidence and correct mistakes.
+2. **Put the reader first. Write plainly, with personality and low ego.** Explain
+   why something matters. Be direct, engaging and specific. Prefer useful
+   information to self-congratulation; include qualifications when they change
+   understanding.
+3. **Preserve meaning across languages and surfaces.** Adapt wording naturally
+   to the audience and context. Keep facts, product identity and material
+   qualifications consistent.
+
+Lead with Mouthfolio. Explain ASOF Data where it helps readers understand the
+service. Copy can improve through normal review; these principles add no word
+blacklist, punctuation ban, fixed slogan test or separate copy-approval gate.
+
 ## Delivery and publication boundary
 
 - Work on an owned feature branch and deliver focused changes through a PR.
@@ -42,8 +59,9 @@ CLAUDE.md imports this file so the two instruction entry points stay consistent.
 - Keep the synthetic demo usable without backend credentials and visibly
   fictional. Public-source availability is not redistribution permission.
 - Preserve attribution, evidence versions, reporting periods and availability
-  cutoffs. Unknown is not zero; request failure is not no change. Do not infer
-  holdings, conviction or investor quality, or introduce performance rankings.
+  cutoffs. Unknown is not zero; request failure is not no change. Attribute
+  expressed conviction to its source; a mention alone establishes neither a
+  stance nor an investment holding. Keep projections within the consumer contract.
 - Follow the backend's read-time eligibility and rights contract. Client-side
   hiding is not access control. Keep service credentials out of browser bundles.
 - Run `npm run check` and `npm run build` for client changes. UI and adapter
