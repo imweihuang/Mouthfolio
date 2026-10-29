@@ -14,32 +14,30 @@ A **voice** is a person or account whose market commentary is followed.
 This public repository contains an experimental, [MIT-licensed](LICENSE) client
 with a local research demo. **All companies, voices, values and excerpts in the
 demo are fictional.** It runs without an account, backend connection or credentials.
-The local demo does not connect to ASOF Data or provide real research. A separate
-Anthropic service journey is implemented; hosted acceptance is pending. An
-optional v0.3 service response can add explicitly labelled AI-authored Record
-TLDRs beside the source context; the default demo remains v0.2.
+The local demo does not connect to ASOF Data or provide real research. The hosted
+Anthropic alpha is a separate service experience. The fictional local demo remains
+available without a service connection.
 
-### Hosted Anthropic alpha — acceptance pending
+### Hosted Anthropic alpha
 
-The planned entry is [Anthropic on Mouthfolio](https://asof.io/mouthfolio/companies/anthropic).
-The first slice is prepared to connect 21 reported SEC filing figures with a
-partial archive of attributed views and mentions, and let readers move from the
-company to a voice and its source receipts. Its newest archived commentary is
-from 10 October 2026; this is not a current-news feed or a collection of reactions
-to the later filing. Coverage is limited to eligible records in that archive.
+[Open Anthropic on Mouthfolio](https://asof.io/mouthfolio/companies/anthropic).
+The first hosted slice connects 21 reported SEC filing figures with a partial
+archive of attributed views and mentions from six voices. Follow the company
+evidence to a voice and open its original sources for context.
 
-This dated preparation note does not establish that the hosted service is ready.
-The fictional local demo remains available without a service connection.
+The newest archived commentary is dated **10 October 2026**. Coverage is partial;
+these records do not establish reactions to the later filing. This alpha is not a
+current-news feed.
 
 | Available in the client | Still to complete |
 |---|---|
 | Connected company, voice and source pages with reported metrics, distinct views/mentions and an evidence inspector | A complete filing reader and broader company coverage |
 | Dated sources, a later correction and visible missing-data and error states in the fictional demo | Reader trials of the complete journey |
-| Fictional data that works locally, plus a server adapter that fails closed without an authorized service | Hosted Anthropic acceptance |
+| A hosted Anthropic company → voice → source journey, plus a fictional demo that works locally | Broader hosted coverage |
 
 For contributors, the repository also includes selected visual foundations, a
-versioned client-service interface and automated checks. The connection code has
-been tested locally. The default demo remains offline; see the [journey guide](docs/JOURNEY.md)
+versioned client-service interface and automated checks. The default demo remains
+offline; see the [journey guide](docs/JOURNEY.md)
 for the separate service route and deployment-time connection.
 
 Interfaces and presentation may change during the alpha. There is no stable API
