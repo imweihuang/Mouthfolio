@@ -1,0 +1,31 @@
+/* Selected AsOf tokens; provenance: docs/import-manifest.json. */
+:root {
+  --v2-light-bg0: #ffffff;
+  --v2-light-bg1: #f7f7f7;
+  --v2-light-bg2: #eeeeee;
+  --v2-light-line: #dedede;
+  --v2-light-line-strong: #aeaeae;
+  --v2-light-text: #202020;
+  --v2-light-text-body: #454545;
+  --v2-light-muted: #656565;
+  --v2-light-focus: #202020;
+  --filing-blue-light: #3f7772;
+  --filing-blue-ink-light: #315e5a;
+  --font-cjk-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC";
+  --font-sans: ui-sans-serif, system-ui, var(--font-cjk-sans), sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", "Songti SC", "SimSun", "Noto Serif SC", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, var(--font-cjk-sans), monospace;
+  --unit: 4px;
+  --radius-v2-control: calc(var(--unit) * 1.5);
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-h3: 18px;
+  --text-h2: 22px;
+  --text-display: 28px;
+  --v2-type-research-read: calc(var(--text-display) + var(--unit));
+  --weight-regular: 400;
+  --weight-medium: 600;
+  --leading-body: 1.5;
+  --leading-reading: 1.6;
+}
