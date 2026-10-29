@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "source_repository": "imweihuang/AsOf",
+  "api_baseline": "2fa1e270fa50f41970fc0818ecc63426502df13d",
+  "visual_baseline": "816357d8dd0a8666f2f138d9f5d36b352a0af735",
+  "imports": [
+    {
+      "source_path": "frontend/public/fonts/source-serif-4-normal-latin.woff2",
+      "source_revision": "816357d8dd0a8666f2f138d9f5d36b352a0af735",
+      "destination": "public/fonts/source-serif-4-normal-latin.woff2",
+      "mode": "unchanged",
+      "source_sha256": "bfc645351d6b6c7c9d6528847e3740eb64acb532638f1659c97f09864e0332fe",
+      "license": "OFL-1.1"
+    },
+    {
+      "source_path": "frontend/public/fonts/SourceSerif4-OFL.txt",
+      "source_revision": "816357d8dd0a8666f2f138d9f5d36b352a0af735",
+      "destination": "public/fonts/SourceSerif4-OFL.txt",
+      "mode": "unchanged",
+      "source_sha256": "5f94c3fd3a23131a417ab5a0c8452de57e70c3cfb9f604d88241f7065ebf9fd9",
+      "license": "OFL-1.1"
+    },
+    {
+      "source_path": "frontend/app/globals.css",
+      "source_revision": "816357d8dd0a8666f2f138d9f5d36b352a0af735",
+      "destination": "app/tokens.css",
+      "mode": "named-token subset",
+      "selected_tokens": [
+        "v2-light-bg0",
+        "v2-light-bg1",
+        "v2-light-bg2",
+        "v2-light-line",
+        "v2-light-line-strong",
+        "v2-light-text",
+        "v2-light-text-body",
+        "v2-light-muted",
+        "v2-light-focus",
+        "filing-blue-light",
+        "filing-blue-ink-light",
+        "font-cjk-sans",
+        "font-sans",
+        "font-serif",
+        "font-mono",
+        "unit",
+        "radius-v2-control",
+        "text-sm",
+        "text-base",
+        "text-md",
+        "text-h3",
+        "text-h2",
+        "text-display",
+        "v2-type-research-read",
+        "weight-regular",
+        "weight-medium",
+        "leading-body",
+        "leading-reading"
+      ],
+      "source_sha256": "11b2a23b86e85207fb16c0861e951a02b55bed34a8354d5dff2098900da10fb7",
+      "license": "MIT (selected original code)"
+    },
+    {
+      "source_path": "frontend/lib/companyApi/client.ts",
+      "source_revision": "2fa1e270fa50f41970fc0818ecc63426502df13d",
+      "destination": "lib/contract.ts",
+      "mode": "adapted routines",
+      "source_sha256": "107b35728e834530d32363044588a0064e504e44b9b4539d3c6ebd73cfdc39d8",
+      "adaptations": "Adapt timestamp and exact decimal routines; new consumer validation is original.",
+      "license": "MIT (selected original code)"
+    },
+    {
+      "source_path": "scripts/export_company_api_contract.py",
+      "source_revision": "2fa1e270fa50f41970fc0818ecc63426502df13d",
+      "destination": "scripts/generate-contract.mjs",
+      "mode": "adapted routines",
+      "source_sha256": "7a3ac3f8ccb239c82d463695ca09fdaaae914d532b78c08b6faaa53fb18bd736",
+      "adaptations": "Port only the schema-to-TypeScript algorithm to Node; no Python imports or sample database.",
+      "license": "MIT (selected original code)"
+    }
+  ],
+  "excluded": [
+    "private source fixtures",
+    "backend",
+    "deployment files",
+    "admin routes",
+    "LandingGlassSurface and dependent landing header",
+    "React Bits vendor code"
+  ],
+  "new_original_files": "The application, adapters, fixtures and portable checks are authored for this preparation. See THIRD_PARTY_NOTICES.md for adapted logic."
+}

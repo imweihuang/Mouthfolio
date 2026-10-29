@@ -1,0 +1,131 @@
+{
+  "schema_version": "asof.mouthfolio.research.v0.1",
+  "data_mode": "synthetic",
+  "status": "ready",
+  "as_of": "2026-10-27T12:00:00Z",
+  "window": "all",
+  "company": {
+    "id": "aster-compute",
+    "name": "Aster Compute"
+  },
+  "coverage": {
+    "state": "partial",
+    "note": "All companies, voices, values and source text are fictional. Retention is deliberately missing."
+  },
+  "questions": [
+    {
+      "id": "paid-demand",
+      "version_id": "question-corrected",
+      "company_id": "aster-compute",
+      "title": "Is revenue growth becoming durable demand?",
+      "finding": "The revenue figure was corrected from 96 to 94 million USD. Durability still needs retention evidence.",
+      "available_at": "2026-10-27T12:00:00Z",
+      "edition_date": "2026-10-27",
+      "receipt_ids": [
+        "receipt-original",
+        "receipt-correction"
+      ]
+    }
+  ],
+  "voices": [
+    {
+      "id": "demo-researcher",
+      "name": "Demo researcher"
+    }
+  ],
+  "views": [
+    {
+      "id": "demand-view",
+      "version_id": "view-initial",
+      "voice_id": "demo-researcher",
+      "company_id": "aster-compute",
+      "statement": "The revenue figure is useful context, but it does not tell us whether customers will stay.",
+      "published_at": "2026-10-26T11:45:00Z",
+      "available_at": "2026-10-26T12:00:00Z",
+      "receipt_id": "receipt-view",
+      "conditions": "Retention remains undisclosed.",
+      "horizon": null,
+      "supersedes": null
+    }
+  ],
+  "observations": [
+    {
+      "id": "revenue",
+      "version_id": "revenue-corrected",
+      "label": "Reported revenue",
+      "amount": "94",
+      "missing_reason": null,
+      "unit": "million USD",
+      "period": {
+        "label": "Q3 2026",
+        "start": "2026-07-01",
+        "end": "2026-09-30"
+      },
+      "available_at": "2026-10-27T12:00:00Z",
+      "receipt_id": "receipt-correction",
+      "revision_kind": "correction",
+      "supersedes": "revenue-initial"
+    },
+    {
+      "id": "retention",
+      "version_id": "retention-initial",
+      "label": "Customer retention",
+      "amount": null,
+      "missing_reason": "The synthetic report does not disclose retention.",
+      "unit": "percent",
+      "period": {
+        "label": "Q3 2026",
+        "start": "2026-07-01",
+        "end": "2026-09-30"
+      },
+      "available_at": "2026-10-26T12:00:00Z",
+      "receipt_id": "receipt-original",
+      "revision_kind": "initial",
+      "supersedes": null
+    }
+  ],
+  "receipts": [
+    {
+      "id": "receipt-original",
+      "source_id": "demo-report",
+      "snapshot_id": "snapshot-original",
+      "title": "Aster Compute \u2014 fictional quarterly note",
+      "locator": "Synthetic example, paragraph 1",
+      "published_at": "2026-10-25T09:00:00Z",
+      "ingested_at": "2026-10-26T11:30:00Z",
+      "available_at": "2026-10-26T12:00:00Z",
+      "content_sha256": "6f76e666e756a68adc574ad762ef14abfb6732ed7a2403ebcb59af8dfb836889",
+      "display_policy": "excerpt",
+      "excerpt": "Fictional example: Aster Compute reports 96 million USD in Q3 revenue. Customer retention is not disclosed.",
+      "url": null
+    },
+    {
+      "id": "receipt-view",
+      "source_id": "demo-research-note",
+      "snapshot_id": "snapshot-view",
+      "title": "Demo researcher \u2014 fictional research note",
+      "locator": "Synthetic research note, paragraph 1",
+      "published_at": "2026-10-26T11:45:00Z",
+      "ingested_at": "2026-10-26T11:50:00Z",
+      "available_at": "2026-10-26T12:00:00Z",
+      "content_sha256": "60348a75af2fd959bfa19fb5e62ca094697f37099c0f70edc0d70e41f8bf7598",
+      "display_policy": "excerpt",
+      "excerpt": "Fictional Demo researcher: The revenue figure is useful context, but it does not tell us whether customers will stay. Retention remains undisclosed.",
+      "url": null
+    },
+    {
+      "id": "receipt-correction",
+      "source_id": "demo-report",
+      "snapshot_id": "snapshot-correction",
+      "title": "Aster Compute \u2014 fictional correction",
+      "locator": "Synthetic example, paragraph 1",
+      "published_at": "2026-10-27T09:00:00Z",
+      "ingested_at": "2026-10-27T11:30:00Z",
+      "available_at": "2026-10-27T12:00:00Z",
+      "content_sha256": "8f9042ed7ce00c10b2475f8d872d895b63e90fe980e93aaa3cf5243ee840851d",
+      "display_policy": "excerpt",
+      "excerpt": "Fictional correction: Q3 revenue is 94 million USD, replacing the earlier 96 million figure. Retention remains undisclosed.",
+      "url": null
+    }
+  ]
+}

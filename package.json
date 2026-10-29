@@ -1,0 +1,45 @@
+{
+  "name": "mouthfolio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
+  "packageManager": "npm@10.9.4",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 3210",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 3210",
+    "typecheck": "next typegen && tsc --noEmit",
+    "contracts:generate": "node scripts/generate-contract.mjs",
+    "contracts:check": "node scripts/generate-contract.mjs --check",
+    "check:boundary": "node scripts/check-boundary.mjs",
+    "check:design": "node scripts/check-design.mjs",
+    "test": "node --disable-warning=ExperimentalWarning --experimental-strip-types --test tests/*.test.ts",
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "check": "npm run contracts:check && npm run check:boundary && npm run typecheck && npm run check:design && npm test && npm run test:boundary",
+    "guards:install": "node scripts/install-guards.mjs",
+    "check:history": "node scripts/publication-guard.mjs history",
+    "test:boundary": "node --test tests/publication-boundary.test.mjs"
+  },
+  "dependencies": {
+    "next": "15.5.28",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  },
+  "overrides": {
+    "postcss": "8.5.32"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "22.19.18",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "playwright": "1.60.0"
+  }
+}

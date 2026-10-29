@@ -1,0 +1,2 @@
+# Preserve the upstream font-license notice byte for byte, including its spaces.
+public/fonts/SourceSerif4-OFL.txt whitespace=-blank-at-eol
