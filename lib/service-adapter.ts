@@ -15,7 +15,7 @@ export function createServiceAdapter(transport: ServiceTransport, version: ApiVe
     try {
       const response = await transport(researchPath(query, version), {
         method: "GET", cache: "no-store", redirect: "error",
-        signal: AbortSignal.timeout(5000), headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(15000), headers: { Accept: "application/json" },
       });
       if (!response.ok || !response.headers.get("content-type")?.includes("application/json") || !response.body) {
         throw new ResearchUnavailable();

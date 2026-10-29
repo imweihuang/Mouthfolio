@@ -62,6 +62,13 @@ Missing configuration, transport errors and rejected payloads render **Research
 unavailable**. Only a successful validated empty result renders **No record
 found**. There is no demo fallback for service subjects.
 
+Service requests have a 15-second deadline, including response-body reading, and
+are not retried. Responses still pass the same size, schema and evidence checks.
+`GET /health` returns only `{"status":"ok"}` without contacting the data service;
+it checks process liveness, not research readiness. Use the configured base path
+for this route, such as `/mouthfolio/health`. Verify research readiness separately
+through the company, voice and source journey.
+
 For hosting beneath an existing application, build with
 `MOUTHFOLIO_BASE_PATH=/mouthfolio npm run build` and run the matching browser check
 with `MOUTHFOLIO_BASE_PATH=/mouthfolio npm run test:browser`. Only an empty base

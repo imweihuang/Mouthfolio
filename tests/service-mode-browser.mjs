@@ -16,7 +16,9 @@ async function checkServiceVersion(browser, basePath, version) {
   await new Promise(resolve => probe.close(resolve));
   const origin = `http://127.0.0.1:${port}${basePath}`;
   let syntheticPayload = null;
+  let transportRequests = 0;
   const transport = createHttpServer((request, response) => {
+    transportRequests++;
     response.setHeader("Content-Type", "application/json");
     if (!syntheticPayload) { response.writeHead(503); response.end('{"detail":"Unavailable synthetic transport"}'); return; }
     const requested = new URL(request.url, "http://localhost");
@@ -35,10 +37,17 @@ async function checkServiceVersion(browser, basePath, version) {
     let ready = false;
     for (let i = 0; i < 60; i++) {
       if (server.exitCode !== null) throw new Error(`Service-only preview exited: ${log}`);
-      try { if (log.includes("Ready in") && (await fetch(origin)).ok) { ready = true; break; } } catch { /* bounded startup */ }
+      try { if (log.includes("Ready in") && (await fetch(origin + "/health")).ok) { ready = true; break; } } catch { /* bounded startup */ }
       await new Promise(resolve => setTimeout(resolve, 500));
     }
     assert.ok(ready, "Service-only preview startup timed out");
+    const health = await fetch(origin + "/health");
+    assert.equal(health.status, 200);
+    assert.equal(health.headers.get("cache-control"), "no-store");
+    assert.deepEqual(await health.json(), { status: "ok" });
+    assert.equal((await fetch(origin + "/health", { method: "HEAD" })).status, 200);
+    assert.equal((await fetch(origin + "/health", { method: "POST" })).status, 405);
+    assert.equal(transportRequests, 0, "Liveness must not query the research service");
     page = await browser.newPage();
     await page.goto(origin);
     await page.getByRole("heading", { name: "Anthropic", exact: true }).waitFor();
