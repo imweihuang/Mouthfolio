@@ -1,7 +1,17 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "../contracts/mouthfolio-research.v0.2.schema.json" with { type: "json" };
-import type { MouthfolioResearch } from "../contracts/types.ts";
+import schemaV03 from "../contracts/mouthfolio-research.v0.3.schema.json" with { type: "json" };
+import type { MouthfolioResearch as ResearchV02, Receipt as ReceiptV02 } from "../contracts/types.ts";
+import type { MouthfolioResearch as ResearchV03, Receipt as ReceiptV03 } from "../contracts/types.v0.3.ts";
+export type MouthfolioResearch = ResearchV02 | ResearchV03;
+export type Receipt = ReceiptV02 | ReceiptV03;
+export type ApiVersion = "v0.2" | "v0.3";
+export function apiVersion(value: string | undefined): ApiVersion {
+  if (value === undefined || value === "v0.2") return "v0.2";
+  if (value === "v0.3") return "v0.3";
+  throw new ResearchUnavailable();
+}
 
 export type ResearchQuery = { companyId: string; asOf: string; window: "all" };
 export type ResearchAdapter = { read(query: ResearchQuery): Promise<MouthfolioResearch> };
@@ -11,7 +21,7 @@ export class ResearchUnavailable extends Error {
 const fail = (): never => { throw new ResearchUnavailable(); };
 const ajv = new Ajv({ strict: true, allErrors: false });
 addFormats(ajv);
-const validate = ajv.compile<MouthfolioResearch>(schema);
+const validators = { "v0.2": ajv.compile<ResearchV02>(schema), "v0.3": ajv.compile<ResearchV03>(schemaV03) };
 
 // Adapted from AsOf's company API client. Preserve microsecond cutoff precision.
 export function instant(value: string): bigint {
@@ -30,10 +40,10 @@ export function validateQuery(query: ResearchQuery): void {
 }
 
 export function decodeResearch(raw: unknown, query: ResearchQuery,
-  mode: MouthfolioResearch["data_mode"]): MouthfolioResearch {
+  mode: MouthfolioResearch["data_mode"], version: ApiVersion = "v0.2"): MouthfolioResearch {
   validateQuery(query);
-  if (!validate(raw)) return fail();
-  const data = raw;
+  if (!validators[apiVersion(version)](raw)) return fail();
+  const data = raw as MouthfolioResearch;
   if (data.company.id !== query.companyId || data.window !== query.window ||
       data.data_mode !== mode || instant(data.as_of) !== instant(query.asOf)) return fail();
   const groups = [data.questions, data.voices, data.views, data.mentions, data.observations, data.receipts];
@@ -51,6 +61,11 @@ export function decodeResearch(raw: unknown, query: ResearchQuery,
   for (const receipt of data.receipts) {
     if (instant(receipt.ingested_at) > instant(receipt.available_at) ||
         instant(receipt.available_at) > cutoff) return fail();
+    if ("summary" in receipt && receipt.summary !== null) {
+      const summary = receipt.summary;
+      if (instant(summary.capture_observed_at) > instant(summary.available_at) ||
+          instant(summary.available_at) > cutoff) return fail();
+    }
     // Publication time never substitutes for availability time.
     instant(receipt.published_at);
     if (receipt.display_policy === "link_only" && receipt.excerpt !== null) return fail();

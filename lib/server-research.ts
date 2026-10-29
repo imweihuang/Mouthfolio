@@ -1,5 +1,5 @@
 import { createServiceAdapter } from "./service-adapter.ts";
-import { ResearchUnavailable } from "./contract.ts";
+import { apiVersion, ResearchUnavailable } from "./contract.ts";
 import type { ResearchQuery } from "./contract.ts";
 
 // Only imported by server components. Configuration never enters component props.
@@ -12,5 +12,6 @@ export async function readServiceResearch(query: ResearchQuery) {
   const loopback = origin.hostname === "127.0.0.1" || origin.hostname === "localhost" || origin.hostname === "[::1]";
   if ((origin.protocol !== "https:" && !(origin.protocol === "http:" && loopback)) ||
       origin.username || origin.password || origin.pathname !== "/" || origin.search || origin.hash) throw new ResearchUnavailable();
-  return createServiceAdapter((path, init) => fetch(new URL(path, origin), init)).read(query);
+  const version = apiVersion(process.env.ASOF_DATA_API_VERSION);
+  return createServiceAdapter((path, init) => fetch(new URL(path, origin), init), version).read(query);
 }

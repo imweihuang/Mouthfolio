@@ -2,9 +2,14 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { createServer as createHttpServer } from "node:http";
+import { checkRecordTldr } from "./tldr-browser.mjs";
 import fixture from "../fixtures/initial.json" with { type: "json" };
 
 export async function checkServiceOnly(browser, basePath = "") {
+  await checkServiceVersion(browser, basePath, "v0.2");
+  await checkServiceVersion(browser, basePath, "v0.3");
+}
+async function checkServiceVersion(browser, basePath, version) {
   const probe = createServer();
   await new Promise(resolve => probe.listen(0, "127.0.0.1", resolve));
   const port = probe.address().port;
@@ -14,13 +19,15 @@ export async function checkServiceOnly(browser, basePath = "") {
   const transport = createHttpServer((request, response) => {
     response.setHeader("Content-Type", "application/json");
     if (!syntheticPayload) { response.writeHead(503); response.end('{"detail":"Unavailable synthetic transport"}'); return; }
-    const query = new URL(request.url, "http://localhost").searchParams;
+    const requested = new URL(request.url, "http://localhost");
+    assert.ok(requested.pathname.startsWith(`/api/mouthfolio/${version}/companies/`));
+    const query = requested.searchParams;
     response.end(JSON.stringify({ ...syntheticPayload, as_of: query.get("asof") }));
   });
   await new Promise(resolve => transport.listen(0, "127.0.0.1", resolve));
   const transportOrigin = `http://127.0.0.1:${transport.address().port}`;
   const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", String(port)], {
-    stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", MOUTHFOLIO_SERVICE_ONLY: "1", ASOF_DATA_ORIGIN: transportOrigin },
+    stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", MOUTHFOLIO_SERVICE_ONLY: "1", ASOF_DATA_ORIGIN: transportOrigin, ASOF_DATA_API_VERSION: version },
   });
   let log = "", page;
   for (const pipe of [server.stdout, server.stderr]) pipe.on("data", chunk => { log = (log + chunk).slice(-4000); });
@@ -44,6 +51,10 @@ export async function checkServiceOnly(browser, basePath = "") {
       assert.equal(await page.getByText("Fictional demo", { exact: true }).count(), 0);
       assert.equal(await page.getByText("94 million USD", { exact: true }).count(), 0);
     }
+    if (version === "v0.3") {
+      await checkRecordTldr(page, origin, value => { syntheticPayload = value; });
+      return;
+    }
     // Entirely fictional transport fixture: proves rendering compatibility, not live service acceptance.
     syntheticPayload = { ...structuredClone(fixture), data_mode: "authorized" };
     syntheticPayload.observations = Array.from({ length: 21 }, (_, index) => ({
@@ -63,10 +74,14 @@ export async function checkServiceOnly(browser, basePath = "") {
       row.missing_reason = reason;
       const receipt = syntheticPayload.receipts.find(item => item.id === row.receipt_id);
       row.receipt_id = `fictional-missing-receipt-${index}`;
-      syntheticPayload.receipts.push({ ...receipt, id: row.receipt_id });
+      syntheticPayload.receipts.push({
+        ...receipt, id: row.receipt_id, display_policy: "link_only", excerpt: null,
+        url: index === 0 ? "https://example.com/fictional-source" : null,
+      });
     }
     await page.goto(origin + "/companies/aster-compute");
     await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
+    assert.equal(await page.locator(".record-tldr").count(), 0);
     assert.equal(await page.locator(".metric-card").count(), 5);
     assert.equal(await page.locator("tbody tr").count(), 21);
     assert.match(await page.locator(".summary-note").textContent(), /Latest reporting date: 2026-06-30/);
@@ -85,6 +100,16 @@ export async function checkServiceOnly(browser, basePath = "") {
         await inspector.getByText(reason, { exact: true }).waitFor();
         assert.equal(new URL(page.url()).searchParams.get("receipt"), `fictional-missing-receipt-${index}`);
         assert.equal(await inspector.getByText("Not disclosed", { exact: true }).count(), 0);
+        assert.ok(await inspector.getByText("Receipt display", { exact: true }).isVisible());
+        assert.equal(await inspector.getByText("Display permission", { exact: true }).count(), 0);
+        assert.equal(await inspector.getByText("This source permits a link only.", { exact: false }).count(), 0);
+        if (index === 0) {
+          await inspector.getByText("Open the original source for full context.", { exact: true }).waitFor();
+          assert.equal(await inspector.getByRole("link", { name: "Open original source" }).getAttribute("href"), "https://example.com/fictional-source");
+        } else {
+          await inspector.getByText("Source text is not displayed here.", { exact: true }).waitFor();
+          assert.equal(await inspector.getByRole("link", { name: "Open original source" }).count(), 0);
+        }
         if (index === 0) await page.screenshot({ path: `artifacts/missing-observation-${width}.png` });
         await page.keyboard.press("Escape");
         await inspector.waitFor({ state: "detached" });

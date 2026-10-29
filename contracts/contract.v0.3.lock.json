@@ -1,0 +1,17 @@
+{
+  "schema_version": "asof.mouthfolio.research.v0.3",
+  "source_repository": "imweihuang/AsOf",
+  "source_revision": "52e3443868ed607c21f85767adb72333be4c2b7e",
+  "source_paths": {
+    "contracts/mouthfolio-research.v0.3.schema.json": "docs/contracts/mouthfolio-research.v0.3.schema.json",
+    "contracts/types.v0.3.ts": "docs/contracts/mouthfolio-research.v0.3.ts",
+    "fixtures/v0.3-initial.json": "docs/contracts/examples/mouthfolio-v0.3-initial.json",
+    "fixtures/v0.3-corrected.json": "docs/contracts/examples/mouthfolio-v0.3-corrected.json"
+  },
+  "files": {
+    "contracts/mouthfolio-research.v0.3.schema.json": "78e6a371aa53f5ca44b7f97381bc90eb3997f62ef5ff358b4af26627a3b4754a",
+    "contracts/types.v0.3.ts": "a653e14c45cf6c8a86d6bd1f1ba9515fa1ceb029fb36e6865628bd1c0e0f01d9",
+    "fixtures/v0.3-initial.json": "3da7a82648c8e8b95b8604b20f52bd3d317affe848700483a4b3f071049b7deb",
+    "fixtures/v0.3-corrected.json": "9131980bd55453c8dc64b20b9a0e60d391f10c3be2f711b561b921d633151d29"
+  }
+}
