@@ -10,7 +10,7 @@ export const UPSTREAM_ID = 1437778933;
 const LIMIT = 2 * 1024 * 1024;
 // Reviewed browser smoke deliberately requests these routes and requires 404.
 // Only this exact file version may contain the route strings; other rules apply.
-const ROUTE_PROBE_SHA256 = "c5b6da5315a5b2534448688651f814b0d875f18eb8d948cf19c7f448cb269ad5";
+const ROUTE_PROBE_SHA256 = "1591649404ff44f7e97787dd1964591107d807a54300c4afa05cfdcb1dd6f020";
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const forbidden = /(^|\/)(?:\.env(?:\..*)?|\.netrc|\.pypirc|\.git-credentials|\.delegate|\.claude|\.codex|\.aws|id_rsa(?:\..*)?|id_ed25519(?:\..*)?|id_ecdsa(?:\..*)?|secrets?(?:\.[^/]*)?|credentials(?:\.[^/]*)?|service[-_]account(?:\.[^/]*)?|\.gitmodules|backend|deploy|private|operator|credentials|archives|backups|raw-data|output)(?:\/|$)|\.(?:pem|key|p12|pfx|sqlite3?|db|dump|zip|tar|gz|bundle)$/i;
 const privateDocs = /(^|\/)(?:DECISIONS(?:[^/]*)|REPO_STATE|OWNER_OVERVIEW|JOURNAL|DEPLOYMENT|BACKUP_RUNBOOK)\.(?:md|json|html)$/i;

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "MouthfolioResearch",
-  "description": "Development consumer contract; does not expose or qualify an ASOF Data endpoint.",
+  "description": "Public-safe company consumer projection. Eligibility and admission are rechecked by the server.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -16,11 +16,12 @@
     "voices",
     "views",
     "observations",
-    "receipts"
+    "receipts",
+    "mentions"
   ],
   "properties": {
     "schema_version": {
-      "const": "asof.mouthfolio.research.v0.1"
+      "const": "asof.mouthfolio.research.v0.2"
     },
     "data_mode": {
       "enum": [
@@ -82,6 +83,13 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/Receipt"
+      },
+      "maxItems": 200
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Mention"
       },
       "maxItems": 200
     }
@@ -254,7 +262,8 @@
         "available_at",
         "receipt_id",
         "revision_kind",
-        "supersedes"
+        "supersedes",
+        "basis"
       ],
       "properties": {
         "id": {
@@ -327,6 +336,11 @@
               "type": "null"
             }
           ]
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
         }
       }
     },
@@ -493,6 +507,51 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 600
+        }
+      }
+    },
+    "Mention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "voice_id",
+        "company_id",
+        "published_at",
+        "available_at",
+        "receipt_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "voice_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
         }
       }
     }

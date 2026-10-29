@@ -35,11 +35,16 @@ for (const status of ["revoked", "unavailable"] as const) {
   test(`${status} is distinct and clears all records even at an earlier cutoff`, async () => {
     const value = await createDemoAdapter(status).read(query);
     assert.equal(value.status, status);
-    assert.deepEqual([value.questions, value.voices, value.views, value.observations, value.receipts], [[],[],[],[],[]]);
+    assert.deepEqual([value.questions, value.voices, value.views, value.mentions, value.observations, value.receipts], [[],[],[],[],[],[]]);
   });
 }
 
 const invalid: [string, (value: MouthfolioResearch) => void][] = [
+  ["future mention", value => { value.mentions[0].available_at = LATEST_AS_OF; }],
+  ["unbound mention voice", value => { value.mentions[0].voice_id = "unknown-voice"; }],
+  ["unbound mention receipt", value => { value.mentions[0].receipt_id = "unknown-receipt"; }],
+  ["cross-company mention", value => { value.mentions[0].company_id = "another-company"; }],
+  ["mention with inferred stance", value => { Object.assign(value.mentions[0], { stance: "positive" }); }],
   ["wrong company", value => { value.company.id = "someone-else"; }],
   ["wrong mode", value => { value.data_mode = "authorized"; }],
   ["wrong cutoff", value => { value.as_of = LATEST_AS_OF; }],
@@ -105,4 +110,10 @@ test("transport errors become unavailable, never no-record", async () => {
 test("request construction rejects path injection and an unsupported window", () => {
   assert.throws(() => researchPath({ ...query, companyId: "../../admin" }));
   assert.throws(() => researchPath({ ...query, window: "later" as "all" }));
+});
+
+test("ready commentary does not require an invented maintained question", () => {
+  const value = sample(); value.questions = []; value.observations = [];
+  assert.equal(decodeResearch(value, query, "synthetic").views.length, 1);
+  assert.equal(decodeResearch(value, query, "synthetic").mentions.length, 1);
 });

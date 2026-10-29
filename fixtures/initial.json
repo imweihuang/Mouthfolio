@@ -1,5 +1,5 @@
 {
-  "schema_version": "asof.mouthfolio.research.v0.1",
+  "schema_version": "asof.mouthfolio.research.v0.2",
   "data_mode": "synthetic",
   "status": "ready",
   "as_of": "2026-10-26T12:00:00Z",
@@ -63,7 +63,8 @@
       "available_at": "2026-10-26T12:00:00Z",
       "receipt_id": "receipt-original",
       "revision_kind": "initial",
-      "supersedes": null
+      "supersedes": null,
+      "basis": "Reported period revenue; fictional example"
     },
     {
       "id": "retention",
@@ -80,7 +81,8 @@
       "available_at": "2026-10-26T12:00:00Z",
       "receipt_id": "receipt-original",
       "revision_kind": "initial",
-      "supersedes": null
+      "supersedes": null,
+      "basis": "Customer retention definition not disclosed; fictional example"
     }
   ],
   "receipts": [
@@ -111,6 +113,31 @@
       "display_policy": "excerpt",
       "excerpt": "Fictional Demo researcher: The revenue figure is useful context, but it does not tell us whether customers will stay. Retention remains undisclosed.",
       "url": null
+    },
+    {
+      "id": "receipt-mention",
+      "source_id": "demo-mention-note",
+      "snapshot_id": "snapshot-mention",
+      "title": "Demo researcher \u2014 fictional company mention",
+      "locator": "Synthetic research note, paragraph 1",
+      "published_at": "2026-10-26T11:45:00Z",
+      "ingested_at": "2026-10-26T11:50:00Z",
+      "available_at": "2026-10-26T12:00:00Z",
+      "content_sha256": "10c3fa9562a54aaf81afdafaa9c8a7150ebdb6b890da9ed9bc802af4f164faac",
+      "display_policy": "excerpt",
+      "excerpt": "Fictional Demo researcher names Aster Compute, without stating a view.",
+      "url": null
+    }
+  ],
+  "mentions": [
+    {
+      "id": "company-mention",
+      "version_id": "mention-initial",
+      "voice_id": "demo-researcher",
+      "company_id": "aster-compute",
+      "published_at": "2026-10-26T11:45:00Z",
+      "available_at": "2026-10-26T12:00:00Z",
+      "receipt_id": "receipt-mention"
     }
   ]
 }

@@ -5,7 +5,7 @@ export type ServiceTransport = (path: string, init: RequestInit) => Promise<Resp
 export function researchPath(query: ResearchQuery): string {
   validateQuery(query);
   const params = new URLSearchParams({ asof: query.asOf, window: query.window });
-  return `/api/mouthfolio/v0.1/companies/${query.companyId}/research?${params}`;
+  return `/api/mouthfolio/v0.2/companies/${query.companyId}/research?${params}`;
 }
 
 // A hosting application's server supplies its authorized transport. There is no
