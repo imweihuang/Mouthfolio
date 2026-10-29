@@ -18,8 +18,12 @@ test("editions preserve the original value before correction availability", asyn
   assert.equal(revised.observations[0].amount, "94");
   assert.equal(revised.observations[0].supersedes, original.observations[0].version_id);
   assert.equal(original.observations[1].amount, null);
-  assert.equal(formatAmount(null, "percent"), "Not disclosed");
+  assert.equal(formatAmount(null, "percent"), "No value");
   assert.equal((await adapter.read(query)).observations[0].amount, "96");
+});
+test("missing amounts use a neutral label without changing reported zero", () => {
+  assert.equal(formatAmount(null, "USD"), "No value");
+  assert.equal(formatAmount("0", "USD"), "0 USD");
 });
 test("publication date does not make later-ingested evidence available", async () => {
   const value = await createDemoAdapter().read({ ...query, asOf: "2026-10-25T12:00:00Z" });

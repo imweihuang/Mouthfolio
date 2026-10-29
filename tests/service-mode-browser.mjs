@@ -52,17 +52,50 @@ export async function checkServiceOnly(browser, basePath = "") {
       period: index < 16 ? { label: "Fictional earlier period", start: "2025-01-01", end: "2025-12-31" } :
         { label: "Fictional latest period", start: "2026-01-01", end: "2026-06-30" },
     }));
+    const missingReasons = [
+      "The fictional source is temporarily unavailable.",
+      "This measure is not applicable to the fictional reporting period.",
+      "The synthetic report does not disclose this measure."
+    ];
+    for (const [index, reason] of missingReasons.entries()) {
+      const row = syntheticPayload.observations[index];
+      row.amount = null;
+      row.missing_reason = reason;
+      const receipt = syntheticPayload.receipts.find(item => item.id === row.receipt_id);
+      row.receipt_id = `fictional-missing-receipt-${index}`;
+      syntheticPayload.receipts.push({ ...receipt, id: row.receipt_id });
+    }
     await page.goto(origin + "/companies/aster-compute");
     await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
     assert.equal(await page.locator(".metric-card").count(), 5);
     assert.equal(await page.locator("tbody tr").count(), 21);
     assert.match(await page.locator(".summary-note").textContent(), /Latest reporting date: 2026-06-30/);
     assert.equal(await page.locator(".metric-card").getByText("Fictional earlier period", { exact: false }).count(), 0);
+    // These null rows are from an earlier period and absent from the summary.
+    // Their distinct reasons must survive both the complete table and exact receipt.
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const [index, reason] of missingReasons.entries()) {
+        const row = page.locator("tbody tr").nth(index);
+        assert.match(await row.locator(".amount").innerText(), /^No value\n/);
+        assert.equal(await row.getByText(reason, { exact: true }).count(), 1);
+        assert.equal(await page.locator(".metric-card").getByText(reason, { exact: true }).count(), 0);
+        await row.getByRole("link", { name: "Inspect receipt", exact: true }).click();
+        const inspector = page.getByRole("dialog");
+        await inspector.getByText(reason, { exact: true }).waitFor();
+        assert.equal(new URL(page.url()).searchParams.get("receipt"), `fictional-missing-receipt-${index}`);
+        assert.equal(await inspector.getByText("Not disclosed", { exact: true }).count(), 0);
+        if (index === 0) await page.screenshot({ path: `artifacts/missing-observation-${width}.png` });
+        await page.keyboard.press("Escape");
+        await inspector.waitFor({ state: "detached" });
+      }
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
     assert.equal(await page.locator("blockquote").count(), 0);
     assert.ok(await page.getByText("See original source", { exact: true }).isVisible());
     await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
     await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
-    console.log("Authorized-mode synthetic transport passed: 21 exact table rows, 5 latest-date summary cards, plain view text, absent qualifiers and unavailable source copy.");
+    console.log("Authorized-mode synthetic transport passed: 21 exact table rows, 5 latest-date summary cards, earlier missing reasons in table and inspector at both widths, plain view text, absent qualifiers and unavailable source copy.");
     console.log("Service-only mode passed: Anthropic home, no demo adapter through company or voice routes, missing service stays unavailable.");
   } finally {
     await page?.close();

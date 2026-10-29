@@ -39,7 +39,7 @@ try {
   assert.match(await page.title(), /^Mouthfolio/);
   await page.getByRole("heading", { name: "Is revenue growth becoming durable demand?" }).waitFor();
   assert.ok(await page.getByText("94 million USD", { exact: true }).first().isVisible());
-  assert.ok(await page.getByText("Not disclosed", { exact: true }).first().isVisible());
+  assert.ok(await page.getByText("No value", { exact: true }).first().isVisible());
   await page.keyboard.press("Tab");
   assert.equal(await page.locator(":focus").textContent(), "Skip to research");
   await page.keyboard.press("Enter");

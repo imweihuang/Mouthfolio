@@ -12,6 +12,7 @@ const LIMIT = 2 * 1024 * 1024;
 // Only these exact reviewed versions may contain route strings; other rules apply.
 // Retain published versions so complete-history scans continue to verify ancestors.
 const ROUTE_PROBE_SHA256 = new Set([
+  "c0d8fe6dd3b1447247a42da66e887372229f4db257ad210e0e1f02f8f4da3b42",
   "c5b6da5315a5b2534448688651f814b0d875f18eb8d948cf19c7f448cb269ad5",
   "1591649404ff44f7e97787dd1964591107d807a54300c4afa05cfdcb1dd6f020",
 ]);
