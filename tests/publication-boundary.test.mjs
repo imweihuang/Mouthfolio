@@ -218,3 +218,11 @@ test("browser route probes are accepted only at reviewed exact hashes", t => {
   put(root, "scripts/browser-smoke.mjs", reviewed + "\n// Changed probe must be reviewed again.\n");
   assert.throws(() => scan(snapshot(root, "worktree")), /private route/);
 });
+
+test("the additional versioned contract requires its own pinned lock and unchanged export bytes", t => {
+  const root = fixture(t);
+  put(root, "contracts/mouthfolio-research.v0.3.schema.json", '{}');
+  assert.throws(() => scan(snapshot(root, "worktree")), /contract.v0.3.lock.json/);
+  put(root, "contracts/contract.v0.3.lock.json", JSON.stringify({ source_revision: "a".repeat(40), files: { "contracts/mouthfolio-research.v0.3.schema.json": "b".repeat(64) } }));
+  assert.throws(() => scan(snapshot(root, "worktree")), /contract drift/);
+});

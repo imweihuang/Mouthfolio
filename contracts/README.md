@@ -1,14 +1,16 @@
 # Mouthfolio consumer contract
 
-`asof.mouthfolio.research.v0.2` is the development interface for the first
+`asof.mouthfolio.research.v0.2` remains the default development interface for the first
 company → voice → view or mention → receipt workflow. ASOF Data
 owns the canonical schema; `contract.lock.json` pins its source commit and the
-redistributable files. It is a consumer projection, not a copy of the private
+redistributable files. The additive v0.3 export is pinned separately in
+`contract.v0.3.lock.json` and the import manifest. These are consumer projections, not a copy of the private
 evidence graph or an announcement of a hosted API.
 
 `mouthfolio-research.v0.2.schema.json` describes the response. `types.ts` is
 generated with `npm run contracts:generate`; `contracts:check` rejects drift.
-The schema and synthetic examples are original project material under MIT.
+The v0.3 schema and `types.v0.3.ts` use the same generator and drift check.
+Both schemas and their synthetic examples are original project material under MIT.
 
 ## Meaning and compatibility
 
@@ -42,7 +44,10 @@ no-store, no-redirect, with a five-second signal and a 256 KiB response cap.
 The injected transport must honor cancellation and must not expose credentials
 to browser code. There is no configured origin or credential in this preparation.
 
-The service path is `/api/mouthfolio/v0.2/companies/{id}/research`. This client
+The default service path is `/api/mouthfolio/v0.2/companies/{id}/research`.
+Explicit server-only `ASOF_DATA_API_VERSION=v0.3` selects the v0.3 endpoint and
+validator together. Unsupported settings or mismatched responses fail closed;
+there is no fallback to another version after an error. This client
 does not implement that endpoint. The server-only adapter can connect to an
 operator-configured origin; see [the journey guide](../docs/JOURNEY.md).
 Financial observations carry their reported basis. A ready commentary response
@@ -51,3 +56,21 @@ need not invent an assessment or financial observations.
 Contract upgrades start in AsOf. Review and copy only the named contract files
 at the selected commit, update the lock, regenerate types, and run the local and
 hosted checks. Public CI validates the vendored files without private-repo access.
+
+## Record TLDR in v0.3
+
+A receipt adds required nullable `summary`. When present, it carries an immutable
+summary identity and version, at most 500 characters of ASOF-authored text,
+`generated_by=ai`, source capture and summary availability timestamps, and
+explicit capture framing. It is separate from the source excerpt and attributed
+view. A link-only receipt still has `excerpt=null`; a summary grants no excerpt
+permission. A null summary renders no TLDR or replacement narrative.
+
+The client labels this text **Record TLDR** and **AI-authored · AI-reviewed**,
+shows its capture/availability dates and preserves the source receipt context.
+Its availability must be no later than the requested cutoff, and its capture
+cannot follow summary availability. Backend review, rights, current revocation
+and exact source/snapshot qualification remain server responsibilities.
+
+The fictional default demo remains v0.2. The v0.3 examples are synthetic test
+fixtures; their presence does not activate or qualify a hosted summary service.

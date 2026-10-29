@@ -75,6 +75,38 @@
       "source_sha256": "7a3ac3f8ccb239c82d463695ca09fdaaae914d532b78c08b6faaa53fb18bd736",
       "adaptations": "Port only the schema-to-TypeScript algorithm to Node; no Python imports or sample database.",
       "license": "MIT (selected original code)"
+    },
+    {
+      "source_path": "docs/contracts/mouthfolio-research.v0.3.schema.json",
+      "source_revision": "52e3443868ed607c21f85767adb72333be4c2b7e",
+      "destination": "contracts/mouthfolio-research.v0.3.schema.json",
+      "mode": "unchanged",
+      "source_sha256": "78e6a371aa53f5ca44b7f97381bc90eb3997f62ef5ff358b4af26627a3b4754a",
+      "license": "MIT"
+    },
+    {
+      "source_path": "docs/contracts/mouthfolio-research.v0.3.ts",
+      "source_revision": "52e3443868ed607c21f85767adb72333be4c2b7e",
+      "destination": "contracts/types.v0.3.ts",
+      "mode": "unchanged",
+      "source_sha256": "a653e14c45cf6c8a86d6bd1f1ba9515fa1ceb029fb36e6865628bd1c0e0f01d9",
+      "license": "MIT"
+    },
+    {
+      "source_path": "docs/contracts/examples/mouthfolio-v0.3-initial.json",
+      "source_revision": "52e3443868ed607c21f85767adb72333be4c2b7e",
+      "destination": "fixtures/v0.3-initial.json",
+      "mode": "unchanged",
+      "source_sha256": "3da7a82648c8e8b95b8604b20f52bd3d317affe848700483a4b3f071049b7deb",
+      "license": "MIT"
+    },
+    {
+      "source_path": "docs/contracts/examples/mouthfolio-v0.3-corrected.json",
+      "source_revision": "52e3443868ed607c21f85767adb72333be4c2b7e",
+      "destination": "fixtures/v0.3-corrected.json",
+      "mode": "unchanged",
+      "source_sha256": "9131980bd55453c8dc64b20b9a0e60d391f10c3be2f711b561b921d633151d29",
+      "license": "MIT"
     }
   ],
   "excluded": [

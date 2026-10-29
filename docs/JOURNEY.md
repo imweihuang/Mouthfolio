@@ -12,6 +12,19 @@ Attributed-view text is plain text, not quotation styling. When a service respon
 omits conditions or horizon, the reader is directed to the original source;
 absence from this projection does not establish that the speaker stated none.
 
+## Record TLDR
+
+A validated v0.3 receipt may include a **Record TLDR**, labelled
+**AI-authored · AI-reviewed**. It appears in a separate box on linked view and
+mention cards and in the exact source inspector, with source capture and summary
+availability dates. This is ASOF-authored summary text, not a source quote or a
+new stance. A mention remains a named reference. Null summaries and v0.2
+responses leave the existing evidence journey intact.
+
+Receipt display describes what this projection includes; it does not assert the
+source's full reuse permissions. A link-only receipt has no source excerpt and
+directs readers to the original source for full context when its URL is present.
+
 ## Routes and context
 
 - `/` and `/companies/aster-compute` open the fictional offline demo.
@@ -32,11 +45,14 @@ Records do not imply a response to another publication.
 
 ## Server connection
 
-The server component uses the same v0.2 adapter and validator as the demo. The
+The server component defaults to the same v0.2 contract as the demo. The
 hosting operator can supply `ASOF_DATA_ORIGIN` as an authorized HTTPS origin
 without a path, query, credentials or fragment; loopback HTTP is also accepted
 for local verification. The server requests the fixed versioned company endpoint.
-This setting is read only on the server and never passed to client components.
+`ASOF_DATA_API_VERSION` is also server-only: omit it for v0.2 or explicitly set
+`v0.3` to select both the newer endpoint and its matching validator. Other
+values and mismatched responses fail closed without a fallback request. These
+settings are never passed to client components.
 No service credentials or real response fixtures are included in this repository.
 Set `MOUTHFOLIO_SERVICE_ONLY=1` at runtime for a service-only deployment. It
 disables the synthetic adapter on every route, including voice query parameters,

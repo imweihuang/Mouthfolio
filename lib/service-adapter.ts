@@ -1,19 +1,19 @@
-import { decodeResearch, ResearchUnavailable, validateQuery } from "./contract.ts";
-import type { ResearchAdapter, ResearchQuery } from "./contract.ts";
+import { apiVersion, decodeResearch, ResearchUnavailable, validateQuery } from "./contract.ts";
+import type { ApiVersion, ResearchAdapter, ResearchQuery } from "./contract.ts";
 
 export type ServiceTransport = (path: string, init: RequestInit) => Promise<Response>;
-export function researchPath(query: ResearchQuery): string {
+export function researchPath(query: ResearchQuery, version: ApiVersion = "v0.2"): string {
   validateQuery(query);
   const params = new URLSearchParams({ asof: query.asOf, window: query.window });
-  return `/api/mouthfolio/v0.2/companies/${query.companyId}/research?${params}`;
+  return `/api/mouthfolio/${apiVersion(version)}/companies/${query.companyId}/research?${params}`;
 }
 
 // A hosting application's server supplies its authorized transport. There is no
 // default host, credential configuration, or connection to ASOF Data in this repo.
-export function createServiceAdapter(transport: ServiceTransport): ResearchAdapter {
+export function createServiceAdapter(transport: ServiceTransport, version: ApiVersion = "v0.2"): ResearchAdapter {
   return { async read(query) {
     try {
-      const response = await transport(researchPath(query), {
+      const response = await transport(researchPath(query, version), {
         method: "GET", cache: "no-store", redirect: "error",
         signal: AbortSignal.timeout(5000), headers: { Accept: "application/json" },
       });
@@ -33,7 +33,7 @@ export function createServiceAdapter(transport: ServiceTransport): ResearchAdapt
         }
         text += decoder.decode();
       } finally { await reader.cancel(); reader.releaseLock(); }
-      return decodeResearch(JSON.parse(text), query, "authorized");
+      return decodeResearch(JSON.parse(text), query, "authorized", version);
     } catch { throw new ResearchUnavailable(); }
   } };
 }

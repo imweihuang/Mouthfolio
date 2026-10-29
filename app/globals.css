@@ -115,3 +115,8 @@ footer { padding-top: calc(var(--unit) * 7); font-size: var(--text-sm); }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 @media (forced-colors: active) { button { border-color: ButtonText; }.source-excerpt { border-color: CanvasText; } }
+.record-tldr { margin: calc(var(--unit) * 4) 0; padding: calc(var(--unit) * 4); border: 1px solid var(--v2-light-line); border-radius: var(--radius-v2-control); background: var(--v2-light-bg1); overflow-wrap: anywhere; }
+.tldr-heading { display: flex; flex-wrap: wrap; gap: calc(var(--unit) * 2) calc(var(--unit) * 4); align-items: baseline; margin-bottom: calc(var(--unit) * 3); }
+.tldr-heading span,.record-tldr .tldr-context,.tldr-dates { color: var(--v2-light-muted); font-size: var(--text-sm); }
+.record-tldr p { margin-bottom: calc(var(--unit) * 3); line-height: var(--leading-reading); }
+.tldr-dates { margin: 0; }.tldr-dates dd { margin: 0 0 calc(var(--unit) * 2); }

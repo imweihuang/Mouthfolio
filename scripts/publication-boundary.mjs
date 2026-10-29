@@ -193,13 +193,16 @@ export function scan(source, { requireMetadata = true } = {}) {
       catch { errors.push(`${file}: invalid fixture JSON`); }
     }
   }
-  const lockPath = "contracts/contract.lock.json";
-  const lock = source.entries.has(lockPath) || requireMetadata ? json(lockPath) : null;
-  if (lock) {
-    if (!/^[0-9a-f]{40}$/.test(lock.source_revision) || !lock.files || typeof lock.files !== "object") errors.push(`${lockPath}: unpinned consumer contract`);
-    for (const [file, expected] of Object.entries(lock.files ?? {})) {
-      try { if (sha256(source.read(file)) !== expected) errors.push(`${file}: contract drift`); }
-      catch (error) { errors.push(error.message); }
+  const lockPaths = ["contracts/contract.lock.json"];
+  if (source.entries.has("contracts/mouthfolio-research.v0.3.schema.json") || source.entries.has("contracts/contract.v0.3.lock.json")) lockPaths.push("contracts/contract.v0.3.lock.json");
+  for (const lockPath of lockPaths) {
+    const lock = source.entries.has(lockPath) || requireMetadata ? json(lockPath) : null;
+    if (lock) {
+      if (!/^[0-9a-f]{40}$/.test(lock.source_revision) || !lock.files || typeof lock.files !== "object") errors.push(`${lockPath}: unpinned consumer contract`);
+      for (const [file, expected] of Object.entries(lock.files ?? {})) {
+        try { if (sha256(source.read(file)) !== expected) errors.push(`${file}: contract drift`); }
+        catch (error) { errors.push(error.message); }
+      }
     }
   }
   if (errors.length) throw new Error([...new Set(errors)].join("\n"));
