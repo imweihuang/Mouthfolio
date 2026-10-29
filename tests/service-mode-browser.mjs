@@ -66,12 +66,19 @@ async function checkServiceVersion(browser, basePath, version) {
     }
     // Entirely fictional transport fixture: proves rendering compatibility, not live service acceptance.
     syntheticPayload = { ...structuredClone(fixture), data_mode: "authorized" };
+    syntheticPayload.questions = [];
+    syntheticPayload.coverage.note = "Fictional internal admission details must not lead the reader experience.";
     syntheticPayload.observations = Array.from({ length: 21 }, (_, index) => ({
       ...fixture.observations[0], id: `fictional-metric-${index}`, version_id: `fictional-version-${index}`,
-      label: `Fictional measure ${index + 1}`,
+      label: `Fictional measure ${index + 1}`, amount: "2345678901.23", unit: "USD", basis: "fictional-basis-code: see complete provenance",
       period: index < 16 ? { label: "Fictional earlier period", start: "2025-01-01", end: "2025-12-31" } :
         { label: "Fictional latest period", start: "2026-01-01", end: "2026-06-30" },
     }));
+    for (const [index, row] of syntheticPayload.observations.entries()) {
+      const receipt = syntheticPayload.receipts.find(item => item.id === row.receipt_id);
+      row.receipt_id = `fictional-financial-receipt-${index}`;
+      syntheticPayload.receipts.push({ ...receipt, id: row.receipt_id, display_policy: "link_only", excerpt: null, url: "https://example.com/fictional-filing" });
+    }
     const missingReasons = [
       "The fictional source is temporarily unavailable.",
       "This measure is not applicable to the fictional reporting period.",
@@ -93,8 +100,37 @@ async function checkServiceVersion(browser, basePath, version) {
     assert.equal(await page.locator(".record-tldr").count(), 0);
     assert.equal(await page.locator(".metric-card").count(), 5);
     assert.equal(await page.locator("tbody tr").count(), 21);
-    assert.match(await page.locator(".summary-note").textContent(), /Latest reporting date: 2026-06-30/);
+    assert.match(await page.locator("#evidence > .summary-note").textContent(), /Latest reporting date: 2026-06-30/);
     assert.equal(await page.locator(".metric-card").getByText("Fictional earlier period", { exact: false }).count(), 0);
+    assert.equal(await page.locator("#question, a[href='#question']").count(), 0);
+    assert.equal(await page.getByText(syntheticPayload.coverage.note, { exact: true }).count(), 0);
+    assert.match(await page.getByTestId("commentary-coverage").innerText(), /Partial commentary archive:.*Latest commentary:/);
+    assert.equal(await page.locator(".metric-card").getByText("$2.35B", { exact: true }).count(), 5);
+    assert.equal(await page.locator(".metric-card").getByText("USD · rounded to 2 decimals; exact value below", { exact: true }).count(), 5);
+    assert.equal(await page.locator(".metric-card").getByText("fictional-basis-code", { exact: false }).count(), 0);
+    assert.equal(await page.locator("tbody tr").nth(16).getByText("2,345,678,901.23 USD", { exact: true }).count(), 1);
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.evaluate(() => scrollTo(0, 0));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Clarity page overflow at ${width}`);
+      await page.screenshot({ path: `artifacts/reading-clarity-${width}.png` });
+      await page.locator(".metric-card").first().getByRole("link").click();
+      const inspector = page.getByRole("dialog");
+      await inspector.getByText("Reported value: 2,345,678,901.23 USD", { exact: true }).first().waitFor();
+      assert.ok(await inspector.getByText("Unit: USD · fictional-basis-code: see complete provenance", { exact: true }).first().isVisible());
+      await page.screenshot({ path: `artifacts/reading-clarity-receipt-${width}.png` });
+      const receiptUrl = page.url();
+      await page.reload();
+      await page.getByRole("dialog").getByText("Reported value: 2,345,678,901.23 USD", { exact: true }).first().waitFor();
+      assert.equal(page.url(), receiptUrl);
+      await page.keyboard.press("Escape");
+      await page.getByRole("dialog").waitFor({ state: "detached" });
+      await page.goBack();
+      await page.getByRole("dialog").waitFor();
+      assert.equal(page.url(), receiptUrl);
+      await page.goForward();
+      await page.getByRole("dialog").waitFor({ state: "detached" });
+    }
     // These null rows are from an earlier period and absent from the summary.
     // Their distinct reasons must survive both the complete table and exact receipt.
     for (const width of [1440, 390]) {

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { Observation } from "../../contracts/types";
 import type { Receipt } from "../../lib/contract";
+import { formatAmount } from "../../lib/format-amount";
 import { RecordTldr } from "./record-tldr";
 
 export function SourceInspector({ receipt, requestedId, closeUrl, observations, synthetic }: {
@@ -40,7 +41,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     {receipt ? <>
       <RecordTldr receipt={receipt} details/>
       <p className="source-excerpt">{receipt.excerpt ?? (receipt.url ? "Open the original source for full context." : "Source text is not displayed here.")}</p>
-      {observations.map(row => <div className="receipt-measure" key={row.version_id}><strong>{row.label}</strong>{row.missing_reason !== null ? <p>{row.missing_reason}</p> : null}<p>{row.period.label} · {row.period.start} – {row.period.end}</p><p>Unit: {row.unit} · {row.basis}</p><small>Evidence version: {row.version_id}{row.supersedes ? ` · supersedes ${row.supersedes}` : ""}</small></div>)}
+      {observations.map(row => <div className="receipt-measure" key={row.version_id}><strong>{row.label}</strong><p className="receipt-amount">Reported value: {formatAmount(row.amount, row.unit)}</p>{row.missing_reason !== null ? <p>{row.missing_reason}</p> : null}<p>{row.period.label} · {row.period.start} – {row.period.end}</p><p>Unit: {row.unit} · {row.basis}</p><small>Evidence version: {row.version_id}{row.supersedes ? ` · supersedes ${row.supersedes}` : ""}</small></div>)}
       <dl className="receipt-details"><dt>Source location</dt><dd>{receipt.locator}</dd><dt>Published</dt><dd><time dateTime={receipt.published_at}>{receipt.published_at}</time></dd>
         <dt>Ingested</dt><dd>{receipt.ingested_at}</dd><dt>Available</dt><dd>{receipt.available_at}</dd><dt>Receipt display</dt><dd>{receipt.display_policy === "excerpt" ? "Excerpt" : "Link only"}</dd>
         <dt>Receipt identity</dt><dd>{receipt.id}</dd><dt>Source identity</dt><dd>{receipt.source_id}</dd><dt>Snapshot</dt><dd data-testid="snapshot">{receipt.snapshot_id}</dd></dl>
