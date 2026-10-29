@@ -3,8 +3,14 @@
 The company view starts with a maintained question when one is available, then
 shows exact reported observations, attributed views, mentions and source receipts.
 Observation cards and the table show the same values, units, reporting periods and
-financial basis. Missing values retain their explanation. Voice pages keep views
+financial basis. The headline summary is capped at four records, taking the latest
+period only within identical labels, units and bases. The contract has no stable
+metric-family key; the complete reporting history remains in the table. No growth
+or margin is inferred. Missing values retain their explanation. Voice pages keep views
 and mentions in separate sections: a named reference alone establishes no stance.
+Attributed-view text is plain text, not quotation styling. When a service response
+omits conditions or horizon, the reader is directed to the original source;
+absence from this projection does not establish that the speaker stated none.
 
 ## Routes and context
 

@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
+import { createServer as createHttpServer } from "node:http";
+import fixture from "../fixtures/initial.json" with { type: "json" };
 
 export async function checkServiceOnly(browser, basePath = "") {
   const probe = createServer();
@@ -8,8 +10,17 @@ export async function checkServiceOnly(browser, basePath = "") {
   const port = probe.address().port;
   await new Promise(resolve => probe.close(resolve));
   const origin = `http://127.0.0.1:${port}${basePath}`;
+  let syntheticPayload = null;
+  const transport = createHttpServer((request, response) => {
+    response.setHeader("Content-Type", "application/json");
+    if (!syntheticPayload) { response.writeHead(503); response.end('{"detail":"Unavailable synthetic transport"}'); return; }
+    const query = new URL(request.url, "http://localhost").searchParams;
+    response.end(JSON.stringify({ ...syntheticPayload, as_of: query.get("asof") }));
+  });
+  await new Promise(resolve => transport.listen(0, "127.0.0.1", resolve));
+  const transportOrigin = `http://127.0.0.1:${transport.address().port}`;
   const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", String(port)], {
-    stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", MOUTHFOLIO_SERVICE_ONLY: "1", ASOF_DATA_ORIGIN: "" },
+    stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", MOUTHFOLIO_SERVICE_ONLY: "1", ASOF_DATA_ORIGIN: transportOrigin },
   });
   let log = "", page;
   for (const pipe of [server.stdout, server.stderr]) pipe.on("data", chunk => { log = (log + chunk).slice(-4000); });
@@ -33,9 +44,25 @@ export async function checkServiceOnly(browser, basePath = "") {
       assert.equal(await page.getByText("Fictional demo", { exact: true }).count(), 0);
       assert.equal(await page.getByText("94 million USD", { exact: true }).count(), 0);
     }
+    // Entirely fictional transport fixture: proves rendering compatibility, not live service acceptance.
+    syntheticPayload = { ...structuredClone(fixture), data_mode: "authorized" };
+    syntheticPayload.observations = Array.from({ length: 21 }, (_, index) => ({
+      ...fixture.observations[0], id: `fictional-metric-${index}`, version_id: `fictional-version-${index}`,
+      label: `Fictional measure ${index + 1}`,
+    }));
+    await page.goto(origin + "/companies/aster-compute");
+    await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
+    assert.equal(await page.locator(".metric-card").count(), 4);
+    assert.equal(await page.locator("tbody tr").count(), 21);
+    assert.equal(await page.locator("blockquote").count(), 0);
+    assert.ok(await page.getByText("See original source", { exact: true }).isVisible());
+    await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
+    await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
+    console.log("Authorized-mode synthetic transport passed: 21 exact table rows, 4 summary cards, plain view text, absent qualifiers and unavailable source copy.");
     console.log("Service-only mode passed: Anthropic home, no demo adapter through company or voice routes, missing service stays unavailable.");
   } finally {
     await page?.close();
+    await new Promise(resolve => transport.close(resolve));
     if (server.exitCode === null) {
       const exited = new Promise(resolve => server.once("exit", resolve)); server.kill("SIGTERM");
       await Promise.race([exited, new Promise(resolve => setTimeout(resolve, 5000))]);

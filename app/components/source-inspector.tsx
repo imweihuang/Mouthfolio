@@ -42,7 +42,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
         <dt>Ingested</dt><dd>{receipt.ingested_at}</dd><dt>Available</dt><dd>{receipt.available_at}</dd><dt>Display permission</dt><dd>{receipt.display_policy === "excerpt" ? "Permitted excerpt" : "Link only"}</dd>
         <dt>Receipt identity</dt><dd>{receipt.id}</dd><dt>Source identity</dt><dd>{receipt.source_id}</dd><dt>Snapshot</dt><dd data-testid="snapshot">{receipt.snapshot_id}</dd></dl>
       <details><summary>Content fingerprint</summary><code>{receipt.content_sha256}</code></details>
-      {receipt.url ? <a className="source-link" href={receipt.url} rel="noreferrer">Open original source ↗</a> : <p className="muted">Original fictional text; there is no external source.</p>}
+      {receipt.url ? <a className="source-link" href={receipt.url} rel="noreferrer">Open original source ↗</a> : <p className="muted">{synthetic ? "Original fictional text; there is no external source." : "The original source link is unavailable. Source text is not displayed."}</p>}
     </> : <p>This exact receipt is absent or no longer eligible at the selected cutoff. Another version has not been substituted.</p>}
   </dialog>;
 }
