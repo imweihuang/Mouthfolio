@@ -1,4 +1,4 @@
-# Mouthfolio by ASOF
+# Mouthfolio
 
 Explore market views, company evidence and what changed.
 

@@ -1,9 +1,8 @@
 # Development handoff
 
-This source snapshot contains the selected synthetic client foundation.
-The [progress record](PROGRESS.md) maps the remaining client work to plain-English
-milestones. It is a dated summary; this handoff retains the source and boundary
-rules for implementation.
+The [README](../README.md) describes the current client and the
+[progress record](PROGRESS.md) maps remaining work to milestones. This handoff
+retains source ownership and verification guidance.
 
 ## Selected sources and ownership
 
@@ -26,16 +25,12 @@ Existing AsOf UI owners retain their frozen candidates and current work until
 their selected source is imported. There is no duplicate feature implementation
 mandate and no live Station cutover in this preparation.
 
-## First feature slice
+## Continue development
 
-1. Import the selected company/filing shell and portable UI components against
-   the synthetic contract. Update the allowlist, notices and browser checks.
-2. Extend the contract only in AsOf when the feature needs a new projection;
-   pin its reviewed revision here. Keep real source data in AsOf.
-3. Connect company/question/voice navigation while retaining as-of/window and
-   browser history. Keep absent evidence explicit.
-4. Evaluate a real hosted adapter separately, after backend access, rights and
-   publication qualification. The injected adapter here is tested but unconnected.
+Use [PROGRESS](PROGRESS.md) for milestone status and [JOURNEY](JOURNEY.md) for the
+connected company, voice and source experience. This handoff does not maintain a
+second feature backlog. New service projections originate in ASOF Data and are
+pinned here through the consumer contract; real source data stays with that service.
 
 ## Verification and merge gate
 
