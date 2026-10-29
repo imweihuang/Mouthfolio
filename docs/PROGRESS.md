@@ -1,34 +1,37 @@
 # Mouthfolio progress
 
-Source snapshot prepared **28 October 2026** for review in this independent
-repository. This is a dated client progress record,
-not a live service or release report.
+Client checkpoint: **28 October 2026**, after foundation integration through
+[Mouthfolio #1](https://github.com/imweihuang/Mouthfolio/pull/1). This is a dated
+client progress record, not a live service or release report.
 
-Mouthfolio is the primary customer experience, powered by ASOF Data. Start with
-one complete research journey: explore a company, see related attributed views,
-inspect the sources and understand what changed. ASOF Research and ASOF Chat
-remain separate, parked product directions.
+Mouthfolio is the primary planned customer experience, with ASOF Data as its
+intended data foundation. The current demo uses fictional data and has no hosted
+connection. The next milestone is one complete research journey: explore a
+company, see related market commentary, inspect its sources and understand what
+changed. A **voice** is a person or account whose market commentary is followed.
+ASOF Research and ASOF Chat remain separate product directions with no active
+development planned.
 
 ## Where we are
 
 | Work area | In place | Still to do |
 |---|---|---|
-| Client foundation | This snapshot includes the independent client, selected visual assets and [license notices](../THIRD_PARTY_NOTICES.md). | Review later component imports individually, including their assets and dependencies. |
+| Client foundation | The independent client, selected visual assets and [license notices](../THIRD_PARTY_NOTICES.md) are integrated into main. | Review later component imports individually, including their assets and dependencies. |
 | Contributor safeguards | Staged-content, authorship, destination identity and outgoing-history guards are included, with portable instructions and CI. | Complete the exact-candidate review and separately authorize source release. |
-| Working demonstration | The snapshot includes the synthetic research demo, versioned consumer format, adapters and automated checks. | Connect the full company, question, voice, source and edition reading flow. |
+| Working demonstration | The fictional local demo and its automated checks are integrated into main. | Connect the full company, question, voice, source and edition reading flow. |
 | Reading experience | Selected light tokens and the local font are available. | Import the selected company shell, charts and filing reader with synthetic fixtures. Full Storybook extraction remains open. |
-| Hosted information | The injected-service adapter is tested against the consumer format. | An authorized hosted connection has not been implemented or connected. Backend qualification and release are separate. |
+| Hosted information | Connection code has been tested locally against the agreed data format. | The demo has no hosted service connection. Backend checks and release are separate. |
 | Reader usefulness | The intended question-led journey is defined. | Test the complete journey with readers; no customer-use or paid-demand result is claimed. |
 
-The foundation is prepared for review. The full connected feature build has not started in
-this repository at this checkpoint. No progress percentage is assigned: each
-milestone below states what must work before it can be called complete.
+The local demo foundation is integrated. The full connected feature build has
+not started in this repository at this checkpoint. Each milestone below states
+what must work before it can be called complete; no progress percentage is assigned.
 
 ## Roadmap and completion conditions
 
 | Arc | Milestone | Complete when | State |
 |---|---|---|---|
-| Prepare the foundations | Independent sample client | A clean checkout runs with synthetic data, local assets and portable checks, without backend access. | Source snapshot prepared for review |
+| Prepare the foundations | Independent sample client | A clean checkout runs with synthetic data, local assets and portable checks, without backend access. | Integrated in [#1](https://github.com/imweihuang/Mouthfolio/pull/1); clean-checkout checks passed |
 | Prepare the foundations | Early-alpha source release | The exact candidate and retained repository contents pass source/rights review, contributor guidance is ready, and public visibility is separately authorized and verified. | Release preparation; visibility change pending |
 | Complete a research journey | Selected reading components | The company shell, charts and filing reader use the consumer interface; source boundaries and notices pass. | Proposed next |
 | Complete a research journey | Connected company and voice navigation | Readers move between question, company, view, source and earlier editions without losing dates or browser history. | Proposed next |
