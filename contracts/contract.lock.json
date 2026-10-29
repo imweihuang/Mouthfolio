@@ -1,7 +1,7 @@
 {
   "schema_version": "asof.mouthfolio.research.v0.2",
   "source_repository": "imweihuang/AsOf",
-  "source_revision": "564c09dad3b7f8fc1b9288b6a1c48ee83faeaabc",
+  "source_revision": "f2e42220ee681105a60f83c7eb47bcc9190acc88",
   "source_paths": {
     "contracts/mouthfolio-research.v0.2.schema.json": "docs/contracts/mouthfolio-research.v0.2.schema.json",
     "contracts/types.ts": "docs/contracts/mouthfolio-research.v0.2.ts",
