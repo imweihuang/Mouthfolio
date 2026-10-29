@@ -1,35 +1,44 @@
-# Mouthfolio
+# Mouthfolio by ASOF
 
-Question-led company and voice research, powered by ASOF Data.
+Explore market views, company evidence and what changed.
 
-Mouthfolio is being built to connect company evidence, attributed market views
-and changes over time. The planned experience lets readers start with a company
-or a voice, investigate a maintained question, and inspect supporting sources.
+Mouthfolio is being built to help self-directed investors explore what market
+commentators have said, compare those views with company evidence, and see what
+changed over time. The planned experience lets readers start with a company or a
+commentator, investigate an ongoing research question, and inspect dated sources.
+
+A **voice** is a person or account whose market commentary is followed.
 
 ## Early alpha
 
-This is an experimental, [MIT-licensed](LICENSE) client with a runnable synthetic
-research demo. All companies, voices, values and excerpts in the demo are fictional.
-It runs locally without an ASOF Data account, service connection or credentials.
+This repository contains an experimental, [MIT-licensed](LICENSE) client with a
+small local research demo. **All companies, voices, values and excerpts in the
+demo are fictional.** It runs without an account, backend connection or credentials.
+ASOF Data is the intended foundation for a future hosted connection; this demo
+does not connect to that service or provide real research.
 
-| Available now | Planned |
+| Included in the fictional local demo | Planned |
 |---|---|
-| A small company/question/view/source example | The full company dashboard, filing reader and voice navigation |
-| Dated evidence, a later correction and explicit missing/error states | A complete research journey and reader testing |
-| Selected visual foundations, a versioned consumer contract and automated checks | A separately qualified connection to hosted ASOF Data |
+| A small example linking a company, research question, commentator's view and source | The full company dashboard, filing reader and navigation between companies and voices |
+| Dated sources, a later correction and visible missing-data and error states | A complete research journey, tested with readers |
+| Fictional data that works locally | An authorized connection to hosted ASOF Data |
+
+For contributors, the repository also includes selected visual foundations, a
+versioned client-service interface and automated checks. The connection code has
+been tested locally, but the demo is not connected to a hosted service.
 
 Interfaces and presentation may change during the alpha. There is no stable API
-or production-support commitment. The injected service adapter is tested but has
-no configured hosted endpoint. Publishing this source is separate from deploying
-a service or publishing real research.
+or production-support commitment. Publishing this source is separate from
+deploying a service or publishing real research.
 
 See [progress and milestones](docs/PROGRESS.md) for the dated client status,
 what is in place and what completes the next research journey.
 
-The planned experience reuses the existing Next.js/React client and visual
-system. Its first connected workflow is company → research question → attributed
-view → evidence, with a filing reader and dated research editions. ASOF Research
-and ASOF Chat are separate, parked product directions.
+The first full research journey will connect a company, an ongoing research
+question, related commentary and its sources, with a filing reader and earlier
+dated editions to inspect. It will reuse selected Next.js/React components and
+the existing visual system. ASOF Research and ASOF Chat are separate product
+directions with no active development planned.
 
 ## Client and data boundary
 
@@ -42,10 +51,10 @@ operations. This repository's license does not grant access to that service or
 rights to its data. See [the source boundary](docs/SOURCE_BOUNDARY.md) before
 bringing files or dependencies into this repository.
 
-## Contributing
+## Run the demo
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md). Use Node **22.22.0** (`.nvmrc`) and
-npm **10.9.4**. All commands run from this repository root:
+Use Node **22.22.0** (`.nvmrc`) and npm **10.9.4**. All commands run from this
+repository root:
 
 ```sh
 npm ci --ignore-scripts
@@ -56,6 +65,10 @@ npm run dev
 Open <http://127.0.0.1:3210>. No environment file, account, backend, provider or
 credential is needed to run the demo. It includes an original edition, a later correction,
 a missing metric, and unavailable/revoked examples. Its fonts are local.
+
+## Contributing
+
+Start with [CONTRIBUTING.md](CONTRIBUTING.md). After setup, run:
 
 ```sh
 npm run check
