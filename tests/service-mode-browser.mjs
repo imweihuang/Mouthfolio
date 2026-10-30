@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { createServer as createHttpServer } from "node:http";
+import { checkVoiceReceiptScope } from "./voice-receipts-browser.mjs";
 import { checkRecordTldr } from "./tldr-browser.mjs";
 import fixture from "../fixtures/initial.json" with { type: "json" };
 
@@ -111,6 +112,7 @@ async function checkServiceVersion(browser, basePath, version) {
       await page.getByRole("button", { name: "Close source" }).click();
       await page.getByRole("dialog").waitFor({ state: "detached" });
     }
+    await checkVoiceReceiptScope(page, origin, recovering, value => { syntheticPayload = value; });
     if (version === "v0.3") {
       await checkRecordTldr(page, origin, value => { syntheticPayload = value; });
       assert.deepEqual(errors, [], `${version} service browser console/page errors`);
