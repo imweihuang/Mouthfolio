@@ -1,6 +1,6 @@
 # Mouthfolio progress
 
-Current checkpoint: **29 October 2026**. The source is public, and the first hosted
+Current checkpoint: **30 October 2026**. The source is public, and the first hosted
 Anthropic company → voice → source journey is available.
 
 Mouthfolio lets readers follow company evidence into related voices and source
@@ -14,19 +14,29 @@ The default local demo uses fictional information and needs no service access.
 | Public source | The [early-alpha repository](https://github.com/imweihuang/Mouthfolio), license notices, contributor instructions and publication guards are available. | Review each future import and preserve the boundary between code and service data. |
 | Connected reading | [Journey #3](https://github.com/imweihuang/Mouthfolio/pull/3) connects company, voice and source pages with dated context, exact receipts and visible missing-value reasons. | Complete the filing reader and broaden company coverage. |
 | Local demonstration | Fictional observations, distinct views/mentions, corrections, cutoff changes and unavailable states work without a backend connection. | Continue testing the experience as it expands. |
-| Hosted Anthropic slice | [Anthropic on Mouthfolio](https://asof.io/mouthfolio/companies/anthropic) connects 21 reported SEC filing figures with a partial older commentary archive from six voices and company → voice → source navigation. | Broaden coverage and gather reader feedback. |
+| Hosted Anthropic slice | [Anthropic on Mouthfolio](https://asof.io/mouthfolio/companies/anthropic) connects 21 reported SEC filing figures with a partial commentary archive from six voices and company → voice → source navigation. | Broaden coverage and gather reader feedback. |
 | Record TLDR | Six reviewed Record TLDRs are available in the hosted Anthropic slice. | Broaden qualified summary coverage; the commentary archive remains partial. |
 | Design and usefulness | Selected light tokens and the local font support the integrated journey. | Full Storybook extraction and reader trials remain open; no customer-use or paid-demand result is claimed. |
 
 [Open the Anthropic alpha](https://asof.io/mouthfolio/companies/anthropic).
-Its newest archived commentary source is dated **10 October 2026**. The archive is
-partial and does not establish reactions to the later filing.
+The page shows the date of its newest eligible commentary. Coverage is partial;
+archive freshness does not establish complete reactions to a filing.
 Missing evidence stays visible. There is no stable API or
 production-support commitment during this alpha.
 
 ASOF Research and ASOF Chat remain separate product directions with no active
 development planned. A public client repository does not grant rights to service
 data; the [source boundary](SOURCE_BOUNDARY.md) remains in force.
+
+## Client presentation update: 30 October 2026
+
+This change adds question-led revenue and result-versus-operating-cash-flow
+comparisons, exact-value tables and links to each observation's receipt.
+Chronological commentary cards group exact voice/source pairs, retain every
+attributed statement and mention count, and provide URL-backed voice, type and
+order controls. These changes use the existing consumer response. They add no
+commentary, summaries or coverage, and do not establish deployment of this
+revision. Local verification and hosted acceptance remain separate.
 
 ## Historical checkpoint: 28 October 2026
 

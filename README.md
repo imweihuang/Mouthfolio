@@ -39,6 +39,7 @@ current-news feed.
 | Available in the client | Still to complete |
 |---|---|
 | Connected company, voice and source pages with reported metrics, distinct views/mentions and an evidence inspector | A complete filing reader and broader company coverage |
+| Question-led financial charts with exact-value tables and source links; dated commentary cards with voice/type filters | Broader comparable observations and richer qualified commentary |
 | Dated sources, a later correction and visible missing-data and error states in the fictional demo | Reader trials of the complete journey |
 | A hosted Anthropic company → voice → source journey, plus a fictional demo that works locally | Broader hosted coverage |
 
@@ -46,6 +47,8 @@ For contributors, the repository also includes selected visual foundations, a
 versioned client-service interface and automated checks. The default demo remains
 offline; see the [journey guide](docs/JOURNEY.md)
 for the separate service route and deployment-time connection.
+The chart and commentary presentation uses the existing evidence response;
+it does not add data coverage or establish that this client revision is deployed.
 
 Interfaces and presentation may change during the alpha. There is no stable API
 or production-support commitment. Publishing this source is separate from

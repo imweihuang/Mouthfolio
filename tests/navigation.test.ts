@@ -18,3 +18,19 @@ test("closing source clears only receipt selection", () => {
   assert.equal(url.searchParams.get("asof"), context.asOf);
   assert.equal(url.searchParams.get("state"), "revoked");
 });
+test("commentary filters survive receipts and history while profiles own their speaker", () => {
+  const filtered = { ...context, commentaryVoice: "demo-observer", commentaryKind: "mentions", commentaryOrder: "oldest" };
+  const open = new URL(companyUrl(filtered), "https://example.test");
+  const close = new URL(journeyUrl("/companies/aster-compute", filtered, ""), "https://example.test");
+  for (const url of [open, close]) {
+    assert.equal(url.searchParams.get("voice"), "demo-observer");
+    assert.equal(url.searchParams.get("kind"), "mentions");
+    assert.equal(url.searchParams.get("order"), "oldest");
+    assert.equal(url.searchParams.get("asof"), context.asOf);
+  }
+  assert.equal(close.searchParams.has("receipt"), false);
+  const profile = new URL(voiceUrl("demo-researcher", filtered), "https://example.test");
+  assert.equal(profile.searchParams.has("voice"), false);
+  assert.equal(profile.searchParams.get("kind"), "mentions");
+  assert.equal(profile.searchParams.get("receipt"), context.receipt);
+});

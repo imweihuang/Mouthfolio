@@ -19,7 +19,7 @@ export async function checkRecordTldr(page, origin, supply) {
     assert.equal(await page.locator(".record-tldr").getByText("AI-authored · AI-reviewed", { exact: true }).count(), 2);
     assert.equal(await page.locator(".record-tldr").getByText("Summary available", { exact: true }).count(), 2);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `TLDR overflow at ${width}`);
-    await page.locator("#views").screenshot({ path: `artifacts/tldr-view-${width}.png` });
+    await page.locator("#commentary").screenshot({ path: `artifacts/tldr-view-${width}.png` });
     await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByText(viewReceipt.summary.text, { exact: true }).waitFor();
