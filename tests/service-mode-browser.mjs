@@ -32,6 +32,7 @@ async function checkServiceVersion(browser, basePath, version) {
     stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", MOUTHFOLIO_SERVICE_ONLY: "1", ASOF_DATA_ORIGIN: transportOrigin, ASOF_DATA_API_VERSION: version },
   });
   let log = "", page;
+  const errors = [];
   for (const pipe of [server.stdout, server.stderr]) pipe.on("data", chunk => { log = (log + chunk).slice(-4000); });
   try {
     let ready = false;
@@ -49,8 +50,13 @@ async function checkServiceVersion(browser, basePath, version) {
     assert.equal((await fetch(origin + "/health", { method: "POST" })).status, 405);
     assert.equal(transportRequests, 0, "Liveness must not query the research service");
     page = await browser.newPage();
+    page.on("pageerror", error => errors.push(error.message));
+    page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
     await page.goto(origin);
     await page.getByRole("heading", { name: "Anthropic", exact: true }).waitFor();
+    await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
+    assert.equal(await page.locator(".sidebar-empty").textContent(), "Voices unavailable");
+    await page.getByRole("button", { name: "Reload this page", exact: true }).click();
     await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
     assert.ok((await page.locator(".brand").getAttribute("href")).includes("/companies/anthropic"));
     for (const route of ["/companies/aster-compute", "/voices/demo-researcher?company=aster-compute", "/voices/demo-researcher?company=anthropic"]) {
@@ -60,8 +66,35 @@ async function checkServiceVersion(browser, basePath, version) {
       assert.equal(await page.getByText("Fictional demo", { exact: true }).count(), 0);
       assert.equal(await page.getByText("94 million USD", { exact: true }).count(), 0);
     }
+    // A handled service outage retains the exact request, including the receipt.
+    const recoveryUrl = origin + "/voices/demo-researcher?company=aster-compute&asof=2026-10-26T12%3A00%3A00Z&window=all&receipt=receipt-mention";
+    await page.goto(recoveryUrl);
+    await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
+    const recovering = { ...structuredClone(fixture), data_mode: "authorized" };
+    if (version === "v0.3") {
+      recovering.schema_version = "asof.mouthfolio.research.v0.3";
+      recovering.receipts.forEach(receipt => { receipt.summary = null; });
+    }
+    syntheticPayload = recovering;
+    await page.getByRole("button", { name: "Reload this page", exact: true }).click();
+    await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
+    await page.getByRole("dialog").waitFor();
+    await page.waitForLoadState("networkidle");
+    assert.equal(page.url(), recoveryUrl);
+    assert.equal(await page.getByTestId("snapshot").textContent(), "snapshot-mention");
+    assert.equal(await page.getByLabel("Evidence cutoff").inputValue(), "2026-10-26T12:00:00Z");
+    await page.getByRole("button", { name: "Close source" }).click();
+    await page.getByRole("dialog").waitFor({ state: "detached" });
+    await page.locator(".subject-link").click();
+    await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
+    syntheticPayload = { ...recovering, status: "no_record_found", observations: [], questions: [], voices: [], views: [], mentions: [], receipts: [] };
+    await page.reload();
+    await page.getByRole("heading", { name: "No record found", exact: true }).waitFor();
+    assert.equal(await page.locator(".sidebar-empty").textContent(), "No eligible voices");
+    assert.equal(await page.getByRole("button", { name: "Reload this page", exact: true }).count(), 0);
     if (version === "v0.3") {
       await checkRecordTldr(page, origin, value => { syntheticPayload = value; });
+      assert.deepEqual(errors, [], `${version} service browser console/page errors`);
       return;
     }
     // Entirely fictional transport fixture: proves rendering compatibility, not live service acceptance.
@@ -165,8 +198,11 @@ async function checkServiceVersion(browser, basePath, version) {
     assert.ok(await page.getByText("See original source", { exact: true }).isVisible());
     await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
     await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
+    assert.deepEqual(errors, [], `${version} service browser console/page errors`);
     console.log("Authorized-mode synthetic transport passed: 21 exact table rows, 5 latest-date summary cards, earlier missing reasons in table and inspector at both widths, plain view text, absent qualifiers and unavailable source copy.");
     console.log("Service-only mode passed: Anthropic home, no demo adapter through company or voice routes, missing service stays unavailable.");
+  } catch (error) {
+    throw new Error(`${version}: ${error.message}; URL=${page?.url()}; errors=${JSON.stringify(errors)}`, { cause: error });
   } finally {
     await page?.close();
     await new Promise(resolve => transport.close(resolve));
