@@ -25,6 +25,8 @@ a:hover { text-decoration-thickness: 2px; }
 .page-nav { margin-top: calc(var(--unit) * 10); }
 .page-nav a { color: var(--v2-light-text-body); font-size: var(--text-sm); }
 .sidebar-empty { font-size: var(--text-sm); color: var(--v2-light-muted); padding: 0 calc(var(--unit) * 3); }
+.navigation-pending { margin-inline-start: calc(var(--unit) * 2); color: var(--v2-light-muted); font: var(--weight-regular) var(--text-sm)/var(--leading-body) var(--font-sans); }
+.navigation-pending:empty { display: none; }
 .sidebar-end { margin: calc(var(--unit) * 16) calc(var(--unit) * 3) 0; padding-top: calc(var(--unit) * 5); border-top: 1px solid var(--v2-light-line); font-size: var(--text-sm); }
 .sidebar-end p { margin-bottom: var(--unit); }
 main { min-width: 0; padding: calc(var(--unit) * 8) calc(var(--unit) * 13) calc(var(--unit) * 10); }

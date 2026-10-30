@@ -5,6 +5,7 @@ import { createServer as createHttpServer } from "node:http";
 import { checkVoiceReceiptScope } from "./voice-receipts-browser.mjs";
 import { checkFinancialComparisons } from "./financial-browser.mjs";
 import { checkCommentaryFeed } from "./commentary-browser.mjs";
+import { checkNavigationLoading } from "./navigation-loading-browser.mjs";
 import { checkRecordTldr } from "./tldr-browser.mjs";
 import fixture from "../fixtures/initial.json" with { type: "json" };
 
@@ -12,7 +13,7 @@ export async function checkServiceOnly(browser, basePath = "") {
   await checkServiceVersion(browser, basePath, "v0.2");
   await checkServiceVersion(browser, basePath, "v0.3");
 }
-async function checkServiceVersion(browser, basePath, version) {
+export async function checkServiceVersion(browser, basePath, version) {
   const probe = createServer();
   await new Promise(resolve => probe.listen(0, "127.0.0.1", resolve));
   const port = probe.address().port;
@@ -20,8 +21,10 @@ async function checkServiceVersion(browser, basePath, version) {
   const origin = `http://127.0.0.1:${port}${basePath}`;
   let syntheticPayload = null;
   let transportRequests = 0;
-  const transport = createHttpServer((request, response) => {
+  let transportDelayMs = 0;
+  const transport = createHttpServer(async (request, response) => {
     transportRequests++;
+    if (transportDelayMs) await new Promise(resolve => setTimeout(resolve, transportDelayMs));
     response.setHeader("Content-Type", "application/json");
     if (!syntheticPayload) { response.writeHead(503); response.end('{"detail":"Unavailable synthetic transport"}'); return; }
     const requested = new URL(request.url, "http://localhost");
@@ -116,8 +119,13 @@ async function checkServiceVersion(browser, basePath, version) {
     }
     await checkVoiceReceiptScope(page, origin, recovering, value => { syntheticPayload = value; });
     if (version === "v0.3") {
+      assert.deepEqual(errors, [], "v0.3 initial journey console/page errors");
+      await checkNavigationLoading(page, origin, value => { syntheticPayload = value; }, delay => { transportDelayMs = delay; }, () => transportRequests);
+      assert.deepEqual(errors, [], "v0.3 navigation loading console/page errors");
       await checkRecordTldr(page, origin, value => { syntheticPayload = value; });
+      assert.deepEqual(errors, [], "v0.3 TLDR console/page errors");
       await checkCommentaryFeed(page, origin, value => { syntheticPayload = value; });
+      assert.deepEqual(errors, [], "v0.3 commentary console/page errors");
       await checkFinancialComparisons(page, origin, value => { syntheticPayload = value; });
       assert.deepEqual(errors, [], `${version} service browser console/page errors`);
       return;

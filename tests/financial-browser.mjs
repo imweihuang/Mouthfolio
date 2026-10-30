@@ -88,6 +88,10 @@ export async function checkFinancialComparisons(page, origin, supply) {
   await page.keyboard.press("Escape");
   await page.locator("dialog").waitFor({ state: "detached" });
   assert.equal(await page.locator(":focus").getAttribute("id"), "research", "Hidden receipt links must not swallow keyboard focus");
+  // Dismissal is deliberately immediate. Finish its pending navigation before
+  // replacing the synthetic service's dataset for the missing-value case.
+  await page.waitForURL(url => !url.searchParams.has("receipt"));
+  await page.waitForLoadState("networkidle");
   const missing = structuredClone(data);
   missing.observations.find(row => row.id === "fictional-2026-06-30-2").amount = null;
   missing.observations.find(row => row.id === "fictional-2026-06-30-2").missing_reason = "Fictional cash-flow measure not disclosed.";

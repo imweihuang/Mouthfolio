@@ -67,6 +67,11 @@ linked to its selected company; it does not claim complete commentary coverage.
 Publication dates are shown separately from ingestion and availability dates.
 Records do not imply a response to another publication.
 
+Company and voice links show a loading status as soon as navigation starts.
+The current page and URL remain in place until the destination's fresh service
+read completes. These links do not prefetch evidence or reuse a client response
+cache to bypass current eligibility checks.
+
 ## Server connection
 
 The server component defaults to the same v0.2 contract as the demo. The

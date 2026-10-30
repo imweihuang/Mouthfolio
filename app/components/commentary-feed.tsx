@@ -6,6 +6,7 @@ import type { CommentaryGroup, CommentaryKind, CommentaryOrder } from "../../lib
 import { journeyUrl, voiceUrl } from "../../lib/navigation";
 import type { JourneyContext } from "../../lib/navigation";
 import { RecordTldr } from "./record-tldr";
+import { ResearchLink } from "./research-link";
 import "./commentary.css";
 
 export type CommentaryFeedProps = {
@@ -43,7 +44,7 @@ export function CommentaryFeed({ views, mentions, voices, receipts, companyName,
     const genericTitle = group.receipt?.title === `${voiceNames.get(group.voiceId)} on ${companyName}`;
     return <li key={group.key}>
       <article className={`commentary-card ${group.views.length ? "commentary-record" : "mention-record"}${compactMention ? " commentary-compact-mention" : ""}`} data-commentary-card="" data-voice={group.voiceId} data-source-receipt={group.receiptId}>
-        <div className="record-meta"><Link prefetch={false} href={voiceUrl(group.voiceId, context)}>{voiceNames.get(group.voiceId) ?? "Voice unavailable"}</Link><time dateTime={group.publishedAt}>{dateLabel(group.publishedAt)}</time></div>
+        <div className="record-meta"><ResearchLink href={voiceUrl(group.voiceId, context)}>{voiceNames.get(group.voiceId) ?? "Voice unavailable"}</ResearchLink><time dateTime={group.publishedAt}>{dateLabel(group.publishedAt)}</time></div>
         <div className="commentary-type-labels">{group.views.length ? <span>{group.views.length} attributed {group.views.length === 1 ? "view" : "views"}</span> : null}{group.mentions.length ? <span>{group.mentions.length} {group.mentions.length === 1 ? "mention" : "mentions"}{compactMention ? <> · <span>Named {companyName}</span></> : group.views.length ? "" : " · no attributed view in this record"}</span> : null}</div>
         {compactMention && genericTitle ? null : <h3 className="commentary-source-title">{group.receipt?.title ?? "Source title unavailable"}</h3>}
         {group.views.length ? <ul className="commentary-statements">{group.views.map(view => <li key={view.version_id}>
