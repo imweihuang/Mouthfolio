@@ -32,8 +32,8 @@ The first hosted slice connects 21 reported SEC filing figures with a partial
 archive of attributed views and mentions from six voices. Follow the company
 evidence to a voice and open its original sources for context.
 
-The newest archived commentary is dated **10 October 2026**. Coverage is partial;
-these records do not establish reactions to the later filing. This alpha is not a
+See the company page for the latest archived commentary date. Coverage is partial
+and does not capture every reaction to company filings. This alpha is not a
 current-news feed.
 
 | Available in the client | Still to complete |
