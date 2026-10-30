@@ -3,6 +3,8 @@ import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { createServer as createHttpServer } from "node:http";
 import { checkVoiceReceiptScope } from "./voice-receipts-browser.mjs";
+import { checkFinancialComparisons } from "./financial-browser.mjs";
+import { checkCommentaryFeed } from "./commentary-browser.mjs";
 import { checkRecordTldr } from "./tldr-browser.mjs";
 import fixture from "../fixtures/initial.json" with { type: "json" };
 
@@ -115,6 +117,8 @@ async function checkServiceVersion(browser, basePath, version) {
     await checkVoiceReceiptScope(page, origin, recovering, value => { syntheticPayload = value; });
     if (version === "v0.3") {
       await checkRecordTldr(page, origin, value => { syntheticPayload = value; });
+      await checkCommentaryFeed(page, origin, value => { syntheticPayload = value; });
+      await checkFinancialComparisons(page, origin, value => { syntheticPayload = value; });
       assert.deepEqual(errors, [], `${version} service browser console/page errors`);
       return;
     }
@@ -154,7 +158,7 @@ async function checkServiceVersion(browser, basePath, version) {
     assert.equal(await page.locator(".record-tldr").count(), 0);
     assert.equal(await page.locator(".metric-card").count(), 5);
     assert.equal(await page.locator("tbody tr").count(), 21);
-    assert.match(await page.locator("#evidence > .summary-note").textContent(), /Latest reporting date: 2026-06-30/);
+    assert.match(await page.locator("#evidence > .summary-note").textContent(), /Latest reporting date: Jun 30, 2026/);
     assert.equal(await page.locator(".metric-card").getByText("Fictional earlier period", { exact: false }).count(), 0);
     assert.equal(await page.locator("#question, a[href='#question']").count(), 0);
     assert.equal(await page.getByText(syntheticPayload.coverage.note, { exact: true }).count(), 0);
@@ -190,6 +194,7 @@ async function checkServiceVersion(browser, basePath, version) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 });
       for (const [index, reason] of missingReasons.entries()) {
+        if (!await page.locator(".evidence-table").evaluate(element => element.open)) await page.locator(".evidence-table > summary").click();
         const row = page.locator("tbody tr").nth(index);
         assert.match(await row.locator(".amount").innerText(), /^No value\n/);
         assert.equal(await row.getByText(reason, { exact: true }).count(), 1);
@@ -216,7 +221,8 @@ async function checkServiceVersion(browser, basePath, version) {
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
     assert.equal(await page.locator("blockquote").count(), 0);
-    assert.ok(await page.getByText("See original source", { exact: true }).isVisible());
+    await page.locator(".commentary-context > summary").first().click();
+    assert.ok(await page.getByText("Not provided in this record. See the original source.", { exact: true }).first().isVisible());
     await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
     await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
     assert.deepEqual(errors, [], `${version} service browser console/page errors`);

@@ -19,7 +19,7 @@ export async function checkVoiceReceiptScope(page, origin, base, setPayload) {
   await page.goto(company);
   await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), payload.receipts.map(receipt => receipt.id), "Company retains the full eligible source list");
-  await page.getByRole("navigation").getByRole("link", { name: "Demo researcher", exact: true }).click();
+  await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo researcher", exact: true }).click();
   await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), ["receipt-view"], "Voice list excludes other speakers and observation-only receipts");
   const researcherUrl = page.url();
@@ -27,7 +27,7 @@ export async function checkVoiceReceiptScope(page, origin, base, setPayload) {
   await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), ["receipt-view"]);
   await page.screenshot({ path: "artifacts/voice-receipt-scope-desktop.png", fullPage: true });
-  await page.getByRole("navigation").getByRole("link", { name: "Demo observer", exact: true }).click();
+  await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo observer", exact: true }).click();
   await page.getByRole("heading", { name: "Demo observer", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), ["receipt-mention"], "Mention-only voice retains its unique source");
   await page.setViewportSize({ width: 390, height: 1000 });

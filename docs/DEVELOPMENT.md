@@ -15,8 +15,8 @@ branch stack or copy its files wholesale.
 
 The import manifest selects the initial token subset and font. The API's timestamp,
 decimal and generator patterns are adapted with notices. The runnable research
-demo is intentionally small and synthetic; the full reader, charts, two-pane
-shell and Storybook are subsequent reviewed imports. Their private fixtures,
+demo is intentionally small and synthetic; the full filing reader and Storybook
+remain subsequent reviewed work. Their private fixtures,
 local API loaders and operator routes cannot cross with them.
 
 Mouthfolio now owns new reusable client work following foundation integration.
@@ -24,6 +24,13 @@ AsOf owns capture, evidence, rights, review, schemas and backend enforcement.
 Existing AsOf UI owners retain their frozen candidates and current work until
 their selected source is imported. There is no duplicate feature implementation
 mandate and no live Station cutover in this preparation.
+
+The client now includes original question-led financial comparisons and a
+chronological commentary feed. The charts use only compatible observations in
+the existing consumer response, and source cards group exact voice/receipt
+pairs without adding commentary or inferring a stance from mentions. See
+[JOURNEY](JOURNEY.md) for chart limits, exact-source links and URL filters.
+This presentation change adds no service data or deployment acceptance.
 
 ## Continue development
 

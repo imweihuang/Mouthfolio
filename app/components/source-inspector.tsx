@@ -6,6 +6,17 @@ import type { Receipt } from "../../lib/contract";
 import { formatAmount } from "../../lib/format-amount";
 import { RecordTldr } from "./record-tldr";
 
+// A receipt can live inside a collapsed evidence table after a reload.
+// Attempt visible candidates, then return keyboard focus to the research region.
+function focusReceiptOpener(opener: HTMLElement | null, requestedId: string) {
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[data-receipt]")).filter(link => link.dataset.receipt === requestedId);
+  for (const candidate of [opener, ...links, document.getElementById("research")]) {
+    if (!candidate?.isConnected || !candidate.getClientRects().length) continue;
+    candidate.focus({ preventScroll: true });
+    if (document.activeElement === candidate) return;
+  }
+}
+
 export function SourceInspector({ receipt, requestedId, closeUrl, observations, synthetic }: {
   receipt: Receipt | undefined; requestedId: string; closeUrl: string; observations: Observation[]; synthetic: boolean;
 }) {
@@ -18,8 +29,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
   const [isPending, startTransition] = useTransition();
   const restoreFocus = () => {
     focusRestored.current = true;
-    const fallback = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[data-receipt]")).find(link => link.dataset.receipt === requestedId);
-    (opener.current?.isConnected ? opener.current : fallback ?? document.getElementById("research"))?.focus({ preventScroll: true });
+    focusReceiptOpener(opener.current, requestedId);
   };
   const close = () => {
     if (dismissed.current) return;
@@ -36,11 +46,14 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     const media = matchMedia("(max-width: 1100px)");
     const defaults = new URL(closeUrl, location.href).searchParams;
     defaults.set("state", defaults.get("state") ?? "available");
+    defaults.set("voice", defaults.get("voice") ?? "all");
+    defaults.set("kind", defaults.get("kind") ?? "all");
+    defaults.set("order", defaults.get("order") ?? "newest");
     // Query ordering and percent encoding do not change research context. Keep
     // each parameter's full value list: duplicates must not become valid singles.
     const currentContext = () => {
       const url = new URL(location.href);
-      return JSON.stringify([url.pathname, ...["company", "asof", "window", "state", "receipt"].map(key => {
+      return JSON.stringify([url.pathname, ...["company", "asof", "window", "state", "receipt", "voice", "kind", "order"].map(key => {
         const values = url.searchParams.getAll(key);
         return values.length ? values : defaults.getAll(key);
       })]);
@@ -74,8 +87,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
       pane.close();
       requestAnimationFrame(() => {
         if (focusAlreadyRestored || new URL(location.href).searchParams.has("receipt")) return;
-        const fallback = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[data-receipt]")).find(link => link.dataset.receipt === requestedId);
-        (opener.current?.isConnected ? opener.current : fallback ?? document.getElementById("research"))?.focus({ preventScroll: true });
+        focusReceiptOpener(opener.current, requestedId);
       });
     };
   }, [requestedId, closeUrl]);

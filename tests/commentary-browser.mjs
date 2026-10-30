@@ -1,0 +1,113 @@
+import assert from "node:assert/strict";
+import fixture from "../fixtures/v0.3-initial.json" with { type: "json" };
+
+// Uses only the fictional consumer fixture through the existing local test service.
+export async function checkCommentaryFeed(page, origin, supply) {
+  const value = { ...structuredClone(fixture), data_mode: "authorized" };
+  const first = value.views[0];
+  const secondVoice = { id: "fictional-second-voice", name: "Fictional second voice" };
+  value.voices.push(secondVoice);
+  value.views.push({ ...first, id: "fictional-second-statement", version_id: "fictional-second-statement", statement: "A separate fictional statement retained on the same source card.", conditions: null, horizon: null });
+  value.views.push({ ...first, id: "fictional-other-voice-view", version_id: "fictional-other-voice-view", voice_id: secondVoice.id });
+  value.mentions.push({ ...value.mentions[0], id: "fictional-mixed-mention", version_id: "fictional-mixed-mention", voice_id: first.voice_id, receipt_id: first.receipt_id });
+  value.receipts.forEach(receipt => { receipt.display_policy = "link_only"; receipt.excerpt = null; receipt.url = "https://example.com/fictional-source"; });
+  supply(value);
+  const company = origin + "/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all";
+  await page.goto(company);
+  const feed = page.locator("#commentary");
+  await feed.getByRole("heading", { name: "What have these voices said?" }).waitFor();
+  assert.equal(await feed.locator("[data-commentary-card]").count(), 3);
+  const mixed = feed.locator(`[data-source-receipt="${first.receipt_id}"][data-voice="${first.voice_id}"]`);
+  assert.equal(await mixed.locator(".attributed-statement").count(), 2);
+  assert.equal(await mixed.locator(".record-tldr").count(), 1);
+  assert.equal(await mixed.getByText("1 mention", { exact: true }).count(), 1);
+  assert.equal(await feed.locator("blockquote").count(), 0);
+  const addedViewContext = mixed.locator(".commentary-context").last();
+  await addedViewContext.getByText("View context", { exact: true }).click();
+  const missingQualifiers = addedViewContext.getByText("Not provided in this record. See the original source.", { exact: true });
+  assert.equal(await missingQualifiers.count(), 2);
+  assert.ok(await missingQualifiers.nth(0).isVisible());
+  assert.ok(await missingQualifiers.nth(1).isVisible());
+
+  await feed.getByRole("navigation", { name: "Filter commentary by type" }).getByRole("link", { name: "Views", exact: true }).click();
+  await page.waitForURL(url => url.searchParams.get("kind") === "views");
+  assert.equal(await feed.locator("[data-commentary-card]").count(), 2);
+  assert.equal(await mixed.getByText("1 mention", { exact: true }).count(), 1);
+  await feed.getByRole("navigation", { name: "Filter commentary by voice" }).getByRole("link", { name: secondVoice.name, exact: true }).click();
+  await page.waitForURL(url => url.searchParams.get("voice") === secondVoice.id);
+  assert.equal(await feed.locator("[data-commentary-card]").count(), 1);
+  await feed.getByRole("navigation", { name: "Order commentary" }).getByRole("link", { name: "Oldest first", exact: true }).click();
+  await page.waitForURL(url => url.searchParams.get("order") === "oldest");
+  await page.reload();
+  assert.equal(await feed.locator("[data-commentary-card]").count(), 1);
+  assert.equal(await feed.locator(".commentary-order [aria-current]").textContent(), "Oldest first");
+  await feed.getByRole("link", { name: "Inspect supporting receipt" }).click();
+  await page.getByRole("dialog").waitFor();
+  for (const [key, expected] of Object.entries({ company: "aster-compute", asof: "2026-10-26T12:00:00Z", window: "all", voice: secondVoice.id, kind: "views", order: "oldest", receipt: first.receipt_id })) {
+    assert.equal(new URL(page.url()).searchParams.get(key), expected);
+  }
+  await page.keyboard.press("Escape");
+  await page.locator("dialog").waitFor({ state: "detached" });
+  assert.equal(new URL(page.url()).searchParams.get("voice"), secondVoice.id);
+  await page.goBack(); await page.getByRole("dialog").waitFor();
+  await page.goForward(); await page.locator("dialog").waitFor({ state: "detached" });
+  await feed.locator(".record-meta a").click();
+  await page.getByRole("heading", { name: secondVoice.name, exact: true }).waitFor();
+  assert.equal(await feed.locator("[data-commentary-card]").count(), 1);
+  assert.equal(await feed.getByRole("navigation", { name: "Filter commentary by voice" }).count(), 0);
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto(company);
+    await feed.locator("[data-commentary-card]").first().waitFor();
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Commentary overflow at ${width}`);
+    await feed.screenshot({ path: `artifacts/commentary-feed-${width}.png` });
+  }
+  const longArchive = structuredClone(value);
+  const source = longArchive.receipts.find(receipt => receipt.id === first.receipt_id);
+  for (let index = 0; index < 22; index++) {
+    const receiptId = `fictional-archive-source-${index}`;
+    const published_at = `2026-10-${String(index + 1).padStart(2, "0")}T10:00:00Z`;
+    const title = index === 0 ? `${value.voices.find(voice => voice.id === first.voice_id).name} on ${value.company.name}` : `Fictional archive source ${index}`;
+    longArchive.receipts.push({ ...source, id: receiptId, source_id: receiptId, snapshot_id: `${receiptId}-snapshot`, title, published_at, summary: null });
+    longArchive.mentions.push({ ...value.mentions[0], id: `fictional-archive-mention-${index}`, version_id: `fictional-archive-mention-${index}`, receipt_id: receiptId, published_at });
+  }
+  supply(longArchive);
+  await page.goto(company);
+  const cards = feed.locator("[data-commentary-card]");
+  const more = feed.locator(".commentary-more");
+  await more.getByText("Show 5 more source cards", { exact: true }).waitFor();
+  assert.equal(await cards.count(), 25, "All source groups remain in the document");
+  assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 20);
+  await more.locator(":scope > summary").click();
+  assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 25);
+  const genericMention = feed.locator('[data-source-receipt="fictional-archive-source-0"]');
+  assert.equal(await genericMention.locator(".commentary-source-title").count(), 0, "Only the exact generic title is suppressed");
+  assert.ok(await genericMention.getByText("Named Aster Compute", { exact: true }).isVisible());
+  assert.ok(await feed.locator('[data-source-receipt="fictional-archive-source-1"]').getByRole("heading", { name: "Fictional archive source 1", exact: true }).isVisible());
+  assert.equal(await more.locator("ol").getAttribute("start"), "21");
+  const published = await cards.locator(".record-meta time").evaluateAll(nodes => nodes.map(node => Date.parse(node.dateTime)));
+  assert.deepEqual(published, [...published].sort((a, b) => b - a));
+  await feed.getByRole("navigation", { name: "Order commentary" }).getByRole("link", { name: "Oldest first", exact: true }).click();
+  await page.waitForURL(url => url.searchParams.get("order") === "oldest");
+  assert.equal(await more.getAttribute("open"), null, "Ordering resets the local disclosure");
+  assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 20);
+  await more.locator(":scope > summary").click();
+  const oldestFirst = await cards.locator(".record-meta time").evaluateAll(nodes => nodes.map(node => Date.parse(node.dateTime)));
+  assert.deepEqual(oldestFirst, [...oldestFirst].sort((a, b) => a - b));
+  await feed.getByRole("navigation", { name: "Filter commentary by voice" }).getByRole("link", { name: secondVoice.name, exact: true }).click();
+  await page.waitForURL(url => url.searchParams.get("voice") === secondVoice.id);
+  assert.equal(await cards.count(), 1);
+  assert.equal(await more.count(), 0);
+  await feed.getByRole("navigation", { name: "Filter commentary by voice" }).getByRole("link", { name: "All voices", exact: true }).click();
+  await page.waitForURL(url => !url.searchParams.has("voice"));
+  assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 20);
+  assert.equal(await more.getAttribute("open"), null);
+  await more.locator(":scope > summary").click();
+  await feed.getByRole("navigation", { name: "Filter commentary by type" }).getByRole("link", { name: "Mentions", exact: true }).click();
+  await page.waitForURL(url => url.searchParams.get("kind") === "mentions");
+  assert.equal(await cards.count(), 24);
+  assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 20);
+  assert.equal(await more.getAttribute("open"), null, "Type filtering resets the local disclosure");
+  assert.equal(await more.locator(":scope > summary").textContent(), "Show 4 more source cards");
+  console.log("Commentary browser checks passed: exact voice/source grouping, every statement, summary once/card, mixed evidence, URL filters/order, reload/history, scoped voice, mobile layouts.");
+}

@@ -1,22 +1,41 @@
 # Company, voice and source journey
 
 The company view starts with a maintained question when one is available, then
-shows exact reported observations, attributed views, mentions and source receipts.
-Observation cards and the table show the same values, units, reporting periods and
-financial basis. The headline summary selects the latest reporting end date,
+asks how reported revenue is changing and how the reported result compares with
+operating cash flow. Revenue charts keep full years and first halves separate,
+with independent zero-based scales. The result and cash-flow chart compares the
+same reporting period, with negative values left of zero and positive values
+right. A period selector and exact-table controls support closer reading. Charts
+include only recognized USD measures and compatible reported bases; unmatched or
+ambiguous observations remain in the complete evidence table. Missing evidence
+is not plotted as zero. No growth rate, margin, cash runway or explanation of the
+accounting-to-cash difference is inferred.
+
+Chart labels and headline amounts may be rounded; exact tables retain the
+original values, units, reporting periods and financial basis. Each plotted
+observation and table source link opens its exact receipt. The headline summary
+selects the latest reporting end date,
 sorts deterministically, and is capped at six records. That exact date is labelled.
 Different bases or durations are never merged; the complete reporting history
-remains in the table. No comparability, growth or margin is inferred. Missing values retain their explanation. Voice pages keep views
-and mentions in separate sections: a named reference alone establishes no stance.
+remains in the table. Missing values retain their explanation.
+
+Company and voice pages show commentary in source cards, ordered by publication
+date with newest first by default. Each card groups one exact voice and receipt,
+retains every attributed-view statement and shows its mention count separately.
+Company readers can filter by voice; both pages offer All, Views and Mentions
+filters and newest/oldest ordering. A type filter selects whole matching cards,
+so a mixed card retains both its views and mentions. Voice pages stay scoped to
+the selected voice and company. A named reference alone establishes no stance.
 Attributed-view text is plain text, not quotation styling. When a service response
-omits conditions or horizon, the reader is directed to the original source;
+omits conditions or horizon, optional view context directs readers to the
+original source;
 absence from this projection does not establish that the speaker stated none.
 
 ## Record TLDR
 
 A validated v0.3 receipt may include a **Record TLDR**, labelled
-**AI-authored · AI-reviewed**. It appears in a separate box on linked view and
-mention cards and in the exact source inspector, with source capture and summary
+**AI-authored · AI-reviewed**. It appears once per source card in a separate box
+and in the exact source inspector, with source capture and summary
 availability dates. This is ASOF-authored summary text, not a source quote or a
 new stance. A mention remains a named reference. Null summaries and v0.2
 responses leave the existing evidence journey intact.
@@ -34,6 +53,11 @@ directs readers to the original source for full context when its URL is present.
   identity, not the latest version of the clicked metric. Changing the cutoff
   does not silently replace a selected receipt. Unknown or revoked receipts show
   a source-unavailable notice without another source's content.
+- Commentary filters use `voice`, `kind=all|views|mentions` and
+  `order=newest|oldest`. Defaults are all voices, all record types and newest
+  first. Links and cutoff changes preserve the selected research context and
+  receipt. Entering a voice profile clears the company voice filter and makes
+  the route's voice authoritative, while retaining type and order selections.
 
 The source inspector is alongside the page above 1100px and a modal drawer at
 narrow widths. Escape closes it and returns focus to the source opener. Back,
@@ -78,7 +102,7 @@ font assets stay beneath the selected base path. Build again to change it.
 ## Verification and reuse
 
 `npm run check`, `npm run build` and `npm run test:browser` cover this slice.
-The browser suite checks both company and voice entry, separate views/mentions,
+The browser suite checks both company and voice entry, grouped views/mentions,
 exact snapshot identity across history and corrections, missing/revoked sources,
 service-unavailable behavior, keyboard focus, and 320/390/1440px layouts. Run it
 for each selected build base path. Screenshots remain in ignored `artifacts/`.

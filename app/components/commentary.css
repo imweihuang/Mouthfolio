@@ -1,0 +1,46 @@
+.commentary-anchor { display: block; scroll-margin-top: calc(var(--unit) * 5); }
+.commentary-controls { border-top: 1px solid var(--v2-light-line); border-bottom: 1px solid var(--v2-light-line); padding: calc(var(--unit) * 4) 0; }
+.commentary-filter { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--unit) * 2); font-size: var(--text-sm); }
+.commentary-filter-label { color: var(--v2-light-muted); margin-right: calc(var(--unit) * 2); }
+.commentary-filter a { display: inline-flex; align-items: center; min-height: 42px; padding: calc(var(--unit) * 2) calc(var(--unit) * 3); border: 1px solid transparent; border-radius: var(--radius-v2-control); text-decoration: none; }
+.commentary-filter a[aria-current] { background: var(--v2-light-bg2); border-color: var(--v2-light-line-strong); font-weight: var(--weight-medium); }
+.commentary-filter a:hover { border-color: var(--v2-light-line-strong); }
+.commentary-control-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: calc(var(--unit) * 3); }
+.commentary-controls > .commentary-filter { margin-bottom: calc(var(--unit) * 3); }
+.commentary-result-count { margin: calc(var(--unit) * 4) 0; color: var(--v2-light-muted); font-size: var(--text-sm); }
+.commentary-timeline { list-style: none; margin: 0; padding: 0 0 0 calc(var(--unit) * 5); border-left: 1px solid var(--v2-light-line); }
+.commentary-more > summary { cursor: pointer; padding: calc(var(--unit) * 4) calc(var(--unit) * 5); border: 1px solid var(--v2-light-line); border-radius: var(--radius-v2-control); font-size: var(--text-sm); background: var(--v2-light-bg1); }
+.commentary-more[open] > summary { margin-bottom: calc(var(--unit) * 4); }
+.commentary-timeline > li { position: relative; }
+.commentary-timeline > li::before { content: ""; position: absolute; left: calc(var(--unit) * -6); top: calc(var(--unit) * 7); width: calc(var(--unit) * 2); height: calc(var(--unit) * 2); border-radius: 50%; background: var(--v2-light-bg0); border: 1px solid var(--v2-light-line-strong); }
+.commentary-feed .commentary-card { display: block; padding: calc(var(--unit) * 5); margin: 0 0 calc(var(--unit) * 4); border: 1px solid var(--v2-light-line); border-radius: var(--radius-v2-control); background: var(--v2-light-bg0); overflow-wrap: anywhere; }
+.commentary-card .record-meta { display: flex; justify-content: space-between; margin-bottom: calc(var(--unit) * 3); }
+.commentary-card .record-meta time { color: var(--v2-light-muted); }
+.commentary-type-labels { display: flex; flex-wrap: wrap; gap: var(--unit) calc(var(--unit) * 4); font-size: var(--text-sm); color: var(--v2-light-muted); margin-bottom: calc(var(--unit) * 3); }
+.commentary-source-title { font: var(--weight-regular) var(--text-h3)/var(--leading-reading) var(--font-serif); margin-bottom: calc(var(--unit) * 4); }
+.commentary-statements { list-style: none; padding: 0; margin: 0; }
+.commentary-statements > li + li { border-top: 1px solid var(--v2-light-line); padding-top: calc(var(--unit) * 4); margin-top: calc(var(--unit) * 4); }
+.commentary-card .attributed-statement { font-size: var(--text-base); margin-bottom: calc(var(--unit) * 3); }
+.commentary-context { font-size: var(--text-sm); color: var(--v2-light-text-body); }
+.commentary-context summary { cursor: pointer; color: var(--v2-light-muted); padding: var(--unit) 0; }
+.commentary-context dl { margin-bottom: calc(var(--unit) * 3); }
+.commentary-feed .commentary-mention { margin-bottom: calc(var(--unit) * 3); }
+.commentary-source-actions { display: flex; flex-wrap: wrap; gap: calc(var(--unit) * 3) calc(var(--unit) * 6); margin-top: calc(var(--unit) * 4); font-size: var(--text-sm); }
+.commentary-card .record-tldr { margin-top: calc(var(--unit) * 4); }
+.commentary-feed .commentary-compact-mention { padding: calc(var(--unit) * 3) calc(var(--unit) * 5); }
+.commentary-compact-mention .record-meta { margin-bottom: calc(var(--unit) * 2); }
+.commentary-compact-mention .commentary-type-labels { margin-bottom: 0; }
+.commentary-compact-mention .commentary-source-title { margin-top: calc(var(--unit) * 2); margin-bottom: 0; font-size: var(--text-base); }
+.commentary-compact-mention .commentary-source-actions { margin-top: calc(var(--unit) * 3); }
+@media (max-width: 650px) {
+  .commentary-timeline { padding-left: calc(var(--unit) * 3); }
+  .commentary-timeline > li::before { left: calc(var(--unit) * -4); }
+  .commentary-feed .commentary-card { padding: calc(var(--unit) * 4); }
+  .commentary-feed .commentary-compact-mention { padding: calc(var(--unit) * 3) calc(var(--unit) * 4); }
+  .commentary-card .record-meta { display: grid; gap: var(--unit); }
+  .commentary-context dl { grid-template-columns: 1fr; gap: var(--unit); }
+  .commentary-context dd { margin-bottom: calc(var(--unit) * 2); }
+  .commentary-control-row { display: grid; }
+  .commentary-filter-label { flex-basis: 100%; }
+}
+@media (forced-colors: active) { .commentary-filter a[aria-current] { border-color: LinkText; }.commentary-timeline > li::before { border-color: CanvasText; } }

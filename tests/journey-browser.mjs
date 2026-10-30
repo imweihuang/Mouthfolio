@@ -11,8 +11,9 @@ export async function checkJourney(page, origin) {
   await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
   assert.equal(new URL(page.url()).searchParams.get("asof"), "2026-10-26T12:00:00Z");
   assert.equal(new URL(page.url()).searchParams.get("window"), "all");
-  await page.getByRole("heading", { name: "Attributed views", exact: true }).waitFor();
-  await page.getByRole("heading", { name: "Mentions", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "What have these voices said?", exact: true }).waitFor();
+  assert.equal(await page.locator(".commentary-record").count(), 1);
+  assert.equal(await page.locator(".mention-record").count(), 1);
   await page.getByRole("link", { name: "Inspect mention receipt" }).click();
   await page.getByRole("button", { name: "Close source" }).waitFor();
   const mentionUrl = page.url();
