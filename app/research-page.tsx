@@ -8,6 +8,7 @@ import type { JourneyContext } from "../lib/navigation";
 import type { MouthfolioResearch } from "../lib/contract";
 import { RecordTldr } from "./components/record-tldr";
 import { SourceInspector } from "./components/source-inspector";
+import { ReloadPage } from "./components/reload-page";
 
 const unavailableCopy = {
   no_record_found: "No eligible record was found for this cutoff. A source's publication date does not establish when it became available.",
@@ -47,16 +48,19 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
   const mentions = ready?.mentions.filter(item => !voiceId || item.voice_id === voiceId) ?? [];
   const summary = summaryObservations(ready?.observations ?? []);
   const selected = ready?.receipts.find(item => item.id === receiptId);
+  // A failed request cannot establish receipt eligibility. Keep its URL for recovery
+  // without opening a modal that makes the page recovery action inert.
+  const showInspector = Boolean(receiptId) && (ready !== null || status !== "unavailable");
   const inspect = (id: string, label = "Inspect receipt") => <Link prefetch={false} scroll={false} data-receipt={id} href={href(id)}>{label} <span aria-hidden="true">↗</span></Link>;
   return <>
-    <div className={receiptId ? "reader-shell has-inspector" : "reader-shell"}>
+    <div className={showInspector ? "reader-shell has-inspector" : "reader-shell"}>
       <a className="skip-link" href="#research">Skip to research</a>
       <header className="topbar"><Link href={companyUrl(context)} className="brand">Mouthfolio<span className="brand-by">by ASOF</span></Link><span className="topbar-note">Company evidence. Attributed views.</span></header>
       <div className="demo-notice">{synthetic ? <><strong>Fictional demo</strong><span>All companies, voices, values and source text in this example are invented.</span></> : <><strong>ASOF Data</strong><span>Company research · only eligible evidence is displayed.</span></>}</div>
       <div className="workspace">
         <nav className="sidebar" aria-label="Research navigation"><p className="nav-label">Companies</p>
           <Link prefetch={false} href={companyUrl(context)} aria-current={!voiceId ? "page" : undefined}>{companyName}<span aria-hidden="true">↗</span></Link>
-          <p className="nav-label">Voices</p>{ready?.voices.length ? ready.voices.map(item => <Link prefetch={false} key={item.id} href={voiceUrl(item.id, context)} aria-current={voiceId === item.id ? "page" : undefined}>{item.name}</Link>) : <p className="sidebar-empty">No eligible voices</p>}
+          <p className="nav-label">Voices</p>{ready?.voices.length ? ready.voices.map(item => <Link prefetch={false} key={item.id} href={voiceUrl(item.id, context)} aria-current={voiceId === item.id ? "page" : undefined}>{item.name}</Link>) : <p className="sidebar-empty">{ready || status === "no_record_found" ? "No eligible voices" : "Voices unavailable"}</p>}
           <div className="page-nav"><p className="nav-label">On this page</p>{!voiceId ? <>{question ? <a href="#question">Research question</a> : null}<a href="#evidence">Reported evidence</a></> : null}<a href="#views">Attributed views</a><a href="#mentions">Mentions</a><a href="#sources">Source receipts</a></div>
           <div className="sidebar-end"><p>Evidence, in context.</p><small>Availability dates keep each edition grounded in what was known.</small></div>
         </nav>
@@ -91,11 +95,11 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
               {mentions.length ? mentions.map(mention => <article className="mention-record" key={mention.version_id}><div><div className="record-meta"><Link prefetch={false} href={voiceUrl(mention.voice_id,context)}>{ready.voices.find(item => item.id === mention.voice_id)?.name}</Link><span>Mention · {dateLabel(mention.published_at)}</span></div><p>Named {companyName}</p><RecordTldr receipt={ready.receipts.find(item => item.id === mention.receipt_id)}/></div>{inspect(mention.receipt_id,"Inspect mention receipt")}</article>) : <p className="empty-inline">No eligible mentions for this context.</p>}
             </section>
             <section id="sources" aria-labelledby="sources-title"><div className="section-heading"><div><p className="eyebrow">Evidence library</p><h2 id="sources-title">Source receipts</h2></div></div>{ready.receipts.map(receipt => <article className="source-row" key={receipt.id}><div><h3>{receipt.title}</h3><p>Published {dateLabel(receipt.published_at)} · available {dateLabel(receipt.available_at)}</p></div>{inspect(receipt.id,"Open receipt")}</article>)}</section>
-          </> : <section className="empty" role="status"><p className="eyebrow">Evidence status</p><h2>{ready && voiceId ? "Voice not found" : status === "no_record_found" ? "No record found" : status === "revoked" ? "Evidence revoked" : "Research unavailable"}</h2><p>{ready && voiceId ? "This voice has no eligible identity in the selected company context." : unavailableCopy[status]}</p>{voiceId ? <Link prefetch={false} href={companyUrl(context)}>Return to company</Link> : null}</section>}
+          </> : <section className="empty" role="status"><p className="eyebrow">Evidence status</p><h2>{ready && voiceId ? "Voice not found" : status === "no_record_found" ? "No record found" : status === "revoked" ? "Evidence revoked" : "Research unavailable"}</h2><p>{ready && voiceId ? "This voice has no eligible identity in the selected company context." : unavailableCopy[status]}</p>{!ready && status === "unavailable" ? <p><ReloadPage/></p> : null}{voiceId ? <Link prefetch={false} href={companyUrl(context)}>Return to company</Link> : null}</section>}
           <footer>{synthetic ? "Fictional research examples" : "ASOF Data research"} · evidence availability is distinct from publication time.<br/>Known as of {asOf} · no holdings or investor scores are inferred.</footer>
         </main>
       </div>
     </div>
-    {receiptId ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} synthetic={synthetic}/> : null}
+    {showInspector ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} synthetic={synthetic}/> : null}
   </>;
 }

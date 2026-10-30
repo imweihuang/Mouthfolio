@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { checkNavigationRecovery } from "./navigation-recovery-browser.mjs";
 
 export async function checkJourney(page, origin) {
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -78,5 +79,6 @@ export async function checkJourney(page, origin) {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Voice overflow at ${width}`);
     await page.screenshot({ path: `artifacts/voice-${width}.png`, fullPage: true });
   }
+  await checkNavigationRecovery(page.context().browser(), origin);
   console.log("Journey passed: company/voice/source, distinct views and mentions, exact receipts, Back/Forward/reload/Escape, focus trap/return, unavailable service and 3 widths.");
 }
