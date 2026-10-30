@@ -1,22 +1,29 @@
 # Mouthfolio
 
-Explore market views, company evidence and what changed.
+**Market opinions, grounded in evidence.**
 
-Mouthfolio is being built to help self-directed investors explore what market
-commentators have said, compare those views with company evidence, and see what
-changed over time. The current client connects company, voice and source pages,
-with dated evidence and an ongoing research question when one is available.
+Explore what market commentators say, how their views change, and how those views
+compare with company evidence. Start with a company or commentator and trace
+public opinions back to dated sources.
 
-A **voice** is a person or account whose market commentary is followed.
+A portfolio is where the money is. A Mouthfolio is where the mouth is:
+**a portfolio of public convictions**, built from what people say publicly.
+It records expressed views, not verified investment holdings.
+
+We're building a living history of market views, starting with the AI economy.
+The first hosted alpha connects Anthropic's reported numbers with attributed
+commentary and original sources.
+
+[Explore Anthropic](https://asof.io/mouthfolio/companies/anthropic) · [Run the demo](#run-the-demo)
+
+In the app, a **voice** is a person or account whose market commentary you can
+explore.
 
 ## Early alpha
 
-This public repository contains an experimental, [MIT-licensed](LICENSE) client
-with a local research demo. **All companies, voices, values and excerpts in the
-demo are fictional.** It runs without an account, backend connection or credentials.
-The local demo does not connect to ASOF Data or provide real research. The hosted
-Anthropic alpha is a separate service experience. The fictional local demo remains
-available without a service connection.
+This repository contains the experimental, [MIT-licensed](LICENSE) client and a
+local demo. **All companies, voices, values and excerpts in the local demo are
+fictional.** It runs without an account, service connection or credentials.
 
 ### Hosted Anthropic alpha
 
