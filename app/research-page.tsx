@@ -48,9 +48,12 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
   const mentions = ready?.mentions.filter(item => !voiceId || item.voice_id === voiceId) ?? [];
   const summary = summaryObservations(ready?.observations ?? []);
   const selected = ready?.receipts.find(item => item.id === receiptId);
+  // A failed request cannot establish receipt eligibility. Keep its URL for recovery
+  // without opening a modal that makes the page recovery action inert.
+  const showInspector = Boolean(receiptId) && (ready !== null || status !== "unavailable");
   const inspect = (id: string, label = "Inspect receipt") => <Link prefetch={false} scroll={false} data-receipt={id} href={href(id)}>{label} <span aria-hidden="true">↗</span></Link>;
   return <>
-    <div className={receiptId ? "reader-shell has-inspector" : "reader-shell"}>
+    <div className={showInspector ? "reader-shell has-inspector" : "reader-shell"}>
       <a className="skip-link" href="#research">Skip to research</a>
       <header className="topbar"><Link href={companyUrl(context)} className="brand">Mouthfolio<span className="brand-by">by ASOF</span></Link><span className="topbar-note">Company evidence. Attributed views.</span></header>
       <div className="demo-notice">{synthetic ? <><strong>Fictional demo</strong><span>All companies, voices, values and source text in this example are invented.</span></> : <><strong>ASOF Data</strong><span>Company research · only eligible evidence is displayed.</span></>}</div>
@@ -97,6 +100,6 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
         </main>
       </div>
     </div>
-    {receiptId ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} synthetic={synthetic}/> : null}
+    {showInspector ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} synthetic={synthetic}/> : null}
   </>;
 }

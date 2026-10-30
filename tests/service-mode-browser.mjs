@@ -68,23 +68,32 @@ async function checkServiceVersion(browser, basePath, version) {
     }
     // A handled service outage retains the exact request, including the receipt.
     const recoveryUrl = origin + "/voices/demo-researcher?company=aster-compute&asof=2026-10-26T12%3A00%3A00Z&window=all&receipt=receipt-mention";
-    await page.goto(recoveryUrl);
-    await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
     const recovering = { ...structuredClone(fixture), data_mode: "authorized" };
     if (version === "v0.3") {
       recovering.schema_version = "asof.mouthfolio.research.v0.3";
       recovering.receipts.forEach(receipt => { receipt.summary = null; });
     }
-    syntheticPayload = recovering;
-    await page.getByRole("button", { name: "Reload this page", exact: true }).click();
-    await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
-    await page.getByRole("dialog").waitFor();
-    await page.waitForLoadState("networkidle");
-    assert.equal(page.url(), recoveryUrl);
-    assert.equal(await page.getByTestId("snapshot").textContent(), "snapshot-mention");
-    assert.equal(await page.getByLabel("Evidence cutoff").inputValue(), "2026-10-26T12:00:00Z");
-    await page.getByRole("button", { name: "Close source" }).click();
-    await page.getByRole("dialog").waitFor({ state: "detached" });
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      syntheticPayload = null;
+      await page.goto(recoveryUrl);
+      await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
+      assert.equal(page.url(), recoveryUrl);
+      assert.equal(await page.getByRole("dialog").count(), 0, "A failed request must not block recovery with a receipt modal");
+      assert.equal(await page.locator(".has-inspector").count(), 0, "A failed request reserves no empty inspector column");
+      if (width === 390) await page.screenshot({ path: `artifacts/service-recovery-${version}-${width}.png`, fullPage: true });
+      syntheticPayload = recovering;
+      await page.getByRole("button", { name: "Reload this page", exact: true }).focus();
+      await page.keyboard.press("Enter");
+      await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
+      await page.getByRole("dialog").waitFor();
+      await page.waitForLoadState("networkidle");
+      assert.equal(page.url(), recoveryUrl);
+      assert.equal(await page.getByTestId("snapshot").textContent(), "snapshot-mention");
+      assert.equal(await page.getByLabel("Evidence cutoff").inputValue(), "2026-10-26T12:00:00Z");
+      await page.getByRole("button", { name: "Close source" }).click();
+      await page.getByRole("dialog").waitFor({ state: "detached" });
+    }
     await page.locator(".subject-link").click();
     await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
     syntheticPayload = { ...recovering, status: "no_record_found", observations: [], questions: [], voices: [], views: [], mentions: [], receipts: [] };
@@ -92,6 +101,16 @@ async function checkServiceVersion(browser, basePath, version) {
     await page.getByRole("heading", { name: "No record found", exact: true }).waitFor();
     assert.equal(await page.locator(".sidebar-empty").textContent(), "No eligible voices");
     assert.equal(await page.getByRole("button", { name: "Reload this page", exact: true }).count(), 0);
+    for (const status of ["no_record_found", "revoked"]) {
+      syntheticPayload = { ...recovering, status, observations: [], questions: [], voices: [], views: [], mentions: [], receipts: [] };
+      await page.goto(recoveryUrl);
+      await page.getByRole("dialog").waitFor();
+      assert.equal(page.url(), recoveryUrl);
+      assert.equal(await page.getByRole("heading", { name: "Source unavailable", exact: true }).count(), 1);
+      assert.equal(await page.getByRole("button", { name: "Reload this page", exact: true }).count(), 0);
+      await page.getByRole("button", { name: "Close source" }).click();
+      await page.getByRole("dialog").waitFor({ state: "detached" });
+    }
     if (version === "v0.3") {
       await checkRecordTldr(page, origin, value => { syntheticPayload = value; });
       assert.deepEqual(errors, [], `${version} service browser console/page errors`);
