@@ -15,7 +15,7 @@ The default local demo uses fictional information and needs no service access.
 | Connected reading | [Journey #3](https://github.com/imweihuang/Mouthfolio/pull/3) connects company, voice and source pages with dated context, exact receipts and visible missing-value reasons. | Complete the filing reader and broaden company coverage. |
 | Local demonstration | Fictional observations, distinct views/mentions, corrections, cutoff changes and unavailable states work without a backend connection. | Continue testing the experience as it expands. |
 | Hosted Anthropic slice | [Anthropic on Mouthfolio](https://asof.io/mouthfolio/companies/anthropic) connects 21 reported SEC filing figures with a partial older commentary archive from six voices and company → voice → source navigation. | Broaden coverage and gather reader feedback. |
-| Record TLDR | Client support is integrated. | Hosted qualification and acceptance remain open. |
+| Record TLDR | Six reviewed Record TLDRs are available in the hosted Anthropic slice. | Broaden qualified summary coverage; the commentary archive remains partial. |
 | Design and usefulness | Selected light tokens and the local font support the integrated journey. | Full Storybook extraction and reader trials remain open; no customer-use or paid-demand result is claimed. |
 
 [Open the Anthropic alpha](https://asof.io/mouthfolio/companies/anthropic).
