@@ -31,9 +31,9 @@ export async function checkRecordTldr(page, origin, supply) {
     assert.ok(await dialog.getByText(`Version: ${viewReceipt.summary.version_id}`, { exact: true }).isVisible());
     await page.screenshot({ path: `artifacts/tldr-inspector-${width}.png` });
     await page.reload(); await dialog.getByText(viewReceipt.summary.text, { exact: true }).waitFor();
-    await page.keyboard.press("Escape"); await dialog.waitFor({ state: "detached" });
+    await page.keyboard.press("Escape"); await page.locator("dialog").waitFor({ state: "detached" });
     await page.goBack(); await dialog.getByText(viewReceipt.summary.text, { exact: true }).waitFor();
-    await page.goForward(); await dialog.waitFor({ state: "detached" });
+    await page.goForward(); await page.locator("dialog").waitFor({ state: "detached" });
     await page.locator(".commentary-record .record-meta a").click();
     await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
     assert.equal(await page.locator(".record-tldr").count(), 2);
@@ -41,7 +41,7 @@ export async function checkRecordTldr(page, origin, supply) {
     await dialog.getByText(mentionReceipt.summary.text, { exact: true }).waitFor();
     assert.equal(new URL(page.url()).searchParams.get("receipt"), mentionReceipt.id);
     assert.ok(await dialog.getByText("Based on an ASOF capture.", { exact: false }).isVisible());
-    await page.keyboard.press("Escape"); await dialog.waitFor({ state: "detached" });
+    await page.keyboard.press("Escape"); await page.locator("dialog").waitFor({ state: "detached" });
   }
   const empty = structuredClone(value); empty.receipts.forEach(receipt => { receipt.summary = null; }); supply(empty);
   await page.goto(company); await page.locator(".commentary-record").waitFor();
