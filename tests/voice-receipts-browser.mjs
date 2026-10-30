@@ -37,7 +37,7 @@ export async function checkVoiceReceiptScope(page, origin, base, setPayload) {
   assert.equal(await page.getByTestId("snapshot").textContent(), "snapshot-mention", "An eligible direct receipt link remains accessible");
   assert.deepEqual(await sourceIds(), ["receipt-view"], "Inspecting another receipt does not expand the voice list");
   await page.getByRole("button", { name: "Close source" }).click();
-  await page.getByRole("dialog").waitFor({ state: "detached" });
+  await page.locator("dialog").waitFor({ state: "detached" });
   payload.views = [];
   setPayload(payload);
   await page.reload();

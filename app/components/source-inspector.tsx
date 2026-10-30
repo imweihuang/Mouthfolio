@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Observation } from "../../contracts/types";
 import type { Receipt } from "../../lib/contract";
@@ -12,26 +12,76 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
   const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
   const opener = useRef<HTMLElement | null>(null);
-  const close = () => { router.push(closeUrl, { scroll: false }); };
+  const dismissed = useRef(false);
+  const focusRestored = useRef(false);
+  const reopenIfCurrent = useRef(() => {});
+  const [isPending, startTransition] = useTransition();
+  const restoreFocus = () => {
+    focusRestored.current = true;
+    const fallback = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[data-receipt]")).find(link => link.dataset.receipt === requestedId);
+    (opener.current?.isConnected ? opener.current : fallback ?? document.getElementById("research"))?.focus({ preventScroll: true });
+  };
+  const close = () => {
+    if (dismissed.current) return;
+    dismissed.current = true;
+    dialog.current?.close();
+    restoreFocus();
+    startTransition(() => { router.push(closeUrl, { scroll: false }); });
+  };
   useEffect(() => {
     const pane = dialog.current;
     if (!pane) return;
     const active = document.activeElement;
     if (active instanceof HTMLAnchorElement && active.dataset.receipt === requestedId) opener.current = active;
     const media = matchMedia("(max-width: 1100px)");
-    const show = () => { pane.close(); if (media.matches) pane.showModal(); else pane.show(); };
+    const defaults = new URL(closeUrl, location.href).searchParams;
+    defaults.set("state", defaults.get("state") ?? "available");
+    // Query ordering and percent encoding do not change research context. Keep
+    // each parameter's full value list: duplicates must not become valid singles.
+    const currentContext = () => {
+      const url = new URL(location.href);
+      return JSON.stringify([url.pathname, ...["company", "asof", "window", "state", "receipt"].map(key => {
+        const values = url.searchParams.getAll(key);
+        return values.length ? values : defaults.getAll(key);
+      })]);
+    };
+    const openedContext = currentContext();
+    dismissed.current = false;
+    const show = () => {
+      if (dismissed.current) return;
+      focusRestored.current = false;
+      pane.close();
+      if (media.matches) pane.showModal(); else pane.show();
+      pane.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
+    };
+    // History can restore this same mounted receipt while a close is still pending.
+    // A cancelled navigation must not leave its dialog permanently dismissed.
+    const restoreFromHistory = () => {
+      dismissed.current = currentContext() !== openedContext;
+      if (dismissed.current) { pane.close(); restoreFocus(); } else show();
+    };
+    reopenIfCurrent.current = () => {
+      if (dismissed.current && currentContext() === openedContext) restoreFromHistory();
+    };
     show();
-    pane.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
     media.addEventListener("change", show);
+    window.addEventListener("popstate", restoreFromHistory);
     return () => {
-      media.removeEventListener("change", show); pane.close();
+      media.removeEventListener("change", show);
+      window.removeEventListener("popstate", restoreFromHistory);
+      reopenIfCurrent.current = () => {};
+      const focusAlreadyRestored = focusRestored.current;
+      pane.close();
       requestAnimationFrame(() => {
-        if (new URL(location.href).searchParams.has("receipt")) return;
+        if (focusAlreadyRestored || new URL(location.href).searchParams.has("receipt")) return;
         const fallback = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[data-receipt]")).find(link => link.dataset.receipt === requestedId);
         (opener.current?.isConnected ? opener.current : fallback ?? document.getElementById("research"))?.focus({ preventScroll: true });
       });
     };
-  }, [requestedId]);
+  }, [requestedId, closeUrl]);
+  useEffect(() => {
+    if (!isPending) reopenIfCurrent.current();
+  }, [isPending]);
   return <dialog ref={dialog} className="source-inspector" aria-labelledby="source-heading"
     onCancel={event => { event.preventDefault(); close(); }} onKeyDown={event => {
       if (event.key === "Escape") { event.preventDefault(); close(); }

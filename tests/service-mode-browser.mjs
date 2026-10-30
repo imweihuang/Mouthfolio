@@ -93,7 +93,7 @@ async function checkServiceVersion(browser, basePath, version) {
       assert.equal(await page.getByTestId("snapshot").textContent(), "snapshot-mention");
       assert.equal(await page.getByLabel("Evidence cutoff").inputValue(), "2026-10-26T12:00:00Z");
       await page.getByRole("button", { name: "Close source" }).click();
-      await page.getByRole("dialog").waitFor({ state: "detached" });
+      await page.locator("dialog").waitFor({ state: "detached" });
     }
     await page.locator(".subject-link").click();
     await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
@@ -110,7 +110,7 @@ async function checkServiceVersion(browser, basePath, version) {
       assert.equal(await page.getByRole("heading", { name: "Source unavailable", exact: true }).count(), 1);
       assert.equal(await page.getByRole("button", { name: "Reload this page", exact: true }).count(), 0);
       await page.getByRole("button", { name: "Close source" }).click();
-      await page.getByRole("dialog").waitFor({ state: "detached" });
+      await page.locator("dialog").waitFor({ state: "detached" });
     }
     await checkVoiceReceiptScope(page, origin, recovering, value => { syntheticPayload = value; });
     if (version === "v0.3") {
@@ -178,12 +178,12 @@ async function checkServiceVersion(browser, basePath, version) {
       await page.getByRole("dialog").getByText("Reported value: 2,345,678,901.23 USD", { exact: true }).first().waitFor();
       assert.equal(page.url(), receiptUrl);
       await page.keyboard.press("Escape");
-      await page.getByRole("dialog").waitFor({ state: "detached" });
+      await page.locator("dialog").waitFor({ state: "detached" });
       await page.goBack();
       await page.getByRole("dialog").waitFor();
       assert.equal(page.url(), receiptUrl);
       await page.goForward();
-      await page.getByRole("dialog").waitFor({ state: "detached" });
+      await page.locator("dialog").waitFor({ state: "detached" });
     }
     // These null rows are from an earlier period and absent from the summary.
     // Their distinct reasons must survive both the complete table and exact receipt.
@@ -211,7 +211,7 @@ async function checkServiceVersion(browser, basePath, version) {
         }
         if (index === 0) await page.screenshot({ path: `artifacts/missing-observation-${width}.png` });
         await page.keyboard.press("Escape");
-        await inspector.waitFor({ state: "detached" });
+        await page.locator("dialog").waitFor({ state: "detached" });
       }
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
