@@ -16,10 +16,11 @@ export async function checkVoiceReceiptScope(page, origin, base, setPayload) {
   const company = `${origin}/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all`;
   const sourceIds = () => page.locator("#sources [data-receipt]").evaluateAll(nodes => nodes.map(node => node.dataset.receipt));
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto(company);
+  await page.goto(company + "&section=sources");
   await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), payload.receipts.map(receipt => receipt.id), "Company retains the full eligible source list");
-  await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo researcher", exact: true }).click();
+  await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Commentary", exact: true }).click();
+  await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo researcher", exact: true }).first().click();
   await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), ["receipt-view"], "Voice list excludes other speakers and observation-only receipts");
   const researcherUrl = page.url();
@@ -27,7 +28,8 @@ export async function checkVoiceReceiptScope(page, origin, base, setPayload) {
   await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), ["receipt-view"]);
   await page.screenshot({ path: "artifacts/voice-receipt-scope-desktop.png", fullPage: true });
-  await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo observer", exact: true }).click();
+  await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Commentary", exact: true }).click();
+  await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo observer", exact: true }).first().click();
   await page.getByRole("heading", { name: "Demo observer", exact: true }).waitFor();
   assert.deepEqual(await sourceIds(), ["receipt-mention"], "Mention-only voice retains its unique source");
   await page.setViewportSize({ width: 390, height: 1000 });

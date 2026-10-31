@@ -1,0 +1,19 @@
+.source-context-pane { padding: calc(var(--unit) * 6); background: var(--v2-light-bg0); border-left: 1px solid var(--v2-light-line); overflow-wrap: anywhere; }
+.source-context-pane h2 { font-family: var(--font-serif); font-size: var(--text-h2); font-weight: var(--weight-medium); line-height: 1.25; margin: calc(var(--unit) * 2) 0 calc(var(--unit) * 4); }
+.evidence-context-intro, .receipt-publication { color: var(--v2-light-muted); font-size: var(--text-sm); line-height: var(--leading-body); }
+.evidence-context-section { border-top: 1px solid var(--v2-light-line); margin-top: calc(var(--unit) * 6); padding-top: calc(var(--unit) * 4); }
+.evidence-context-section h3 { font-size: var(--text-base); font-weight: var(--weight-medium); }
+.evidence-context-links { padding: 0; margin: calc(var(--unit) * 3) 0; list-style: none; }
+.evidence-context-links li { padding: calc(var(--unit) * 2) 0; }
+.evidence-context-links a { display: inline-block; color: var(--filing-blue-ink-light); text-underline-offset: calc(var(--unit) * .75); font-size: var(--text-base); }
+.evidence-context-links span, .evidence-context-links time { display: block; color: var(--v2-light-muted); font-size: var(--text-sm); margin-top: var(--unit); }
+.evidence-coverage { margin-top: calc(var(--unit) * 6); padding-top: calc(var(--unit) * 4); border-top: 1px solid var(--v2-light-line); font-size: var(--text-sm); line-height: var(--leading-body); }
+.evidence-coverage summary { cursor: pointer; color: var(--v2-light-text-body); }
+.evidence-coverage p { color: var(--v2-light-muted); }
+.source-inspector h2 { font-size: var(--text-h2); line-height: 1.3; margin-bottom: calc(var(--unit) * 3); }
+.source-inspector .receipt-publication { margin-bottom: calc(var(--unit) * 5); }
+.source-inspector .record-details { margin-top: calc(var(--unit) * 5); }
+.source-inspector .source-link { display: inline-block; color: var(--filing-blue-ink-light); margin: calc(var(--unit) * 4) 0; }
+.source-inspector .receipt-measure { margin: calc(var(--unit) * 5) 0; }
+.source-inspector .receipt-details { margin-top: calc(var(--unit) * 4); }
+@media (max-width: 1100px) { .source-context-pane { display: none; } }

@@ -2,6 +2,7 @@ import type { Observation } from "../contracts/types.ts";
 
 export type FinancialMetric = "revenue" | "netIncome" | "operatingCashFlow";
 export type ReportingDuration = "annual" | "firstHalf";
+export type FinancialView = "revenue" | "result";
 export type FinancialPoint = { row: Observation; value: number | null; unavailable: string | null };
 export type FinancialPair = {
   key: string; label: string; duration: ReportingDuration;
@@ -137,6 +138,25 @@ export function buildFinancialComparisons(rows: Observation[], companyName: stri
   }
   pairs.sort((a, b) => a.netIncome.row.period.end.localeCompare(b.netIncome.row.period.end));
   return { revenue, pairs };
+}
+
+// Resolve controls against the current evidence on every render. A selection
+// from a previous company or edition cannot introduce an unsupported period.
+export function financialSelection(
+  comparisons: ReturnType<typeof buildFinancialComparisons>,
+  requested: { metric?: FinancialView; duration?: ReportingDuration } = {},
+) {
+  const metrics: FinancialView[] = [];
+  if (Object.values(comparisons.revenue).some(points => points.length)) metrics.push("revenue");
+  if (comparisons.pairs.length) metrics.push("result");
+  const metric = requested.metric && metrics.includes(requested.metric) ? requested.metric : metrics[0];
+  const periods = metric === "revenue"
+    ? (["annual", "firstHalf"] as const).flatMap(duration => comparisons.revenue[duration].map(point => ({ duration, end: point.row.period.end })))
+    : metric === "result" ? comparisons.pairs.map(pair => ({ duration: pair.duration, end: pair.netIncome.row.period.end })) : [];
+  const durations = (["annual", "firstHalf"] as const).filter(duration => periods.some(period => period.duration === duration));
+  const latest = periods.reduce<(typeof periods)[number] | undefined>((current, period) => !current || period.end > current.end ? period : current, undefined);
+  const duration = requested.duration && durations.includes(requested.duration) ? requested.duration : latest?.duration;
+  return { metrics, metric, durations, duration };
 }
 
 export function barScale(points: FinancialPoint[]) {

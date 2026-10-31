@@ -1,10 +1,51 @@
 "use client";
 import { useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { Observation } from "../../contracts/types";
+import Link from "next/link";
+import type { Coverage, Observation } from "../../contracts/types";
 import type { Receipt } from "../../lib/contract";
 import { formatAmount } from "../../lib/format-amount";
+import { journeyUrl, type JourneyContext } from "../../lib/navigation";
+import { overviewObservations } from "../../lib/overview-observations";
 import { RecordTldr } from "./record-tldr";
+import "./source-inspector.css";
+
+const readableDate = (value: string) => new Date(value).toLocaleDateString("en-US", {
+  year: "numeric", month: "short", day: "numeric", timeZone: "UTC",
+});
+
+/** A useful docked starting point; every link still selects one exact receipt. */
+export function EvidenceContext({ receipts, observations, companyName, context, coverage, synthetic, path }: {
+  receipts: Receipt[]; observations: Observation[]; companyName: string; context: JourneyContext;
+  coverage: Coverage; synthetic: boolean; path: string;
+}) {
+  const receiptIds = new Set(receipts.map(receipt => receipt.id));
+  const figures = overviewObservations(observations, companyName).filter(row => receiptIds.has(row.receipt_id));
+  const notes = receipts.filter(receipt => "summary" in receipt && receipt.summary).sort((a, b) =>
+    Date.parse(b.published_at) - Date.parse(a.published_at) || a.id.localeCompare(b.id)).slice(0, 3);
+  return <aside className="source-context-pane" aria-labelledby="evidence-context-heading">
+    <p className="eyebrow">{synthetic ? "Fictional evidence" : "Evidence"}</p>
+    <h2 id="evidence-context-heading">Sources &amp; context</h2>
+    <p className="evidence-context-intro">Explore the source behind a number or commentary item. {companyName} stays in view.</p>
+    {figures.length ? <section className="evidence-context-section"><h3>Reported figures</h3>
+      <ul className="evidence-context-links">{figures.map(row => <li key={row.version_id}>
+        <Link prefetch={false} scroll={false} data-receipt={row.receipt_id} href={journeyUrl(path, context, row.receipt_id)}>{row.label}</Link>
+        <span>{row.period.label}</span>
+      </li>)}</ul>
+    </section> : null}
+    {notes.length ? <section className="evidence-context-section"><h3>Commentary sources</h3>
+      <ul className="evidence-context-links">{notes.map(receipt => <li key={receipt.id}>
+        <Link prefetch={false} scroll={false} data-receipt={receipt.id} href={journeyUrl(path, context, receipt.id)}>{receipt.title}</Link>
+        <time dateTime={receipt.published_at}>{readableDate(receipt.published_at)}</time>
+      </li>)}</ul>
+    </section> : null}
+    <details className="evidence-coverage"><summary>Sources and coverage</summary>
+      <p>{coverage.state === "partial" ? "Coverage is partial. This archive does not include every source or reaction." : "The available evidence covers the supplied research scope."}</p>
+      <p>Evidence available by <time dateTime={context.asOf}>{readableDate(context.asOf)} UTC</time>. This is the research cutoff, not a promise that sources were checked at that time.</p>
+      <p>Publication dates, reporting periods and the date evidence became available describe different things. Each source retains those dates.</p>
+    </details>
+  </aside>;
+}
 
 // A receipt can live inside a collapsed evidence table after a reload.
 // Attempt visible candidates, then return keyboard focus to the research region.
@@ -53,7 +94,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     // each parameter's full value list: duplicates must not become valid singles.
     const currentContext = () => {
       const url = new URL(location.href);
-      return JSON.stringify([url.pathname, ...["company", "asof", "window", "state", "receipt", "voice", "kind", "order"].map(key => {
+      return JSON.stringify([url.pathname, ...["company", "asof", "window", "state", "receipt", "voice", "kind", "order", "section"].map(key => {
         const values = url.searchParams.getAll(key);
         return values.length ? values : defaults.getAll(key);
       })]);
@@ -97,18 +138,31 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
   return <dialog ref={dialog} className="source-inspector" aria-labelledby="source-heading"
     onCancel={event => { event.preventDefault(); close(); }} onKeyDown={event => {
       if (event.key === "Escape") { event.preventDefault(); close(); }
+      if (event.key === "Tab" && event.currentTarget.matches(":modal")) {
+        const targets = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+          "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex='-1'])",
+        )).filter(element => element.getClientRects().length && element.checkVisibility());
+        const first = targets[0], last = targets.at(-1);
+        if (first && last && ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last))) {
+          event.preventDefault();
+          (event.shiftKey ? last : first).focus();
+        }
+      }
     }}>
-    <div className="inspector-top"><span className="eyebrow">Source receipt{synthetic ? " · fictional" : ""}</span><button className="quiet-button" onClick={close} aria-label="Close source">Close ×</button></div>
+    <div className="inspector-top"><span className="eyebrow">Source &amp; context{synthetic ? " · fictional" : ""}</span><button className="quiet-button" onClick={close} aria-label="Close source">Close</button></div>
     <h2 id="source-heading">{receipt?.title ?? "Source unavailable"}</h2>
     {receipt ? <>
+      <p className="receipt-publication">Published <time dateTime={receipt.published_at} title={receipt.published_at}>{readableDate(receipt.published_at)} UTC</time></p>
       <RecordTldr receipt={receipt} details/>
-      <p className="source-excerpt">{receipt.excerpt ?? (receipt.url ? "Open the original source for full context." : "Source text is not displayed here.")}</p>
-      {observations.map(row => <div className="receipt-measure" key={row.version_id}><strong>{row.label}</strong><p className="receipt-amount">Reported value: {formatAmount(row.amount, row.unit)}</p>{row.missing_reason !== null ? <p>{row.missing_reason}</p> : null}<p>{row.period.label} · {row.period.start} – {row.period.end}</p><p>Unit: {row.unit} · {row.basis}</p><small>Evidence version: {row.version_id}{row.supersedes ? ` · supersedes ${row.supersedes}` : ""}</small></div>)}
+      {receipt.excerpt ? <p className="source-excerpt">{receipt.excerpt}</p> : !("summary" in receipt && receipt.summary) && !observations.length ? <p className="source-excerpt">{receipt.url ? "Open the original source for full context." : "Source text is not displayed here."}</p> : null}
+      {observations.map(row => <div className="receipt-measure" key={row.version_id}><strong>{row.label}</strong><p className="receipt-amount">Reported value: {formatAmount(row.amount, row.unit)}</p>{row.missing_reason !== null ? <p>{row.missing_reason}</p> : null}<p>{row.period.label} · {row.period.start} – {row.period.end}</p><details><summary>Definition and reporting basis</summary><p>Unit: {row.unit} · {row.basis}</p><small>Evidence version: {row.version_id}{row.supersedes ? ` · supersedes ${row.supersedes}` : ""}</small></details></div>)}
+      {receipt.url ? <a className="source-link" href={receipt.url} rel="noreferrer">Open original source</a> : <p className="muted">{synthetic ? "Original fictional text; there is no external source." : "The original source link is unavailable. Source text is not displayed."}</p>}
+      <details className="record-details"><summary>Record details</summary>
       <dl className="receipt-details"><dt>Source location</dt><dd>{receipt.locator}</dd><dt>Published</dt><dd><time dateTime={receipt.published_at}>{receipt.published_at}</time></dd>
         <dt>Ingested</dt><dd>{receipt.ingested_at}</dd><dt>Available</dt><dd>{receipt.available_at}</dd><dt>Receipt display</dt><dd>{receipt.display_policy === "excerpt" ? "Excerpt" : "Link only"}</dd>
         <dt>Receipt identity</dt><dd>{receipt.id}</dd><dt>Source identity</dt><dd>{receipt.source_id}</dd><dt>Snapshot</dt><dd data-testid="snapshot">{receipt.snapshot_id}</dd></dl>
-      <details><summary>Content fingerprint</summary><code>{receipt.content_sha256}</code></details>
-      {receipt.url ? <a className="source-link" href={receipt.url} rel="noreferrer">Open original source ↗</a> : <p className="muted">{synthetic ? "Original fictional text; there is no external source." : "The original source link is unavailable. Source text is not displayed."}</p>}
+      <p>Content fingerprint</p><code>{receipt.content_sha256}</code>
+      </details>
     </> : <p>This exact receipt is absent or no longer eligible at the selected cutoff. Another version has not been substituted.</p>}
   </dialog>;
 }

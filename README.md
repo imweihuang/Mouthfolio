@@ -2,17 +2,13 @@
 
 **Market opinions, grounded in evidence.**
 
-Explore what market commentators say, how their views change, and how those views
-compare with company evidence. Start with a company or commentator and trace
-public opinions back to dated sources.
+Start with a company. Explore its reported figures, read the commentary around
+them, and open the dated sources behind both. Anthropic is the first hosted
+company, with the AI economy as our starting focus.
 
-A portfolio is where the money is. A Mouthfolio is where the mouth is:
-**a portfolio of public convictions**, built from what people say publicly.
-It records expressed views, not verified investment holdings.
-
-We're building a living history of market views, starting with the AI economy.
-The first hosted alpha connects Anthropic's reported numbers with attributed
-commentary and original sources.
+A Mouthfolio is **a portfolio of public convictions**, built from what people
+say publicly. Follow an author's name from a commentary item to explore their
+history about the company. These are expressed views, not verified holdings.
 
 [Explore Anthropic](https://asof.io/mouthfolio/companies/anthropic) · [Run the demo](#run-the-demo)
 
@@ -28,9 +24,9 @@ fictional.** It runs without an account, service connection or credentials.
 ### Hosted Anthropic alpha
 
 [Open Anthropic on Mouthfolio](https://asof.io/mouthfolio/companies/anthropic).
-The first hosted slice connects 21 reported SEC filing figures with a partial
-archive of attributed views and mentions from six voices. Follow the company
-evidence to a voice and open its original sources for context.
+The first hosted slice connects reported SEC filing figures with a partial
+archive of attributed views and mentions. Company evidence and commentary each
+lead to their original sources.
 
 See the company page for the latest archived commentary date. Coverage is partial
 and does not capture every reaction to company filings. This alpha is not a
@@ -38,17 +34,23 @@ current-news feed.
 
 | Available in the client | Still to complete |
 |---|---|
-| Connected company, voice and source pages with reported metrics, distinct views/mentions and an evidence inspector | A complete filing reader and broader company coverage |
-| Question-led financial charts with exact-value tables and source links; dated commentary cards with voice/type filters | Broader comparable observations and richer qualified commentary |
+| Company Overview and Commentary sections, with author history linked from each source card | Additional companies with qualified facts and sources |
+| One primary financial comparison in Overview, detailed financials and exact-value tables | Broader comparable observations and a complete filing reader |
+| Dated commentary and an adjacent source-context pane on desktop, with a source drawer on small screens | Richer qualified commentary and summaries |
 | Dated sources, a later correction and visible missing-data and error states in the fictional demo | Reader trials of the complete journey |
-| A hosted Anthropic company → voice → source journey, plus a fictional demo that works locally | Broader hosted coverage |
+| A hosted Anthropic journey, plus a fictional demo that works locally | Broader hosted coverage |
 
 For contributors, the repository also includes selected visual foundations, a
 versioned client-service interface and automated checks. The default demo remains
 offline; see the [journey guide](docs/JOURNEY.md)
 for the separate service route and deployment-time connection.
-The chart and commentary presentation uses the existing evidence response;
-it does not add data coverage or establish that this client revision is deployed.
+The company-first presentation uses the existing evidence response. Overview
+keeps reported figures, a primary chart and selected commentary together;
+Commentary opens the fuller dated feed. Author history is linked in the feed,
+while navigation stays focused on the company. This client change adds no data
+coverage and does not establish that this revision is deployed. Anthropic is the
+only hosted company described here; adding another requires qualified facts and
+source coverage.
 
 Interfaces and presentation may change during the alpha. There is no stable API
 or production-support commitment. Publishing this source is separate from

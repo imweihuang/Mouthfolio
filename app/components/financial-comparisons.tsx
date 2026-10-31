@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Observation } from "../../contracts/types";
-import { barScale, buildFinancialComparisons, periodLabel } from "../../lib/financial-comparisons";
-import type { FinancialPoint, ReportingDuration } from "../../lib/financial-comparisons";
+import { barScale, buildFinancialComparisons, financialSelection, periodLabel } from "../../lib/financial-comparisons";
+import type { FinancialPoint, FinancialView, ReportingDuration } from "../../lib/financial-comparisons";
 import { formatAmount } from "../../lib/format-amount";
 import { headlineAmount } from "../../lib/observations";
-import { companyUrl } from "../../lib/navigation";
+import { companySectionUrl } from "../../lib/navigation";
 import type { JourneyContext } from "../../lib/navigation";
 
 type Display = "chart" | "table";
@@ -22,7 +22,7 @@ function DisplaySwitch({ display, setDisplay, label }: { display: Display; setDi
 
 function SourceLink({ point, context, children }: { point: FinancialPoint; context: JourneyContext; children: React.ReactNode }) {
   return <Link prefetch={false} scroll={false} data-receipt={point.row.receipt_id}
-    href={companyUrl({ ...context, receipt: point.row.receipt_id })} className="financial-source"
+    href={companySectionUrl({ ...context, receipt: point.row.receipt_id }, context.section ?? "overview")} className="financial-source"
     aria-label={`Open source: ${point.row.label}, ${point.row.period.label}, ${formatAmount(point.row.amount, point.row.unit)}${point.unavailable ? `. ${point.unavailable}` : ""}${point.row.revision_kind === "correction" ? ". Corrected observation" : ""}`}>
     {children}<span className="financial-source-hint" aria-hidden="true">Source ↗</span>
   </Link>;
@@ -79,9 +79,69 @@ function ExactTable({ rows, context, caption }: { rows: LabeledPoint[]; context:
 const durationNames: Record<ReportingDuration, string> = { annual: "Full year", firstHalf: "First half" };
 const durationNotes: Record<ReportingDuration, string> = { annual: "January–December", firstHalf: "January–June" };
 
-export function FinancialComparisons({ observations, companyName, context }: {
+type FinancialComparisonsProps = {
   observations: Observation[]; companyName: string; context: JourneyContext;
-}) {
+};
+
+export function FinancialComparisons({ compact = false, ...props }: FinancialComparisonsProps & { compact?: boolean }) {
+  return compact ? <CompactFinancialComparisons {...props}/> : <DetailedFinancialComparisons {...props}/>;
+}
+
+function CompactFinancialComparisons({ observations, companyName, context }: FinancialComparisonsProps) {
+  const comparisons = buildFinancialComparisons(observations, companyName);
+  const [requested, setRequested] = useState<{ metric?: FinancialView; duration?: ReportingDuration }>({});
+  const [display, setDisplay] = useState<Display>("chart");
+  const [selectedPeriod, setSelectedPeriod] = useState("");
+  const { metric, metrics, duration, durations } = financialSelection(comparisons, requested);
+  const pairs = comparisons.pairs.filter(pair => pair.duration === duration);
+  const pair = pairs.find(item => item.key === selectedPeriod) ?? pairs.at(-1);
+  const rows: LabeledPoint[] = metric === "revenue" && duration
+    ? comparisons.revenue[duration].map(point => ({ point, label: periodLabel(point.row, duration) }))
+    : pair ? [
+      { point: pair.netIncome, label: "Net income (loss)", tone: "result" },
+      { point: pair.operatingCashFlow, label: "Operating cash flow", tone: "cash" },
+    ] : [];
+  const question = metric === "result" ? "How does the result compare with cash flow?" : "How is reported revenue changing?";
+  const caption = `${duration ? durationNames[duration] : "Reported"} ${metric === "result" ? `${pair?.label ?? ""} result and operating cash flow` : "revenue"}`;
+
+  return <div id="financial-comparisons" className="financial-comparisons financial-compact" data-testid="financial-comparisons" data-comparison={metric}>
+    <section aria-labelledby="financial-overview-question">
+      <div className="financial-question-heading"><h2 id="financial-overview-question">{question}</h2>
+        <Link prefetch={false} href={companySectionUrl(context, "financials")} className="financial-detail-link">All financials ↗</Link>
+      </div>
+      {rows.length ? <>
+        <div className="financial-compact-controls">
+          <div className="financial-switch" role="group" aria-label="Financial comparison">
+            {metrics.map(value => <button key={value} type="button" aria-pressed={metric === value}
+              onClick={() => { setRequested({ metric: value }); setSelectedPeriod(""); }}>
+              {value === "revenue" ? "Revenue" : "Result & cash flow"}
+            </button>)}
+          </div>
+          <div className="financial-switch" role="group" aria-label="Reporting duration">
+            {durations.map(value => <button key={value} type="button" aria-pressed={duration === value}
+              onClick={() => { setRequested({ metric, duration: value }); setSelectedPeriod(""); }}>{durationNames[value]}</button>)}
+          </div>
+          <DisplaySwitch display={display} setDisplay={setDisplay} label={metric === "result" ? "Result and cash flow" : "Revenue"}/>
+        </div>
+        <div className="financial-compact-meta">
+          {metric === "result" && pair ? <label className="financial-compact-period">Reporting period
+            <select aria-label="Reporting period" value={pair.key} onChange={event => setSelectedPeriod(event.target.value)}>
+              {pairs.map(item => <option key={item.key} value={item.key}>{item.label}</option>)}
+            </select>
+          </label> : <p className="financial-period-note">{duration ? durationNotes[duration] : ""} · reported USD</p>}
+        </div>
+        {display === "chart" ? <Bars rows={rows} context={context} label={caption}/>
+          : <ExactTable rows={rows} context={context} caption={caption}/>}
+        <p className="financial-note financial-compact-footnote">{metric === "revenue"
+          ? "Full years and first halves are separate. Each selection has its own zero-based scale."
+          : "Same reporting period. Net income can include valuation and non-operating effects; this is not a cash-flow reconciliation."}
+          {display === "chart" ? " Rounded USD labels; open the exact table for original values." : ""}</p>
+      </> : <p className="financial-empty">No comparable reported periods are available in this edition. Missing evidence is not zero.</p>}
+    </section>
+  </div>;
+}
+
+function DetailedFinancialComparisons({ observations, companyName, context }: FinancialComparisonsProps) {
   const comparisons = buildFinancialComparisons(observations, companyName);
   const [revenueDisplay, setRevenueDisplay] = useState<Display>("chart");
   const [resultDisplay, setResultDisplay] = useState<Display>("chart");

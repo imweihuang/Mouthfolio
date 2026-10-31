@@ -33,7 +33,38 @@ export function financialFixture() {
 export async function checkFinancialComparisons(page, origin, supply) {
   const data = financialFixture();
   supply(data);
-  const company = `${origin}/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all`;
+  const overview = `${origin}/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all`;
+  const company = `${overview}&section=financials`;
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(overview);
+  const compact = page.locator(".financial-compact");
+  await compact.getByRole("heading", { name: "How is reported revenue changing?" }).waitFor();
+  assert.equal(await compact.getByRole("button", { name: "First half", exact: true }).getAttribute("aria-pressed"), "true");
+  assert.equal(await compact.locator("svg rect").count(), 2, "Overview compares one reporting family at a time");
+  await compact.getByRole("button", { name: "Full year", exact: true }).click();
+  assert.ok(await compact.getByText("FY 2024", { exact: true }).isVisible());
+  assert.equal(await compact.getByText("H1 2026", { exact: true }).count(), 0);
+  await compact.getByRole("button", { name: "Result & cash flow", exact: true }).click();
+  assert.equal(await compact.getByLabel("Reporting period", { exact: true }).inputValue(), "2026-01-01:2026-06-30");
+  await compact.getByRole("button", { name: "Full year", exact: true }).click();
+  await compact.getByLabel("Reporting period", { exact: true }).selectOption("2024-01-01:2024-12-31");
+  await compact.getByRole("button", { name: "Exact table", exact: true }).click();
+  assert.equal(await compact.locator("tbody tr").count(), 2);
+  assert.ok(await compact.locator("td.amount").filter({ hasText: /^-40,000,000 USD/ }).isVisible());
+  await compact.getByRole("link", { name: /^Open source: Reported net income \(loss\), FY 2024,/ }).click();
+  await page.getByRole("dialog").waitFor();
+  assert.equal(new URL(page.url()).searchParams.get("section"), null, "Overview source preserves the section");
+  assert.equal(await page.getByTestId("snapshot").textContent(), "fictional-2024-12-31-1-snapshot");
+  await page.keyboard.press("Escape");
+  await page.locator("dialog").waitFor({ state: "detached" });
+  await page.waitForURL(url => !url.searchParams.has("receipt"));
+  assert.equal(await compact.getByLabel("Reporting period", { exact: true }).inputValue(), "2024-01-01:2024-12-31");
+  assert.equal(await compact.locator("tbody tr").count(), 2, "Opening a source retains chart selection and display");
+  await page.goBack();
+  await page.getByRole("dialog").waitFor();
+  assert.equal(await page.getByTestId("snapshot").textContent(), "fictional-2024-12-31-1-snapshot");
+  await page.goForward();
+  await page.locator("dialog").waitFor({ state: "detached" });
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto(company);
@@ -69,6 +100,7 @@ export async function checkFinancialComparisons(page, origin, supply) {
     await revenue.getByRole("link", { name: /^Open source: Reported revenue, FY 2024,/ }).click();
     await page.getByRole("dialog").waitFor();
     const selected = page.url();
+    assert.equal(new URL(selected).searchParams.get("section"), "financials");
     assert.equal(await page.getByTestId("snapshot").textContent(), "fictional-2024-12-31-0-snapshot");
     assert.equal(new URL(selected).searchParams.get("asof"), "2026-10-26T12:00:00Z");
     await page.reload();
@@ -79,12 +111,12 @@ export async function checkFinancialComparisons(page, origin, supply) {
     await page.goBack(); await page.getByRole("dialog").waitFor(); assert.equal(page.url(), selected);
     await page.goForward(); await page.locator("dialog").waitFor({ state: "detached" });
   }
-  // This old result is only linked from collapsed sections on a fresh load.
-  await page.goto(company + "&receipt=fictional-2024-12-31-1-receipt");
+  // This older result has no visible opener in the overview on a fresh load.
+  await page.goto(overview + "&receipt=fictional-2024-12-31-1-receipt");
   await page.getByRole("dialog").waitFor();
   await page.reload();
   await page.getByRole("dialog").waitFor();
-  assert.equal(await page.locator("details.evidence-table").getAttribute("open"), null);
+  assert.equal(await page.locator("details.evidence-table").count(), 0);
   await page.keyboard.press("Escape");
   await page.locator("dialog").waitFor({ state: "detached" });
   assert.equal(await page.locator(":focus").getAttribute("id"), "research", "Hidden receipt links must not swallow keyboard focus");
@@ -99,5 +131,5 @@ export async function checkFinancialComparisons(page, origin, supply) {
   await page.goto(company);
   await page.locator("#cash-flow-comparison").getByText("Fictional cash-flow measure not disclosed.", { exact: true }).waitFor();
   assert.equal(await page.locator("#cash-flow-comparison svg rect").count(), 1, "Missing amount never renders as zero");
-  console.log("Financial browser checks passed: distinct durations, shared signed scale, exact table, period change, immutable source/history, missing values and 3 widths.");
+  console.log("Financial browser checks passed: compact overview controls and source context, detailed financials, distinct durations, shared signed scale, exact table, period change, immutable source/history, missing values and 3 widths.");
 }

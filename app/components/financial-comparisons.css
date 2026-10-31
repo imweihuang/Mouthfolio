@@ -41,6 +41,33 @@
 .financial-table details { margin-top: calc(var(--unit) * 2); max-width: 44ch; }
 .financial-table summary { display: list-item; cursor: pointer; min-height: 44px; padding-top: calc(var(--unit) * 2); color: var(--v2-light-muted); }
 .financial-table details p { font-size: var(--text-sm); overflow-wrap: anywhere; }
+.financial-compact > section { padding: calc(var(--unit) * 3) 0; }
+.financial-compact .financial-question-heading { align-items: baseline; gap: var(--unit) calc(var(--unit) * 4); margin-bottom: var(--unit); }
+.financial-compact .financial-question-heading h2 { flex: 1 1 280px; margin: 0; }
+.financial-detail-link { color: var(--filing-blue-ink-light); font-size: var(--text-sm); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+.financial-detail-link:hover { text-decoration: underline; }
+.financial-compact-controls,.financial-compact-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--unit) calc(var(--unit) * 2); flex-wrap: wrap; }
+.financial-compact-controls { border-bottom: 1px solid var(--v2-light-line); margin-bottom: var(--unit); }
+.financial-compact .financial-switch { margin: 0; gap: 0; flex-wrap: wrap; }
+.financial-compact .financial-switch button { padding: calc(var(--unit) * 2) calc(var(--unit) * 1.5); border-color: transparent; background: transparent; }
+.financial-compact .financial-switch button[aria-pressed="true"] { color: var(--filing-blue-ink-light); border-bottom-color: var(--filing-blue-ink-light); border-radius: 0; }
+.financial-compact .financial-switch button:focus-visible,.financial-compact .financial-source:focus-visible { outline: 2px solid var(--v2-light-focus); outline-offset: var(--unit); }
+.financial-compact-meta { margin-bottom: var(--unit); }
+.financial-compact-meta .financial-period-note { margin: 0; }
+.financial-compact-period { display: flex; align-items: center; flex-wrap: wrap; gap: calc(var(--unit) * 2); color: var(--v2-light-muted); }
+.financial-compact-period select { min-height: 44px; width: auto; font-size: var(--text-sm); }
+.financial-compact .financial-axis { margin: 0 calc(110px + var(--unit) * 3) var(--unit) calc(65px + var(--unit) * 3); }
+.financial-compact .financial-bar-row + .financial-bar-row { margin-top: var(--unit); }
+.financial-compact .financial-bar-row .financial-source { display: grid; grid-template-columns: 65px minmax(0,1fr) 110px; gap: 0 calc(var(--unit) * 3); align-items: center; }
+.financial-compact .financial-row-heading { display: contents; }
+.financial-compact .financial-row-heading > span { grid-column: 1; grid-row: 1; }
+.financial-compact .financial-row-heading > strong { grid-column: 3; grid-row: 1; font-size: var(--text-sm); text-align: right; }
+.financial-compact .financial-bar { grid-column: 2; grid-row: 1; }
+.financial-compact .financial-source-hint { grid-column: 3; text-align: right; color: var(--filing-blue-ink-light); }
+.financial-compact .financial-unplotted,.financial-compact .financial-correction { grid-column: 1 / -1; margin: var(--unit) 0; }
+.financial-compact[data-comparison="result"] .financial-bar-row .financial-source { grid-template-columns: 150px minmax(0,1fr) 110px; }
+.financial-compact[data-comparison="result"] .financial-axis { margin-left: calc(150px + var(--unit) * 3); }
+.financial-compact .financial-compact-footnote { margin: calc(var(--unit) * 2) 0 0; }
 @media (max-width: 1000px) {
   .financial-revenue-panels { grid-template-columns: 1fr; gap: calc(var(--unit) * 6); }
   .financial-panel + .financial-panel { border-top: 1px solid var(--v2-light-line); padding-top: calc(var(--unit) * 5); }
@@ -51,6 +78,12 @@
   .financial-period-control { align-items: stretch; gap: calc(var(--unit) * 3); }
   .financial-period-control label { flex-basis: 100%; }
   .financial-row-heading { gap: var(--unit) calc(var(--unit) * 2); }
+  .financial-compact .financial-question-heading { gap: var(--unit); }
+  .financial-compact .financial-bar-row .financial-source { display: block; }
+  .financial-compact .financial-row-heading { display: flex; }
+  .financial-compact .financial-axis,.financial-compact[data-comparison="result"] .financial-axis { margin-left: 1px; margin-right: 1px; }
+  .financial-compact .financial-source-hint { text-align: left; }
+  .financial-compact .financial-switch { gap: 0; }
 }
 @media (forced-colors: active) {
   .financial-bar rect { fill: CanvasText; }
