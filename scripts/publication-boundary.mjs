@@ -195,7 +195,9 @@ export function scan(source, { requireMetadata = true } = {}) {
     }
   }
   const lockPaths = ["contracts/contract.lock.json"];
-  if (source.entries.has("contracts/mouthfolio-research.v0.3.schema.json") || source.entries.has("contracts/contract.v0.3.lock.json")) lockPaths.push("contracts/contract.v0.3.lock.json");
+  for (const version of ["v0.3", "v0.4"]) {
+    if (source.entries.has(`contracts/mouthfolio-research.${version}.schema.json`) || source.entries.has(`contracts/contract.${version}.lock.json`)) lockPaths.push(`contracts/contract.${version}.lock.json`);
+  }
   for (const lockPath of lockPaths) {
     const lock = source.entries.has(lockPath) || requireMetadata ? json(lockPath) : null;
     if (lock) {

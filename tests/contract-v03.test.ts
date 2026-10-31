@@ -14,7 +14,7 @@ test("v0.3 retains exact summary identity and separate excerpt across both pinne
     assert.deepEqual(decodeResearch(value, { ...query, asOf: value.as_of }, "synthetic", "v0.3"), value);
   }
   assert.equal(apiVersion(undefined), "v0.2");
-  for (const invalid of ["", "v0.4", "../v0.3"]) assert.throws(() => apiVersion(invalid));
+  for (const invalid of ["", "v0.5", "../v0.3"]) assert.throws(() => apiVersion(invalid));
 });
 test("version selection rejects mismatched responses in both directions", async () => {
   assert.throws(() => decodeResearch(initial, query, "synthetic"));

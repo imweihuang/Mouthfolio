@@ -14,7 +14,9 @@ export async function checkJourney(page, origin) {
   await page.getByRole("heading", { name: "What people are saying", exact: true }).waitFor();
   assert.equal(await page.locator(".commentary-record").count(), 1);
   assert.equal(await page.locator(".mention-record").count(), 1);
-  await page.getByRole("link", { name: "Inspect mention receipt" }).click();
+  const archive = page.locator("details.commentary-more");
+  if (await archive.count()) await archive.locator("summary").click();
+  await page.locator(".mention-record").getByRole("link", { name: /Available source|Source & context/ }).first().click();
   await page.getByRole("button", { name: "Close source" }).waitFor();
   const mentionUrl = page.url();
   const snapshot = await page.getByTestId("snapshot").textContent();

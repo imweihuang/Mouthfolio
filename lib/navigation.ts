@@ -9,7 +9,7 @@ export function journeyUrl(path: string, context: JourneyContext, receipt = cont
   if (context.state && context.state !== "available") query.set("state", context.state);
   if (context.commentaryVoice && context.commentaryVoice !== "all") query.set("voice", context.commentaryVoice);
   if (context.commentaryKind && context.commentaryKind !== "all") query.set("kind", context.commentaryKind);
-  if (context.commentaryOrder && context.commentaryOrder !== "newest") query.set("order", context.commentaryOrder);
+  if (context.commentaryOrder && context.commentaryOrder !== "readable") query.set("order", context.commentaryOrder);
   if (context.section && context.section !== "overview") query.set("section", context.section);
   if (receipt) query.set("receipt", receipt);
   return `${path}?${query}`;

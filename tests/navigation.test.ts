@@ -57,3 +57,9 @@ test("Latest clears only the historical cutoff and preserves receipt, filters an
   original.searchParams.delete("asof");
   assert.equal(latest.href, original.href);
 });
+
+test("explicit archive order survives navigation when the reading view is default", () => {
+  const newest = new URL(companyUrl({ ...context, commentaryOrder: "newest" }), "https://example.test");
+  assert.equal(newest.searchParams.get("order"), "newest");
+  assert.equal(new URL(companyUrl({ ...context, commentaryOrder: "readable" }), "https://example.test").searchParams.has("order"), false);
+});

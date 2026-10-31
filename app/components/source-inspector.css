@@ -17,3 +17,10 @@
 .source-inspector .receipt-measure { margin: calc(var(--unit) * 5) 0; }
 .source-inspector .receipt-details { margin-top: calc(var(--unit) * 4); }
 @media (max-width: 1100px) { .source-context-pane { display: none; } }
+
+.evidence-additions { list-style: none; padding: 0; margin: calc(var(--unit) * 5) 0; }
+.evidence-additions li { border-left: 2px solid var(--v2-light-line); padding: 0 0 calc(var(--unit) * 5) calc(var(--unit) * 4); }
+.evidence-additions li:last-child { padding-bottom: 0; }
+.evidence-additions a { color: var(--filing-blue-ink-light); font-size: var(--text-sm); line-height: var(--leading-reading); }
+.addition-kind,.addition-source-date { font-size: var(--text-sm); color: var(--v2-light-muted); margin: 0 0 var(--unit); }
+.addition-source-date { margin-top: var(--unit); }

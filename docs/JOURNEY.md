@@ -1,15 +1,14 @@
 # Company-first research journey
 
-Start with Anthropic's **Overview**: reported figures, one primary financial
-comparison and a short selection of commentary. **Commentary** opens the fuller
+Start with Anthropic's **Overview**: dated company context when available, reported
+figures, two financial comparisons and a short selection of readable commentary. **Commentary** opens the fuller
 dated feed. Financials and Sources support deeper reading. Author names link
 from individual commentary items to their history about the company; the sidebar
 stays focused on company navigation rather than an inventory of voices.
 
-Overview's compact financial chart defaults to revenue and the latest eligible
-reporting family. Controls offer only supported metrics and periods. Readers can
-switch between revenue and matched result/cash-flow evidence, choose full years
-or first halves where available, and open the exact table. Financials retains the
+Overview shows revenue and matched result/cash-flow evidence together. Controls
+offer only supported periods. Readers can choose full years or first halves
+where available, select a result period, and open either exact table. Financials retains the
 complete reported-evidence table, detailed comparisons, and a maintained question
 when one is available. Revenue charts keep full years and first halves separate,
 with independent zero-based scales. The result and cash-flow chart compares the
@@ -17,26 +16,29 @@ same reporting period, with negative values left of zero and positive values
 right. A period selector and exact-table controls support closer reading. Charts
 include only recognized USD measures and compatible reported bases; unmatched or
 ambiguous observations remain in the complete evidence table. Missing evidence
-is not plotted as zero. No growth rate, margin, cash runway or explanation of the
-accounting-to-cash difference is inferred.
+is not plotted as zero. Year-over-year revenue change is calculated only for
+matching consecutive periods. The conditional accounting reconciliation requires
+a complete, source-matched set of adjustments. No margin or cash runway is inferred.
 
 Chart labels and headline amounts may be rounded; exact tables retain the
 original values, units, reporting periods and financial basis. Each plotted
 observation and table source link opens its exact receipt. The headline summary
 prioritizes the latest recognized revenue and matched result/cash-flow pair,
 then fills remaining slots from other reported observations, up to four records.
+Reconciliation adjustments remain in their chart and the full evidence table.
 Each measure retains its own reporting period; dates can differ across measures.
 Different bases or durations are never merged; the complete reporting history
 remains in Financials. Missing values retain their explanation. A cash balance is
 a point-in-time observation, not operating cash flow.
 
 Overview selects a small set of recent source cards, prioritizing available
-Record TLDRs. This is a selection of posts, not a voice's overall position.
-The full Commentary section and author pages order cards by publication date,
-newest first by default. Each card groups one exact voice and receipt, retains
+company-relevant summaries or substantive attributed text. This is a selection
+of posts, not a voice's overall position. The default “Notes first” order puts
+readable cards first, ordered by publication date within that group. Other
+archived sources remain expandable. Each card groups one exact voice and receipt, retains
 every attributed-view statement in its expandable context, and shows mentions
 separately. Company readers can filter by voice; both full feeds offer All, Views and Mentions
-filters and newest/oldest ordering. A type filter selects whole matching cards,
+filters and notes-first/newest/oldest ordering. A type filter selects whole matching cards,
 so a mixed card retains both its views and mentions. Voice pages stay scoped to
 the selected voice and company. A named reference alone establishes no stance.
 Attributed-view text is plain text, not quotation styling. When a service response
@@ -46,7 +48,7 @@ absence from this projection does not establish that the speaker stated none.
 
 ## Record TLDR
 
-A validated v0.3 receipt may include a **Record TLDR**, labelled
+A validated v0.3 or v0.4 receipt may include a **Summary**, labelled
 **AI-authored · AI-reviewed**. It appears once per source card
 and in the exact source inspector, with source capture and summary
 availability dates. This is ASOF-authored summary text, not a source quote or a
@@ -102,7 +104,7 @@ hosting operator can supply `ASOF_DATA_ORIGIN` as an authorized HTTPS origin
 without a path, query, credentials or fragment; loopback HTTP is also accepted
 for local verification. The server requests the fixed versioned company endpoint.
 `ASOF_DATA_API_VERSION` is also server-only: omit it for v0.2 or explicitly set
-`v0.3` to select both the newer endpoint and its matching validator. Other
+`v0.3` or `v0.4` to select the corresponding endpoint and matching validator. Other
 values and mismatched responses fail closed without a fallback request. These
 settings are never passed to client components.
 No service credentials or real response fixtures are included in this repository.
@@ -142,3 +144,24 @@ The consumer exports are pinned to their canonical source revision and hashes.
 They contain only invented companies, voices, values and text. Public-source
 availability grants no rights to service data. A runnable client and passing
 local tests do not establish hosted data admission or deployment acceptance.
+
+## Investor overview and dated company context
+
+The three-pane company layout leads with reported figures, simultaneous revenue
+and result/cash-flow comparisons, and readable commentary. The default “Notes
+first” order puts source cards with substantive company text first; the complete
+archive remains available, including mention-only records. Explicit date orders
+remain chronological. “What changed” lists dated additions to this archive, not
+changes since a user's last visit or a claim of continuous source monitoring.
+
+Year-over-year revenue change uses consecutive equal-duration periods with the
+same reported basis. A conditional waterfall connects net income to operating
+cash flow only when all eleven eligible adjustments and both endpoints share the
+required period/source lineage and reconcile exactly. Each figure retains its
+receipt and exact table. Noncash adjustments are not represented as cash flows.
+
+Optional v0.4 company context presents fixed, dated product names, delivery
+channels and listing applications with exact receipts. It does not establish
+current trading status. Missing or revoked context adds no inferred company facts;
+older API versions remain supported. The source-code release includes only
+synthetic fixtures. Hosted facts require separate service qualification.
