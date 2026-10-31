@@ -119,5 +119,78 @@ export async function checkReceiptClose(browser, origin) {
       } finally { await page.close(); }
     }
   }
+  // A released drawer is immediately usable: navigate before the close response
+  // commits, then prove its late response cannot reopen the old source or win.
+  for (const width of [390, 1440]) {
+    for (const action of ["button", "escape"]) {
+      const page = await browser.newPage({ viewport: { width, height: 1000 } });
+      try {
+        await page.goto(selected);
+        await page.getByRole("dialog").waitFor();
+        await page.waitForLoadState("networkidle");
+        await holdCloseResponse(page);
+        if (action === "button") await page.getByRole("button", { name: "Close source" }).click();
+        else await page.keyboard.press("Escape");
+        await page.locator("dialog[open]").waitFor({ state: "detached", timeout: 1000 });
+        await page.waitForFunction(() => window.receiptCloseResponseHeld);
+        assert.equal(page.url(), selected, "Regression exercises navigation before Close commits");
+        const financials = page.locator(".secondary-navigation").getByRole("link", { name: "Financials", exact: true });
+        assert.equal(new URL(await financials.getAttribute("href"), origin).searchParams.has("receipt"), false);
+        await financials.click();
+        await page.waitForURL(url => url.searchParams.get("section") === "financials" && !url.searchParams.has("receipt"));
+        assert.equal(await page.locator("dialog[open]").count(), 0);
+        await page.locator(".company-navigation").getByRole("link", { name: "Commentary", exact: true }).click();
+        await page.waitForURL(url => url.searchParams.get("section") === "commentary" && !url.searchParams.has("receipt"));
+        const destination = page.url();
+        await page.evaluate(() => window.releaseReceiptClose());
+        await page.waitForLoadState("networkidle");
+        assert.equal(page.url(), destination, "Late Close cannot replace the newer section");
+        assert.equal(await page.locator("dialog[open]").count(), 0);
+        // Viewport reset alone must not stop ordinary Overview navigation.
+        await page.setViewportSize({ width: width === 390 ? 1440 : 390, height: 1000 });
+        await page.locator(".company-navigation").getByRole("link", { name: "Overview", exact: true }).click();
+        await page.waitForURL(url => !url.searchParams.has("section") && !url.searchParams.has("receipt"));
+        await page.locator(".metric-card").first().waitFor();
+        assert.equal(await page.locator("dialog[open]").count(), 0);
+        if (action === "button") await page.screenshot({ path: `artifacts/receipt-close-navigation-${width}.png` });
+      } finally { await page.close(); }
+    }
+    const filters = await browser.newPage({ viewport: { width, height: 1000 } });
+    try {
+      await filters.goto(`${selected}&section=commentary`);
+      await filters.getByRole("dialog").waitFor();
+      await filters.waitForLoadState("networkidle");
+      await holdCloseResponse(filters);
+      await filters.getByRole("button", { name: "Close source" }).click();
+      await filters.locator("dialog[open]").waitFor({ state: "detached", timeout: 1000 });
+      await filters.waitForFunction(() => window.receiptCloseResponseHeld);
+      await filters.getByRole("navigation", { name: "Filter commentary by type" }).getByRole("link", { name: "Views", exact: true }).click();
+      await filters.waitForURL(url => url.searchParams.get("kind") === "views" && !url.searchParams.has("receipt"));
+      const destination = filters.url();
+      await filters.evaluate(() => window.releaseReceiptClose());
+      await filters.waitForLoadState("networkidle");
+      assert.equal(filters.url(), destination);
+      assert.equal(await filters.locator("dialog[open]").count(), 0, "A commentary filter honors pending Close");
+    } finally { await filters.close(); }
+    const page = await browser.newPage({ viewport: { width, height: 1000 } });
+    try {
+      await page.goto(`${selected}&section=sources`);
+      await page.getByRole("dialog").waitFor();
+      await page.waitForLoadState("networkidle");
+      await holdCloseResponse(page);
+      await page.getByRole("button", { name: "Close source" }).click();
+      await page.locator("dialog[open]").waitFor({ state: "detached", timeout: 1000 });
+      await page.waitForFunction(() => window.receiptCloseResponseHeld);
+      await page.locator('#sources a[data-receipt="receipt-mention"]').click();
+      await page.waitForURL(url => url.searchParams.get("receipt") === "receipt-mention");
+      await page.getByRole("dialog").waitFor();
+      const snapshot = await page.getByTestId("snapshot").textContent();
+      await page.evaluate(() => window.releaseReceiptClose());
+      await page.waitForLoadState("networkidle");
+      assert.equal(new URL(page.url()).searchParams.get("receipt"), "receipt-mention", "Explicit new source selection wins over pending Close");
+      assert.equal(await page.getByTestId("snapshot").textContent(), snapshot);
+      assert.ok(await page.getByRole("dialog").isVisible());
+    } finally { await page.close(); }
+  }
   console.log("Receipt close passed: held RSC response, immediate button/Escape dismissal, focus and modality release, responsive resize, pending history cancellation, exact Back/Forward/reload at 1440/390px.");
 }

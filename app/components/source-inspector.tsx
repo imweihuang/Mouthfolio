@@ -9,6 +9,8 @@ import { companyFactText, disclosureDate, type CompanyFact } from "../../lib/com
 import { companySectionUrl, journeyUrl, type JourneyContext } from "../../lib/navigation";
 import { recentEvidence, readerPeriod } from "../../lib/reader-context";
 import { RecordTldr } from "./record-tldr";
+import { ResearchLink } from "./research-link";
+import { useReceiptDismissal } from "./receipt-dismissal";
 import "./source-inspector.css";
 
 const readableDate = (value: string) => new Date(value).toLocaleDateString("en-US", {
@@ -32,9 +34,9 @@ export function EvidenceContext({ receipts, observations, companyName, context, 
     </li>)}</ol>
     <section className="evidence-context-section"><h3>Questions to follow</h3>
       <ul className="evidence-context-links">
-        <li><Link prefetch={false} href={companySectionUrl(context, "financials")}>How is reported revenue changing?</Link></li>
-        <li><Link prefetch={false} href={companySectionUrl(context, "financials")}>What connects the result to cash flow?</Link></li>
-        <li><Link prefetch={false} href={companySectionUrl(context, "commentary")}>What are sources saying about {companyName}?</Link></li>
+        <li><ResearchLink href={companySectionUrl(context, "financials")}>How is reported revenue changing?</ResearchLink></li>
+        <li><ResearchLink href={companySectionUrl(context, "financials")}>What connects the result to cash flow?</ResearchLink></li>
+        <li><ResearchLink href={companySectionUrl(context, "commentary")}>What are sources saying about {companyName}?</ResearchLink></li>
       </ul>
     </section>
     <details className="evidence-coverage"><summary>Sources and coverage</summary>
@@ -60,6 +62,8 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
   receipt: Receipt | undefined; requestedId: string; closeUrl: string; observations: Observation[]; facts?: CompanyFact[]; synthetic: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const { dismiss, clear } = useReceiptDismissal();
+  const dismissalUrl = useRef<string | null>(null);
   const router = useRouter();
   const opener = useRef<HTMLElement | null>(null);
   const dismissed = useRef(false);
@@ -73,6 +77,10 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
   const close = () => {
     if (dismissed.current) return;
     dismissed.current = true;
+    const selectedUrl = new URL(closeUrl, location.href);
+    selectedUrl.searchParams.set("receipt", requestedId);
+    dismissalUrl.current = selectedUrl.href;
+    dismiss(dismissalUrl.current);
     dialog.current?.close();
     restoreFocus();
     startTransition(() => { router.push(closeUrl, { scroll: false }); });
@@ -109,6 +117,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     // History can restore this same mounted receipt while a close is still pending.
     // A cancelled navigation must not leave its dialog permanently dismissed.
     const restoreFromHistory = () => {
+      if (dismissalUrl.current) clear(dismissalUrl.current);
       dismissed.current = currentContext() !== openedContext;
       if (dismissed.current) { pane.close(); restoreFocus(); } else show();
     };
@@ -119,6 +128,8 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     media.addEventListener("change", show);
     window.addEventListener("popstate", restoreFromHistory);
     return () => {
+      if (dismissalUrl.current) clear(dismissalUrl.current);
+      dismissalUrl.current = null;
       media.removeEventListener("change", show);
       window.removeEventListener("popstate", restoreFromHistory);
       reopenIfCurrent.current = () => {};
@@ -129,7 +140,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
         focusReceiptOpener(opener.current, requestedId);
       });
     };
-  }, [requestedId, closeUrl]);
+  }, [requestedId, closeUrl, clear]);
   useEffect(() => {
     if (!isPending) reopenIfCurrent.current();
   }, [isPending]);
