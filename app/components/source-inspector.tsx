@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Coverage, Observation } from "../../contracts/types";
 import type { Receipt } from "../../lib/contract";
 import { formatAmount } from "../../lib/format-amount";
+import { companyFactText, disclosureDate, type CompanyFact } from "../../lib/company-orientation";
 import { companySectionUrl, journeyUrl, type JourneyContext } from "../../lib/navigation";
 import { recentEvidence, readerPeriod } from "../../lib/reader-context";
 import { RecordTldr } from "./record-tldr";
@@ -55,8 +56,8 @@ function focusReceiptOpener(opener: HTMLElement | null, requestedId: string) {
   }
 }
 
-export function SourceInspector({ receipt, requestedId, closeUrl, observations, synthetic }: {
-  receipt: Receipt | undefined; requestedId: string; closeUrl: string; observations: Observation[]; synthetic: boolean;
+export function SourceInspector({ receipt, requestedId, closeUrl, observations, facts = [], synthetic }: {
+  receipt: Receipt | undefined; requestedId: string; closeUrl: string; observations: Observation[]; facts?: CompanyFact[]; synthetic: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
@@ -151,7 +152,14 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     {receipt ? <>
       <p className="receipt-publication">Published <time dateTime={receipt.published_at} title={receipt.published_at}>{readableDate(receipt.published_at)} UTC</time></p>
       <RecordTldr receipt={receipt} details/>
-      {receipt.excerpt ? <p className="source-excerpt">{receipt.excerpt}</p> : !("summary" in receipt && receipt.summary) && !observations.length ? <p className="source-excerpt">{receipt.url ? "Open the original source for full context." : "Source text is not displayed here."}</p> : null}
+      {receipt.excerpt ? <p className="source-excerpt">{receipt.excerpt}</p> : !("summary" in receipt && receipt.summary) && !observations.length && !facts.length ? <p className="source-excerpt">{receipt.url ? "Open the original source for full context." : "Source text is not displayed here."}</p> : null}
+      {facts.map(fact => <div className="receipt-measure" data-company-fact={fact.version_id} key={fact.version_id}>
+        <strong>{fact.kind === "product" ? "Product" : fact.kind === "delivery_channel" ? "Access" : "Listing application"}</strong>
+        <p>{companyFactText(fact)}</p>
+        <p>Disclosed <time dateTime={fact.disclosed_on}>{disclosureDate(fact.disclosed_on)}</time>.</p>
+        {fact.kind === "listing_application" ? <p>This does not establish current listing status.</p> : null}
+        <details><summary>Fact record</summary><small>Evidence version: {fact.version_id}{fact.supersedes ? ` · supersedes ${fact.supersedes}` : ""}</small></details>
+      </div>)}
       {observations.map(row => <div className="receipt-measure" key={row.version_id}><strong>{row.label}</strong><p className="receipt-amount">Reported value: {formatAmount(row.amount, row.unit)}</p>{row.missing_reason !== null ? <p>{row.missing_reason}</p> : null}<p>{readerPeriod(row)}</p><details><summary>Definition and reporting basis</summary><p>{row.period.start} – {row.period.end}</p><p>Unit: {row.unit} · {row.basis}</p><small>Evidence version: {row.version_id}{row.supersedes ? ` · supersedes ${row.supersedes}` : ""}</small></details></div>)}
       {receipt.url ? <a className="source-link" href={receipt.url} rel="noreferrer">Open original source</a> : <p className="muted">{synthetic ? "Original fictional text; there is no external source." : "The original source link is unavailable. Source text is not displayed."}</p>}
       <details className="record-details"><summary>Record details</summary>

@@ -194,7 +194,7 @@ function CompactFinancialComparisons({ observations, receipts = [], companyName,
           <p className="financial-period-note">{durationNotes[pair.duration]} {pair.netIncome.row.period.start.slice(0, 4)} · reported USD</p>
           {resultDisplay === "chart" ? <Bars rows={pairRows} context={context} label={`${pair.label}: net income and operating cash flow`}/>
             : <ExactTable rows={pairRows} context={context} caption={`${pair.label} result and operating cash flow`}/>}
-          <p className="financial-note financial-compact-footnote">Same period · shared scale · zero separates loss and cash generation.</p>
+          <p className="financial-note financial-compact-footnote">Same period · shared scale · negative values extend left of zero.</p>
           <CashDefinitions hasBridge={Boolean(bridge)}/>
           {bridge ? <CashFlowBridge bridge={bridge} context={context}/> : null}
       </> : <p className="financial-empty">No compatible result and operating cash flow pair is available for the same period. Missing evidence is not zero.</p>}

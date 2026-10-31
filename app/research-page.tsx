@@ -117,6 +117,6 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
       </div>
     </div>
     {ready && !showInspector ? <EvidenceContext path={path} receipts={sourceReceipts} observations={voiceId ? [] : ready.observations} companyName={companyName} context={context} coverage={ready.coverage} synthetic={synthetic}/> : null}
-    {showInspector ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} synthetic={synthetic}/> : null}
+    {showInspector ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} facts={ready && "context" in ready.company ? ready.company.context.facts.filter(fact => fact.receipt_id === receiptId) : []} synthetic={synthetic}/> : null}
   </>;
 }
