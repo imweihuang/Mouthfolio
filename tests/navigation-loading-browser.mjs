@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
-import fixture from "../fixtures/v0.3-initial.json" with { type: "json" };
+import { financialFixture } from "./financial-browser.mjs";
 
 export async function checkNavigationLoading(page, origin, supply, setDelay, requestCount) {
-  const value = { ...structuredClone(fixture), data_mode: "authorized" };
+  const value = financialFixture();
   const query = "company=aster-compute&asof=2026-10-26T12%3A00%3A00.000000Z&window=all&kind=views&order=oldest";
   const company = `${origin}/companies/aster-compute?${query}`;
   const voice = `${origin}/voices/demo-researcher?${query}`;
@@ -14,6 +14,26 @@ export async function checkNavigationLoading(page, origin, supply, setDelay, req
       await page.goto(company);
       await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
       await page.waitForLoadState("networkidle");
+      // Source actions, including HTML links wrapping chart SVG, respond while
+      // the fresh source read is held. No receipt appears before that response.
+      for (const selector of [".metric-card a[data-receipt]", ".financial-source", ".commentary-source-actions a[data-receipt]"]) {
+        const link = page.locator(selector).first();
+        assert.ok(await link.count(), `Expected synthetic source action: ${selector}`);
+        const expected = new URL(await link.getAttribute("href"), origin).searchParams.get("receipt");
+        const beforeSource = requestCount();
+        setDelay(2500);
+        await link.click();
+        await link.locator(".navigation-pending").filter({ hasText: "Loading…" }).waitFor({ timeout: 1500 });
+        assert.equal(await page.locator(".source-inspector[open]").count(), 0);
+        assert.equal(await page.locator("svg .navigation-pending").count(), 0);
+        await page.locator(".source-inspector[open]").waitFor();
+        assert.equal(new URL(page.url()).searchParams.get("receipt"), expected);
+        assert.equal(requestCount(), beforeSource + 1, "Source selection makes exactly one fresh eligibility read");
+        setDelay(0);
+        await page.getByRole("button", { name: "Close source" }).click();
+        await page.waitForURL(company);
+        await page.waitForLoadState("networkidle");
+      }
       const initialRequests = requestCount();
       setDelay(2500);
       const start = performance.now();

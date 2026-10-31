@@ -1,5 +1,4 @@
 import { ReceiptDismissalProvider } from "./components/receipt-dismissal";
-import Link from "next/link";
 import { ResearchLink } from "./components/research-link";
 import { createDemoAdapter, DEMO_COMPANY, INITIAL_AS_OF, LATEST_AS_OF } from "../lib/demo-adapter";
 import { commentaryCoverage, headlineAmount } from "../lib/observations";
@@ -66,9 +65,9 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
   // A failed request cannot establish receipt eligibility. Keep its URL for recovery
   // without opening a modal that makes the page recovery action inert.
   const showInspector = Boolean(receiptId) && (ready !== null || status !== "unavailable");
-  const inspect = (id: string, label = "Inspect receipt", ariaLabel?: string) => <Link aria-label={ariaLabel} prefetch={false} scroll={false} data-receipt={id} href={href(id)}>{label} <span aria-hidden="true">↗</span></Link>;
+  const inspect = (id: string, label = "Inspect receipt", ariaLabel?: string) => <ResearchLink aria-label={ariaLabel} prefetch={false} scroll={false} data-receipt={id} href={href(id)}>{label} <span aria-hidden="true">↗</span></ResearchLink>;
   return <ReceiptDismissalProvider>
-    <div className={`reader-shell${ready ? " has-evidence-pane" : ""}${showInspector ? " has-inspector" : ""}`}>
+    <div className={`reader-shell${showInspector ? " has-inspector" : ""}`}>
       <a className="skip-link" href="#research">Skip to research</a>
       <div className="workspace">
         <nav className="sidebar" aria-label="Research navigation">
@@ -85,6 +84,7 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
           {synthetic ? <div className="demo-notice"><strong>Fictional demo</strong><span>All companies, voices, values and source text are invented.</span></div> : null}
           <div className="breadcrumb"><ResearchLink prefetch={false} href={companyUrl(context)}>Companies</ResearchLink><span>/</span>{voiceId ? <><ResearchLink prefetch={false} href={companyUrl(context)}>{companyName}</ResearchLink><span>/</span><span>Voice</span></> : <span>{companyName}</span>}</div>
           <div className="page-heading"><div><p className="eyebrow">{voiceId ? "Voice profile" : section === "overview" ? "Company overview" : section === "commentary" ? "Commentary" : section === "financials" ? "Company financials" : "Company sources"}{synthetic ? " · fictional" : ""}</p><h1>{voiceId ? voice?.name ?? "Voice unavailable" : companyName}</h1><p className="page-intro">{voiceId ? "Follow the dated record, from an attributed view to its original source." : section === "overview" ? "Reported figures and the conversation around them." : section === "commentary" ? "Follow what people said back to the dated source." : "Reported evidence, with its periods and sources."}</p></div></div>
+          {ready && !showInspector ? <EvidenceContext key={`${path}:${asOf}:${section}`} path={path} receipts={sourceReceipts} observations={voiceId ? [] : ready.observations} companyName={companyName} context={context} coverage={ready.coverage} synthetic={synthetic}/> : null}
           {ready && !voiceId && section === "overview" ? <CompanyOrientation profile={"context" in ready.company ? ready.company.context : undefined} context={context}/> : null}
           <details className="context-controls"><summary>Evidence available by: {dateLabel(asOf)} UTC <span>Change cutoff</span></summary>
           <form className="filters" method="get" action={`${process.env.MOUTHFOLIO_BASE_PATH ?? ""}${path}`} aria-label={synthetic ? "Demo examples" : "Research context"}>
@@ -117,7 +117,6 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
         </main>
       </div>
     </div>
-    {ready && !showInspector ? <EvidenceContext path={path} receipts={sourceReceipts} observations={voiceId ? [] : ready.observations} companyName={companyName} context={context} coverage={ready.coverage} synthetic={synthetic}/> : null}
     {showInspector ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} facts={ready && "context" in ready.company ? ready.company.context.facts.filter(fact => fact.receipt_id === receiptId) : []} synthetic={synthetic}/> : null}
   </ReceiptDismissalProvider>;
 }

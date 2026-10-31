@@ -1,7 +1,6 @@
 "use client";
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import type { Coverage, Observation } from "../../contracts/types";
 import type { Receipt } from "../../lib/contract";
 import { formatAmount } from "../../lib/format-amount";
@@ -17,19 +16,39 @@ const readableDate = (value: string) => new Date(value).toLocaleDateString("en-U
   year: "numeric", month: "short", day: "numeric", timeZone: "UTC",
 });
 
-/** A useful docked starting point; every link still selects one exact receipt. */
+/** Optional research context; every source link still selects one exact receipt. */
 export function EvidenceContext({ receipts, observations, companyName, context, coverage, synthetic, path }: {
   receipts: Receipt[]; observations: Observation[]; companyName: string; context: JourneyContext;
   coverage: Coverage; synthetic: boolean; path: string;
 }) {
+  const pane = useRef<HTMLDialogElement>(null);
+  const opener = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const close = () => { pane.current?.close(); setOpen(false); opener.current?.focus({ preventScroll: true }); };
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1100px)");
+    const dismiss = () => { if (!pane.current?.open) return; pane.current.close(); setOpen(false); opener.current?.focus({ preventScroll: true }); };
+    media.addEventListener("change", dismiss);
+    return () => media.removeEventListener("change", dismiss);
+  }, []);
+  useEffect(() => {
+    if (!open) return;
+    if (window.matchMedia("(max-width: 1100px)").matches) pane.current?.showModal(); else pane.current?.show();
+    pane.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
+  }, [open]);
   const additions = recentEvidence(receipts, observations, context.asOf);
-  return <aside className="source-context-pane" aria-labelledby="evidence-context-heading">
-    <p className="eyebrow">{synthetic ? "Fictional evidence" : "Research notebook"}</p>
+  return <><button ref={opener} type="button" className="quiet-button notebook-opener" aria-expanded={open} aria-controls="research-notebook" onClick={() => {
+    if (open) { close(); return; }
+    setOpen(true);
+  }}>What changed</button>
+  {open ? <dialog ref={pane} id="research-notebook" className="source-context-pane" aria-labelledby="evidence-context-heading" onCancel={event => { event.preventDefault(); close(); }} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); close(); } }}>
+    <div className="inspector-top"><span className="eyebrow">Research notebook</span><button type="button" className="quiet-button" aria-label="Close notebook" onClick={close}>Close</button></div>
+    {synthetic ? <p className="eyebrow">Fictional evidence</p> : null}
     <h2 id="evidence-context-heading">What changed</h2>
     <p className="evidence-context-intro">Recent additions to the evidence available here. Older sources can become available later.</p>
     <ol className="evidence-additions">{additions.map(event => <li key={event.receipt.id}>
       <p className="addition-kind">{event.label} · <time dateTime={event.availableAt}>{readableDate(event.availableAt)}</time></p>
-      <Link prefetch={false} scroll={false} data-receipt={event.receipt.id} href={journeyUrl(path, context, event.receipt.id)}>{event.receipt.title}</Link>
+      <ResearchLink prefetch={false} scroll={false} data-receipt={event.receipt.id} href={journeyUrl(path, context, event.receipt.id)}>{event.receipt.title}</ResearchLink>
       <p className="addition-source-date">Source published {readableDate(event.receipt.published_at)}</p>
     </li>)}</ol>
     <section className="evidence-context-section"><h3>Questions to follow</h3>
@@ -44,7 +63,7 @@ export function EvidenceContext({ receipts, observations, companyName, context, 
       <p>Evidence available by <time dateTime={context.asOf}>{readableDate(context.asOf)} UTC</time>. This is the research cutoff, not a promise that sources were checked at that time.</p>
       <p>Publication dates, reporting periods and the date evidence became available describe different things. Each source retains those dates.</p>
     </details>
-  </aside>;
+  </dialog> : null}</>;
 }
 
 // A receipt can live inside a collapsed evidence table after a reload.

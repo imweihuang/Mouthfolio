@@ -77,8 +77,10 @@ directs readers to the original source for full context when its URL is present.
   receipt. Entering a voice profile clears the company voice filter and makes
   the route's voice authoritative, while retaining type and order selections.
 
-On desktop, the company navigation, reading area and source-context pane sit
-alongside one another. Selecting a chart mark, value source or commentary source
+The page starts with navigation and the reading area. **What changed** opens
+the research notebook on demand; Close or Escape returns focus to its opener.
+The notebook shares the right-hand slot with exact sources and closes on a
+breakpoint change. Closed panes reserve no reading width. Selecting a chart mark, value source or commentary source
 opens its exact receipt in that pane. It becomes a modal drawer at widths of
 1100px or less. Escape closes it and returns focus to the source opener. Back,
 Forward and reload restore URL context. While a close is still loading, ordinary
@@ -94,7 +96,7 @@ available, not complete reactions to a filing or a current-news feed. Anthropic
 is the first hosted company; subsequent companies need qualified observations,
 attribution and source coverage before they can offer the same journey.
 
-Company and voice links show a loading status as soon as navigation starts.
+Company, voice and exact-source links (including charts) show a loading status as soon as navigation starts.
 The current page and URL remain in place until the destination's fresh service
 read completes. These links do not prefetch evidence or reuse a client response
 cache to bypass current eligibility checks.

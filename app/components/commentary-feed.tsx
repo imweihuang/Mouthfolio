@@ -1,4 +1,4 @@
-import Link from "next/link";
+
 import type { AttributedView, Mention, Voice } from "../../contracts/types";
 import type { Receipt } from "../../lib/contract";
 import { commentaryGroups, commentaryReading, companySummary, commentaryContextViews, selectCommentary } from "../../lib/commentary";
@@ -57,7 +57,7 @@ export function CommentaryFeed({ views, mentions, voices, receipts, companyName,
         {compactMention && genericTitle ? null : <h3 className="commentary-source-title">{group.receipt?.title ?? "Source title unavailable"}</h3>}
         {summary ? <div className="commentary-summary" aria-label="Summary"><p className="commentary-disclosure">Summary · AI-authored · AI-reviewed</p><p className="commentary-summary-text">{summary.text}</p><p className="commentary-capture">{summary.framing === "summary_from_asof_capture" ? "Based on an ASOF capture." : "Based on the source at capture time."} <span>Captured {dateLabel(summary.capture_observed_at)} UTC · summary available {dateLabel(summary.available_at)} UTC.</span></p></div> : reading?.kind === "excerpt" ? <div className="commentary-excerpt"><p className="commentary-disclosure">Source excerpt</p><p className="commentary-summary-text">{reading.text}</p></div> : group.views.length ? <p className={`attributed-statement${reading ? " commentary-summary-text" : ""}`}>{visibleText}</p> : <p className="commentary-mention"><span>Named {companyName}</span>. No attributed view in this record.</p>}
         {!preview && contextViews.length ? <details className="commentary-context"><summary>Attributed views and context</summary><ul className="commentary-statements">{contextViews.map(view => <li key={view.version_id}>{view.statement !== visibleText ? <p className="attributed-statement">{view.statement}</p> : null}{view.conditions || view.horizon ? <dl>{view.conditions ? <><dt>Conditions</dt><dd>{view.conditions}</dd></> : null}{view.horizon ? <><dt>Horizon</dt><dd>{view.horizon}</dd></> : null}</dl> : null}</li>)}</ul></details> : null}
-        <div className="commentary-source-actions"><Link prefetch={false} scroll={false} data-receipt={group.receiptId} href={journeyUrl(path, context, group.receiptId)}>{reading ? "Source & context" : "Available source"} <span aria-hidden="true">↗</span></Link>{group.receipt?.url ? <a href={group.receipt.url} target="_blank" rel="noreferrer noopener">Original source <span aria-hidden="true">↗</span></a> : null}</div>
+        <div className="commentary-source-actions"><ResearchLink prefetch={false} scroll={false} data-receipt={group.receiptId} href={journeyUrl(path, context, group.receiptId)}>{reading ? "Source & context" : "Available source"} <span aria-hidden="true">↗</span></ResearchLink>{group.receipt?.url ? <a href={group.receipt.url} target="_blank" rel="noreferrer noopener">Original source <span aria-hidden="true">↗</span></a> : null}</div>
       </article>
     </li>;
   };

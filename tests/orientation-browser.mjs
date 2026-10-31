@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fixture from "../fixtures/v0.4-initial.json" with { type: "json" };
 
-export async function checkCompanyOrientation(page, origin, supply) {
+export async function checkCompanyOrientation(page, origin, supply, setDelay, requestCount) {
   const data = { ...structuredClone(fixture), data_mode: "authorized" };
   const profileReceipt = data.receipts.find(receipt => receipt.id === "receipt-fictional-profile");
   profileReceipt.display_policy = "link_only";
@@ -37,8 +37,16 @@ export async function checkCompanyOrientation(page, origin, supply) {
     assert.equal(await orientation.getByRole("link").count(), 4, "Each admitted fact has a source link");
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Company orientation overflow at ${width}`);
     await orientation.screenshot({ path: `artifacts/company-orientation-${width}.png` });
-    await orientation.getByRole("link", { name: /^Source for Aster Workspace / }).click();
+    await page.waitForLoadState("networkidle");
+    const beforeSource = requestCount();
+    setDelay(2500);
+    const source = orientation.getByRole("link", { name: /^Source for Aster Workspace / });
+    await source.click();
+    await source.locator(".navigation-pending").filter({ hasText: "Loading…" }).waitFor({ timeout: 1500 });
+    assert.equal(await page.locator(".source-inspector[open]").count(), 0);
     await page.getByRole("dialog").waitFor();
+    assert.equal(requestCount(), beforeSource + 1, "A company fact opens with one fresh eligibility read");
+    setDelay(0);
     assert.equal(new URL(page.url()).searchParams.get("receipt"), "receipt-fictional-profile");
     assert.equal(await page.getByTestId("snapshot").textContent(), "snapshot-fictional-profile");
     await assertProfileFacts();

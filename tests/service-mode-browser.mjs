@@ -126,7 +126,7 @@ export async function checkServiceVersion(browser, basePath, version) {
     }
     await checkVoiceReceiptScope(page, origin, recovering, value => { syntheticPayload = value; });
     if (version === "v0.4") {
-      await checkCompanyOrientation(page, origin, value => { syntheticPayload = value; });
+      await checkCompanyOrientation(page, origin, value => { syntheticPayload = value; }, delay => { transportDelayMs = delay; }, () => transportRequests);
       assert.deepEqual(errors, [], "v0.4 service browser console/page errors");
       return;
     }

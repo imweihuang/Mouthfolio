@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ResearchLink } from "./research-link";
 import type { CompanyContext } from "../../contracts/types.v0.4";
 import { companyFactText, disclosureDate } from "../../lib/company-orientation";
 import type { CompanyFact } from "../../lib/company-orientation";
@@ -13,13 +13,13 @@ export function CompanyOrientation({ profile, context }: { profile?: CompanyCont
   const dates = [...new Set(profile.facts.map(fact => fact.disclosed_on))];
   const commonDate = dates.length === 1 ? dates[0] : null;
   const factsOf = (kind: CompanyFact["kind"]) => profile.facts.filter(fact => fact.kind === kind);
-  const sourceLink = (fact: CompanyFact) => <Link key={fact.version_id} prefetch={false} scroll={false}
+  const sourceLink = (fact: CompanyFact) => <ResearchLink key={fact.version_id} prefetch={false} scroll={false}
     href={companySectionUrl({ ...context, receipt: fact.receipt_id }, "overview")} data-receipt={fact.receipt_id}
     aria-label={`Source for ${companyFactText(fact)} Disclosed ${disclosureDate(fact.disclosed_on)}${fact.revision_kind === "correction" ? ". Corrected fact" : ""}`}>
     {companyFactText(fact)} <span aria-hidden="true">↗</span>
     {fact.revision_kind === "correction" ? <small>Corrected</small> : null}
     {!commonDate ? <small>Disclosed {disclosureDate(fact.disclosed_on)}</small> : null}
-  </Link>;
+  </ResearchLink>;
   const products = factsOf("product"), channels = factsOf("delivery_channel"), listings = factsOf("listing_application");
   return <div className="company-orientation" data-testid="company-orientation" role="region" aria-label="Company disclosures">
     <p className="company-orientation-date">Company disclosures{commonDate ? <> · {disclosureDate(commonDate)}</> : null}</p>
