@@ -1,6 +1,6 @@
 # Mouthfolio progress
 
-Current checkpoint: **30 October 2026**. The source is public, and the first hosted
+Current checkpoint: **31 October 2026**. The source is public, and the first hosted
 Anthropic research journey is available. The company-first client changes below
 are a separate presentation update, not a claim that this revision is deployed.
 
@@ -30,23 +30,24 @@ ASOF Research and ASOF Chat remain separate product directions with no active
 development planned. A public client repository does not grant rights to service
 data; the [source boundary](SOURCE_BOUNDARY.md) remains in force.
 
-## Client presentation update: 30 October 2026
+## Client presentation update: 31 October 2026
 
 The client now organizes the company journey around Overview and Commentary.
-Overview combines reported figures, one compact financial comparison and selected
-source cards. Financials holds the complete evidence table and detailed charts;
+Overview combines dated company facts when qualified, reported figures, two
+compact financial comparisons and readable source notes. Financials holds the complete evidence table and detailed charts;
 Sources holds the receipt library. A desktop source-context pane keeps the
 company in view while reading evidence, with a modal drawer on smaller screens.
 Author history is reached from commentary, not a sidebar roster.
 
-The compact chart offers supported metric and reporting-period choices, exact
+The compact charts offer supported reporting-period choices, exact
 tables and links to each observation's receipt. Full-year and first-half scales
 remain separate, and result/cash-flow pairs require matching reporting periods.
 Commentary cards preserve attributed statements and mention counts in their
 context and offer URL-backed voice, type and order controls in the full feed.
-These changes use the existing consumer response. They add no commentary,
-summaries or coverage, and do not establish deployment or CI acceptance of this
-revision. Local verification and hosted acceptance remain separate.
+The optional v0.4 contract supports separately qualified company facts. A
+complete reported reconciliation enables a conditional waterfall. The client
+creates no new commentary or summaries, and code changes do not establish
+production admission, deployment or CI acceptance of this revision. Local verification and hosted acceptance remain separate.
 
 Anthropic remains the first hosted company. Additional companies require
 qualified company facts, attributed commentary and source coverage; the new

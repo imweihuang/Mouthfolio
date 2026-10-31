@@ -45,11 +45,16 @@ export async function checkNavigationRecovery(browser, origin) {
           await page.getByRole("dialog").waitFor();
           await page.getByRole("button", { name: "Close source" }).focus();
         }
+        if (action === "receipt") {
+          const sourceCard = page.locator('[data-commentary-card][data-source-receipt="receipt-mention"]');
+          if (!await sourceCard.isVisible()) await page.locator(".commentary-more > summary").click();
+          await sourceCard.waitFor();
+        }
         await interruptPageStream(page);
         let reloads = 0;
         page.on("request", request => { if (request.isNavigationRequest() && request.frame() === page.mainFrame()) reloads++; });
         if (action === "voice") await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo researcher", exact: true }).first().click();
-        if (action === "receipt") await page.getByRole("link", { name: "Inspect mention receipt" }).click();
+        if (action === "receipt") await page.locator('[data-commentary-card][data-source-receipt="receipt-mention"]').getByRole("link", { name: /Available source|Source & context/ }).first().click();
         if (action === "close") await page.keyboard.press("Escape");
         await page.getByRole("heading", { name: "Research could not be displayed", exact: true }).waitFor();
         const target = voice + (action === "receipt" ? "&receipt=receipt-mention" : "");

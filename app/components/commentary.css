@@ -65,9 +65,9 @@
 .commentary-context { margin-top: calc(var(--unit) * 2); }
 .commentary-context[open] > summary { margin-bottom: calc(var(--unit) * 3); }
 .commentary-preview { padding-top: calc(var(--unit) * 4); }
-.commentary-preview .commentary-type-labels,.commentary-preview .commentary-source-title { display: none; }
+.commentary-preview .commentary-source-title { display: none; }
 .commentary-preview .commentary-summary-text { -webkit-line-clamp: 2; font-size: var(--text-sm); }
-.commentary-preview .commentary-capture span { display: none; }
+.commentary-preview .commentary-capture span { display: inline; }
 .commentary-preview .commentary-card { padding: calc(var(--unit) * 3) 0; }
 .commentary-preview .commentary-source-actions { margin-top: var(--unit); }
 .commentary-preview .commentary-capture { margin-top: var(--unit); }
@@ -76,3 +76,6 @@
   .commentary-feed .commentary-card,.commentary-feed .commentary-compact-mention { padding: calc(var(--unit) * 4) 0; }
   .commentary-filter a { padding: calc(var(--unit) * 2); }
 }
+
+/* Single attributed statements remain fully readable without a duplicate expander. */
+.commentary-feed:not(.commentary-preview) .attributed-statement.commentary-summary-text { display: block; overflow: visible; }

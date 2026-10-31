@@ -247,3 +247,12 @@ section { padding: calc(var(--unit) * 6) 0; }
 .research-overview .metric-card .summary-note { grid-row: 4; }
 .research-overview .metric-card small { grid-row: 5; }
 .research-overview .metric-card > a { grid-row: 6; }
+
+/* Keep the reading canvas generous while preserving all three pane roles. */
+@media (min-width: 1101px) {
+  .source-context-pane,.source-inspector { width: calc(var(--unit) * 75); }
+  .has-evidence-pane,.has-inspector:has(~ .source-inspector[open]) { margin-right: calc(var(--unit) * 75); }
+  .workspace,.has-inspector:has(~ .source-inspector[open]) .workspace { grid-template-columns: 176px minmax(0,1fr); }
+}
+.metric-card .metric-label { line-height: var(--leading-body); }
+.metric-card .metric-period { white-space: normal; }

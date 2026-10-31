@@ -5,8 +5,9 @@ import Link from "next/link";
 import type { Coverage, Observation } from "../../contracts/types";
 import type { Receipt } from "../../lib/contract";
 import { formatAmount } from "../../lib/format-amount";
-import { journeyUrl, type JourneyContext } from "../../lib/navigation";
-import { overviewObservations } from "../../lib/overview-observations";
+import { companyFactText, disclosureDate, type CompanyFact } from "../../lib/company-orientation";
+import { companySectionUrl, journeyUrl, type JourneyContext } from "../../lib/navigation";
+import { recentEvidence, readerPeriod } from "../../lib/reader-context";
 import { RecordTldr } from "./record-tldr";
 import "./source-inspector.css";
 
@@ -19,26 +20,23 @@ export function EvidenceContext({ receipts, observations, companyName, context, 
   receipts: Receipt[]; observations: Observation[]; companyName: string; context: JourneyContext;
   coverage: Coverage; synthetic: boolean; path: string;
 }) {
-  const receiptIds = new Set(receipts.map(receipt => receipt.id));
-  const figures = overviewObservations(observations, companyName).filter(row => receiptIds.has(row.receipt_id));
-  const notes = receipts.filter(receipt => "summary" in receipt && receipt.summary).sort((a, b) =>
-    Date.parse(b.published_at) - Date.parse(a.published_at) || a.id.localeCompare(b.id)).slice(0, 3);
+  const additions = recentEvidence(receipts, observations, context.asOf);
   return <aside className="source-context-pane" aria-labelledby="evidence-context-heading">
-    <p className="eyebrow">{synthetic ? "Fictional evidence" : "Evidence"}</p>
-    <h2 id="evidence-context-heading">Sources &amp; context</h2>
-    <p className="evidence-context-intro">Explore the source behind a number or commentary item. {companyName} stays in view.</p>
-    {figures.length ? <section className="evidence-context-section"><h3>Reported figures</h3>
-      <ul className="evidence-context-links">{figures.map(row => <li key={row.version_id}>
-        <Link prefetch={false} scroll={false} data-receipt={row.receipt_id} href={journeyUrl(path, context, row.receipt_id)}>{row.label}</Link>
-        <span>{row.period.label}</span>
-      </li>)}</ul>
-    </section> : null}
-    {notes.length ? <section className="evidence-context-section"><h3>Commentary sources</h3>
-      <ul className="evidence-context-links">{notes.map(receipt => <li key={receipt.id}>
-        <Link prefetch={false} scroll={false} data-receipt={receipt.id} href={journeyUrl(path, context, receipt.id)}>{receipt.title}</Link>
-        <time dateTime={receipt.published_at}>{readableDate(receipt.published_at)}</time>
-      </li>)}</ul>
-    </section> : null}
+    <p className="eyebrow">{synthetic ? "Fictional evidence" : "Research notebook"}</p>
+    <h2 id="evidence-context-heading">What changed</h2>
+    <p className="evidence-context-intro">Recent additions to the evidence available here. Older sources can become available later.</p>
+    <ol className="evidence-additions">{additions.map(event => <li key={event.receipt.id}>
+      <p className="addition-kind">{event.label} · <time dateTime={event.availableAt}>{readableDate(event.availableAt)}</time></p>
+      <Link prefetch={false} scroll={false} data-receipt={event.receipt.id} href={journeyUrl(path, context, event.receipt.id)}>{event.receipt.title}</Link>
+      <p className="addition-source-date">Source published {readableDate(event.receipt.published_at)}</p>
+    </li>)}</ol>
+    <section className="evidence-context-section"><h3>Questions to follow</h3>
+      <ul className="evidence-context-links">
+        <li><Link prefetch={false} href={companySectionUrl(context, "financials")}>How is reported revenue changing?</Link></li>
+        <li><Link prefetch={false} href={companySectionUrl(context, "financials")}>What connects the result to cash flow?</Link></li>
+        <li><Link prefetch={false} href={companySectionUrl(context, "commentary")}>What are sources saying about {companyName}?</Link></li>
+      </ul>
+    </section>
     <details className="evidence-coverage"><summary>Sources and coverage</summary>
       <p>{coverage.state === "partial" ? "Coverage is partial. This archive does not include every source or reaction." : "The available evidence covers the supplied research scope."}</p>
       <p>Evidence available by <time dateTime={context.asOf}>{readableDate(context.asOf)} UTC</time>. This is the research cutoff, not a promise that sources were checked at that time.</p>
@@ -58,8 +56,8 @@ function focusReceiptOpener(opener: HTMLElement | null, requestedId: string) {
   }
 }
 
-export function SourceInspector({ receipt, requestedId, closeUrl, observations, synthetic }: {
-  receipt: Receipt | undefined; requestedId: string; closeUrl: string; observations: Observation[]; synthetic: boolean;
+export function SourceInspector({ receipt, requestedId, closeUrl, observations, facts = [], synthetic }: {
+  receipt: Receipt | undefined; requestedId: string; closeUrl: string; observations: Observation[]; facts?: CompanyFact[]; synthetic: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
@@ -89,7 +87,7 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     defaults.set("state", defaults.get("state") ?? "available");
     defaults.set("voice", defaults.get("voice") ?? "all");
     defaults.set("kind", defaults.get("kind") ?? "all");
-    defaults.set("order", defaults.get("order") ?? "newest");
+    defaults.set("order", defaults.get("order") ?? "readable");
     // Query ordering and percent encoding do not change research context. Keep
     // each parameter's full value list: duplicates must not become valid singles.
     const currentContext = () => {
@@ -154,8 +152,15 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     {receipt ? <>
       <p className="receipt-publication">Published <time dateTime={receipt.published_at} title={receipt.published_at}>{readableDate(receipt.published_at)} UTC</time></p>
       <RecordTldr receipt={receipt} details/>
-      {receipt.excerpt ? <p className="source-excerpt">{receipt.excerpt}</p> : !("summary" in receipt && receipt.summary) && !observations.length ? <p className="source-excerpt">{receipt.url ? "Open the original source for full context." : "Source text is not displayed here."}</p> : null}
-      {observations.map(row => <div className="receipt-measure" key={row.version_id}><strong>{row.label}</strong><p className="receipt-amount">Reported value: {formatAmount(row.amount, row.unit)}</p>{row.missing_reason !== null ? <p>{row.missing_reason}</p> : null}<p>{row.period.label} · {row.period.start} – {row.period.end}</p><details><summary>Definition and reporting basis</summary><p>Unit: {row.unit} · {row.basis}</p><small>Evidence version: {row.version_id}{row.supersedes ? ` · supersedes ${row.supersedes}` : ""}</small></details></div>)}
+      {receipt.excerpt ? <p className="source-excerpt">{receipt.excerpt}</p> : !("summary" in receipt && receipt.summary) && !observations.length && !facts.length ? <p className="source-excerpt">{receipt.url ? "Open the original source for full context." : "Source text is not displayed here."}</p> : null}
+      {facts.map(fact => <div className="receipt-measure" data-company-fact={fact.version_id} key={fact.version_id}>
+        <strong>{fact.kind === "product" ? "Product" : fact.kind === "delivery_channel" ? "Access" : "Listing application"}</strong>
+        <p>{companyFactText(fact)}</p>
+        <p>Disclosed <time dateTime={fact.disclosed_on}>{disclosureDate(fact.disclosed_on)}</time>.</p>
+        {fact.kind === "listing_application" ? <p>This does not establish current listing status.</p> : null}
+        <details><summary>Fact record</summary><small>Evidence version: {fact.version_id}{fact.supersedes ? ` · supersedes ${fact.supersedes}` : ""}</small></details>
+      </div>)}
+      {observations.map(row => <div className="receipt-measure" key={row.version_id}><strong>{row.label}</strong><p className="receipt-amount">Reported value: {formatAmount(row.amount, row.unit)}</p>{row.missing_reason !== null ? <p>{row.missing_reason}</p> : null}<p>{readerPeriod(row)}</p><details><summary>Definition and reporting basis</summary><p>{row.period.start} – {row.period.end}</p><p>Unit: {row.unit} · {row.basis}</p><small>Evidence version: {row.version_id}{row.supersedes ? ` · supersedes ${row.supersedes}` : ""}</small></details></div>)}
       {receipt.url ? <a className="source-link" href={receipt.url} rel="noreferrer">Open original source</a> : <p className="muted">{synthetic ? "Original fictional text; there is no external source." : "The original source link is unavailable. Source text is not displayed."}</p>}
       <details className="record-details"><summary>Record details</summary>
       <dl className="receipt-details"><dt>Source location</dt><dd>{receipt.locator}</dd><dt>Published</dt><dd><time dateTime={receipt.published_at}>{receipt.published_at}</time></dd>

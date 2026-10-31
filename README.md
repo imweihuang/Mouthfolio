@@ -35,7 +35,7 @@ current-news feed.
 | Available in the client | Still to complete |
 |---|---|
 | Company Overview and Commentary sections, with author history linked from each source card | Additional companies with qualified facts and sources |
-| One primary financial comparison in Overview, detailed financials and exact-value tables | Broader comparable observations and a complete filing reader |
+| Revenue and cash-flow comparisons, a conditional reconciliation chart and exact-value tables | Broader comparable observations and a complete filing reader |
 | Dated commentary and an adjacent source-context pane on desktop, with a source drawer on small screens | Richer qualified commentary and summaries |
 | Dated sources, a later correction and visible missing-data and error states in the fictional demo | Reader trials of the complete journey |
 | A hosted Anthropic journey, plus a fictional demo that works locally | Broader hosted coverage |
@@ -44,8 +44,8 @@ For contributors, the repository also includes selected visual foundations, a
 versioned client-service interface and automated checks. The default demo remains
 offline; see the [journey guide](docs/JOURNEY.md)
 for the separate service route and deployment-time connection.
-The company-first presentation uses the existing evidence response. Overview
-keeps reported figures, a primary chart and selected commentary together;
+The company-first presentation uses qualified evidence from the service. Overview
+keeps dated company facts, reported figures, visual comparisons and readable notes together;
 Commentary opens the fuller dated feed. Author history is linked in the feed,
 while navigation stays focused on the company. This client change adds no data
 coverage and does not establish that this revision is deployed. Anthropic is the

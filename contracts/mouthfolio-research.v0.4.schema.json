@@ -1,0 +1,853 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mouthfolio research v0.4",
+  "description": "Adds separately reviewed dated company disclosure facts. No generated narrative or live listing status.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "data_mode",
+    "status",
+    "as_of",
+    "window",
+    "company",
+    "coverage",
+    "questions",
+    "voices",
+    "views",
+    "observations",
+    "receipts",
+    "mentions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "asof.mouthfolio.research.v0.4"
+    },
+    "data_mode": {
+      "enum": [
+        "synthetic",
+        "authorized"
+      ]
+    },
+    "status": {
+      "enum": [
+        "ready",
+        "no_record_found",
+        "revoked",
+        "unavailable"
+      ]
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 40
+    },
+    "window": {
+      "const": "all"
+    },
+    "company": {
+      "$ref": "#/$defs/Company"
+    },
+    "coverage": {
+      "$ref": "#/$defs/Coverage"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Question"
+      },
+      "maxItems": 200
+    },
+    "voices": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Voice"
+      },
+      "maxItems": 200
+    },
+    "views": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AttributedView"
+      },
+      "maxItems": 200
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Observation"
+      },
+      "maxItems": 200
+    },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Receipt"
+      },
+      "maxItems": 200
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Mention"
+      },
+      "maxItems": 200
+    }
+  },
+  "$defs": {
+    "Company": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "context"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "context": {
+          "$ref": "#/$defs/CompanyContext"
+        }
+      }
+    },
+    "Voice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "Period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "start",
+        "end"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "start": {
+          "type": "string",
+          "format": "date"
+        },
+        "end": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "Receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_id",
+        "snapshot_id",
+        "title",
+        "locator",
+        "published_at",
+        "ingested_at",
+        "available_at",
+        "content_sha256",
+        "display_policy",
+        "excerpt",
+        "url",
+        "summary"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "snapshot_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "ingested_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "display_policy": {
+          "enum": [
+            "excerpt",
+            "link_only"
+          ]
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2400
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^https://[^\\s]+$",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReceiptSummary"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "label",
+        "amount",
+        "missing_reason",
+        "unit",
+        "period",
+        "available_at",
+        "receipt_id",
+        "revision_kind",
+        "supersedes",
+        "basis"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "missing_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "period": {
+          "$ref": "#/$defs/Period"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "revision_kind": {
+          "enum": [
+            "initial",
+            "correction"
+          ]
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,79}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "basis": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        }
+      }
+    },
+    "Question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "company_id",
+        "title",
+        "finding",
+        "available_at",
+        "edition_date",
+        "receipt_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "finding": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "edition_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "receipt_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,79}$"
+          },
+          "minItems": 1,
+          "maxItems": 20
+        }
+      }
+    },
+    "AttributedView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "voice_id",
+        "company_id",
+        "statement",
+        "published_at",
+        "available_at",
+        "receipt_id",
+        "conditions",
+        "horizon",
+        "supersedes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "voice_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "conditions": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 400
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "horizon": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,79}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "note"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "complete",
+            "partial"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600
+        }
+      }
+    },
+    "Mention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "voice_id",
+        "company_id",
+        "published_at",
+        "available_at",
+        "receipt_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "voice_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "company_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "published_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        }
+      }
+    },
+    "ReceiptSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "text",
+        "generated_by",
+        "capture_observed_at",
+        "available_at",
+        "framing"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "generated_by": {
+          "const": "ai"
+        },
+        "capture_observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "framing": {
+          "enum": [
+            "summary_from_asof_capture",
+            "summary_current_source_live"
+          ]
+        }
+      }
+    },
+    "ProductFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "disclosed_on",
+        "available_at",
+        "receipt_id",
+        "revision_kind",
+        "supersedes",
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "disclosed_on": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "revision_kind": {
+          "enum": [
+            "initial",
+            "correction"
+          ]
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,79}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "const": "product"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
+    },
+    "DeliveryFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "disclosed_on",
+        "available_at",
+        "receipt_id",
+        "revision_kind",
+        "supersedes",
+        "kind",
+        "channel"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "disclosed_on": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "revision_kind": {
+          "enum": [
+            "initial",
+            "correction"
+          ]
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,79}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "const": "delivery_channel"
+        },
+        "channel": {
+          "enum": [
+            "consumption_based_access",
+            "subscription"
+          ]
+        }
+      }
+    },
+    "ListingApplicationFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version_id",
+        "disclosed_on",
+        "available_at",
+        "receipt_id",
+        "revision_kind",
+        "supersedes",
+        "kind",
+        "venue",
+        "proposed_symbol"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "version_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "disclosed_on": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "available_at": {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 40
+        },
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,79}$"
+        },
+        "revision_kind": {
+          "enum": [
+            "initial",
+            "correction"
+          ]
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,79}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "const": "listing_application"
+        },
+        "venue": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "proposed_symbol": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9.-]{0,9}$"
+        }
+      }
+    },
+    "CompanyContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "facts"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "revoked"
+          ]
+        },
+        "facts": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ProductFact"
+              },
+              {
+                "$ref": "#/$defs/DeliveryFact"
+              },
+              {
+                "$ref": "#/$defs/ListingApplicationFact"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

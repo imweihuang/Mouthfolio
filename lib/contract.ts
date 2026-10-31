@@ -1,15 +1,17 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "../contracts/mouthfolio-research.v0.2.schema.json" with { type: "json" };
+import schemaV04 from "../contracts/mouthfolio-research.v0.4.schema.json" with { type: "json" };
+import type { MouthfolioResearch as ResearchV04, Receipt as ReceiptV04 } from "../contracts/types.v0.4.ts";
 import schemaV03 from "../contracts/mouthfolio-research.v0.3.schema.json" with { type: "json" };
 import type { MouthfolioResearch as ResearchV02, Receipt as ReceiptV02 } from "../contracts/types.ts";
 import type { MouthfolioResearch as ResearchV03, Receipt as ReceiptV03 } from "../contracts/types.v0.3.ts";
-export type MouthfolioResearch = ResearchV02 | ResearchV03;
-export type Receipt = ReceiptV02 | ReceiptV03;
-export type ApiVersion = "v0.2" | "v0.3";
+export type MouthfolioResearch = ResearchV02 | ResearchV03 | ResearchV04;
+export type Receipt = ReceiptV02 | ReceiptV03 | ReceiptV04;
+export type ApiVersion = "v0.2" | "v0.3" | "v0.4";
 export function apiVersion(value: string | undefined): ApiVersion {
   if (value === undefined || value === "v0.2") return "v0.2";
-  if (value === "v0.3") return "v0.3";
+  if (value === "v0.3" || value === "v0.4") return value;
   throw new ResearchUnavailable();
 }
 
@@ -21,7 +23,7 @@ export class ResearchUnavailable extends Error {
 const fail = (): never => { throw new ResearchUnavailable(); };
 const ajv = new Ajv({ strict: true, allErrors: false });
 addFormats(ajv);
-const validators = { "v0.2": ajv.compile<ResearchV02>(schema), "v0.3": ajv.compile<ResearchV03>(schemaV03) };
+const validators = { "v0.2": ajv.compile<ResearchV02>(schema), "v0.3": ajv.compile<ResearchV03>(schemaV03), "v0.4": ajv.compile<ResearchV04>(schemaV04) };
 
 // Adapted from AsOf's company API client. Preserve microsecond cutoff precision.
 export function instant(value: string): bigint {
@@ -46,7 +48,10 @@ export function decodeResearch(raw: unknown, query: ResearchQuery,
   const data = raw as MouthfolioResearch;
   if (data.company.id !== query.companyId || data.window !== query.window ||
       data.data_mode !== mode || instant(data.as_of) !== instant(query.asOf)) return fail();
-  const groups = [data.questions, data.voices, data.views, data.mentions, data.observations, data.receipts];
+  const context = "context" in data.company ? data.company.context : undefined;
+  const facts = context?.facts ?? [];
+  if (context && ((context.status === "available") !== (facts.length > 0))) return fail();
+  const groups = [data.questions, data.voices, data.views, data.mentions, data.observations, data.receipts, facts];
   if (groups.some(group => new Set(group.map(item => item.id)).size !== group.length)) return fail();
   if (data.status !== "ready") {
     if (groups.some(group => group.length > 0)) return fail();
@@ -56,7 +61,7 @@ export function decodeResearch(raw: unknown, query: ResearchQuery,
   const cutoff = instant(query.asOf);
   const receipts = new Map(data.receipts.map(item => [item.id, item]));
   const voices = new Set(data.voices.map(item => item.id));
-  const rows = [...data.questions, ...data.views, ...data.mentions, ...data.observations];
+  const rows = [...data.questions, ...data.views, ...data.mentions, ...data.observations, ...facts];
   if (new Set(rows.map(row => row.version_id)).size !== rows.length) return fail();
   for (const receipt of data.receipts) {
     if (instant(receipt.ingested_at) > instant(receipt.available_at) ||
@@ -90,6 +95,13 @@ export function decodeResearch(raw: unknown, query: ResearchQuery,
   for (const view of [...data.views, ...data.mentions]) {
     if (!voices.has(view.voice_id)) return fail();
     instant(view.published_at);
+  }
+  for (const fact of facts) {
+    if (instant(`${fact.disclosed_on}T00:00:00Z`) > instant(fact.available_at) ||
+        (fact.revision_kind === "initial") !== (fact.supersedes === null)) return fail();
+    const predecessor = fact.supersedes ? facts.find(item => item.version_id === fact.supersedes) : undefined;
+    if (predecessor && (predecessor.id !== fact.id || predecessor.kind !== fact.kind ||
+        instant(predecessor.available_at) > instant(fact.available_at))) return fail();
   }
   for (const row of data.observations) {
     if ((row.amount === null) !== (row.missing_reason !== null) ||

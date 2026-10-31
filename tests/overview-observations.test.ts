@@ -28,3 +28,10 @@ test("different reporting dates and unsupported measures remain explicit origina
   assert.equal(result[1].period.end, "2031-06-30");
   assert.equal(result[1].amount, null);
 });
+
+test("reconciliation adjustments never replace an overview balance", () => {
+  const cash = row("cash", "Cash and cash equivalents", "Reported cash balance");
+  const adjustment = { ...row("adjustment", "Accounts payable", "gaap-operating-cash-flow-reconciliation-v1; Exact adjustment"), available_at: "2031-03-01T00:00:00Z" };
+  assert.deepEqual(overviewObservations([adjustment, cash], company), [cash]);
+  assert.deepEqual(overviewObservations([adjustment], company), []);
+});

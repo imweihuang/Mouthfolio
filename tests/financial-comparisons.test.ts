@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { Observation } from "../contracts/types.ts";
-import { barScale, buildFinancialComparisons, chartNumber, classifyFinancialObservation, financialSelection } from "../lib/financial-comparisons.ts";
+import type { Observation, Receipt } from "../contracts/types.ts";
+import { barScale, buildFinancialComparisons, buildOperatingCashBridge, cashBridgeComponents, cashBridgeScale, chartNumber, classifyFinancialObservation, financialSelection, revenueYearOverYear } from "../lib/financial-comparisons.ts";
 
 // Entirely synthetic values, identities and source references. These strings
 // exercise the narrow presentation contract without retaining service responses.
@@ -148,4 +148,182 @@ test("compact selection preserves missing evidence and never uses cash balances 
   assert.equal(comparisons.revenue.annual[0].value, null);
   assert.equal(comparisons.revenue.annual[0].unavailable, "Not reported.");
   assert.equal(comparisons.pairs.length, 0);
+});
+
+function revenueForYear(year: number, amount: string | null, overrides: Partial<Observation> = {}) {
+  return row({ id: `revenue-${year}`, version_id: `revenue-${year}-v1`, amount,
+    period: { label: `FY ${year}`, start: `${year}-01-01`, end: `${year}-12-31` }, ...overrides });
+}
+function growth(rows: Observation[]) {
+  return revenueYearOverYear(buildFinancialComparisons(rows, company).revenue.annual, company);
+}
+
+test("YoY derives exact decimal dollars and rounds only the displayed percentage", () => {
+  const result = growth([revenueForYear(2029, "0.10"), revenueForYear(2030, "0.30")]);
+  assert.equal(result?.changeAmount, "0.2");
+  assert.equal(result?.percent, "+200.0%");
+  assert.equal(result?.previous.row.amount, "0.10");
+  assert.equal(result?.current.row.amount, "0.30");
+  const fractional = growth([revenueForYear(2029, "12.25"), revenueForYear(2030, "13.000")]);
+  assert.equal(fractional?.changeAmount, "0.75");
+  assert.equal(fractional?.percent, "+6.1%");
+  assert.equal(growth([revenueForYear(2029, "2000"), revenueForYear(2030, "2001")])?.percent, "+0.1%");
+});
+
+test("declines, unchanged revenue and tiny differences retain their true signs", () => {
+  const decrease = growth([revenueForYear(2029, "2000"), revenueForYear(2030, "1999")]);
+  assert.equal(decrease?.changeAmount, "-1");
+  assert.equal(decrease?.percent, "−0.1%");
+  const tiny = growth([revenueForYear(2029, "1.0000001"), revenueForYear(2030, "1.0000000")]);
+  assert.equal(tiny?.changeAmount, "-0.0000001");
+  assert.equal(tiny?.percent, "0.0%");
+  const equal = growth([revenueForYear(2029, "1200.00"), revenueForYear(2030, "1200")]);
+  assert.equal(equal?.changeAmount, "0");
+  assert.equal(equal?.percent, "0.0%");
+});
+
+test("YoY requires consecutive years and never compares full year to first half", () => {
+  assert.equal(growth([revenueForYear(2028, "100"), revenueForYear(2030, "200")]), null);
+  const half = (year: number, amount: string) => revenueForYear(year, amount, {
+    id: `half-${year}`, version_id: `half-${year}-v1`, basis: row().basis.replace("annual", "interim"),
+    period: { label: `H1 ${year}`, start: `${year}-01-01`, end: `${year}-06-30` },
+  });
+  const comparisons = buildFinancialComparisons([revenueForYear(2029, "900"), half(2029, "100"), half(2030, "150")], company);
+  assert.equal(revenueYearOverYear(comparisons.revenue.firstHalf, company)?.percent, "+50.0%");
+  assert.equal(revenueYearOverYear([...comparisons.revenue.annual, ...comparisons.revenue.firstHalf], company), null);
+  assert.equal(revenueYearOverYear(comparisons.revenue.firstHalf, "Different Company"), null);
+});
+
+test("YoY does not fall back from latest missing, unsafe or conflicted evidence", () => {
+  const previous = revenueForYear(2029, "100");
+  const older = revenueForYear(2028, "80");
+  for (const amount of [null, "9007199254740993", "1e6"]) {
+    assert.equal(growth([older, previous, revenueForYear(2030, amount)]), null);
+  }
+  assert.equal(growth([older, previous, revenueForYear(2030, "200", { missing_reason: "Withheld." })]), null);
+  const points = buildFinancialComparisons([previous, revenueForYear(2030, "200")], company).revenue.annual;
+  assert.equal(revenueYearOverYear([...points, points[1]], company), null);
+  assert.equal(revenueYearOverYear(points.map(point => ({ ...point, row: { ...point.row, basis: `${point.row.basis}; adjusted` } })), company), null);
+});
+
+test("YoY uses an explicit correction and never overwrites the original amounts", () => {
+  const original = revenueForYear(2030, "200");
+  const correction = { ...original, version_id: "revenue-2030-v2", amount: "199.25", revision_kind: "correction" as const,
+    supersedes: original.version_id, available_at: "2031-02-02T00:00:00Z" };
+  const result = growth([revenueForYear(2029, "100.00"), original, correction]);
+  assert.equal(result?.changeAmount, "99.25");
+  assert.equal(result?.percent, "+99.3%");
+  assert.equal(result?.current.row.version_id, correction.version_id);
+  assert.equal(original.amount, "200");
+});
+
+test("zero and negative revenue do not manufacture a percentage growth rate", () => {
+  for (const [prior, current, expected] of [["0", "100", "100"], ["-100", "50", "150"], ["100", "-50", "-150"], ["-10.5", "-2.25", "8.25"]]) {
+    const result = growth([revenueForYear(2029, prior), revenueForYear(2030, current)]);
+    assert.equal(result?.percent, null);
+    assert.equal(result?.changeAmount, expected);
+  }
+  assert.equal(growth([revenueForYear(2029, "100"), revenueForYear(2030, "0")])?.percent, "−100.0%");
+});
+
+function bridgeFixture() {
+  const period = { label: "Fictional H1 2026", start: "2026-01-01", end: "2026-06-30" };
+  const amounts = ["5", "3", "80", "2", "-4", "1", "-7", "-3", "10", "-2", "35"];
+  const rows = [income({ amount: "-100", period, receipt_id: "income-receipt", basis: income().basis.replace("annual", "interim") }),
+    ...cashBridgeComponents.map(([component, label], index) => row({ id: `synthetic-${component}`, version_id: `synthetic-${component}-v1`,
+      label, amount: amounts[index], period, receipt_id: `synthetic-${component}-receipt`,
+      basis: `gaap-operating-cash-flow-reconciliation-v1; ${company} consolidated; Reported interim statement; Reported consolidated figures; USD millions converted exactly to USD; Signed adjustment to reconcile net income to operating cash flow; Component: ${component}; Reconciliation set: h1-2026`,
+    })), cash({ amount: "20", period, receipt_id: "cash-receipt", basis: cash().basis.replace("annual", "interim") })];
+  const receipts: Receipt[] = rows.map((item, index) => ({
+    id: item.receipt_id, source_id: "synthetic-filing-source", snapshot_id: index === 0 || index === rows.length - 1 ? "synthetic-endpoints" : "synthetic-components",
+    title: "Fictional statement", locator: `Synthetic row ${index}`, published_at: "2031-01-01T00:00:00Z", ingested_at: "2031-02-01T00:00:00Z",
+    available_at: "2031-02-01T00:00:00Z", content_sha256: "a".repeat(64), display_policy: "link_only", excerpt: null, url: "https://example.com/synthetic",
+  }));
+  return { rows, receipts };
+}
+function bridgeFrom(rows: Observation[], receipts: Receipt[]) {
+  const pair = buildFinancialComparisons(rows, company).pairs[0];
+  return pair ? buildOperatingCashBridge(rows, receipts, company, pair) : null;
+}
+
+test("cash bridge requires the full exact component set and reconciles signed running totals", () => {
+  const { rows, receipts } = bridgeFixture();
+  const bridge = bridgeFrom(rows, receipts)!;
+  assert.ok(bridge);
+  assert.equal(bridge.steps.length, 13);
+  assert.deepEqual(bridge.steps.map(step => step.runningAmount), ["-100", "-95", "-92", "-12", "-10", "-14", "-13", "-20", "-23", "-13", "-15", "20", "20"]);
+  assert.equal(bridge.steps[0].from, 0);
+  assert.equal(bridge.steps.at(-1)?.from, 0);
+  assert.equal(bridge.steps[5].kind, "adjustment");
+  const scale = cashBridgeScale(bridge);
+  assert.equal(scale.min, -100);
+  assert.equal(scale.max, 20);
+  assert.deepEqual(scale.geometry(bridge.steps[5]), { x: scale.position(-14), width: scale.position(-10) - scale.position(-14) });
+  assert.equal(rows[0].amount, "-100");
+});
+
+test("cash bridge reconciliation is decimal-exact and preserves reported strings", () => {
+  const { rows, receipts } = bridgeFixture();
+  rows.forEach(item => { item.amount = "0"; });
+  rows[0].amount = "-0.30";
+  rows[1].amount = "0.10";
+  rows[2].amount = "0.20";
+  const bridge = bridgeFrom(rows, receipts)!;
+  assert.ok(bridge);
+  assert.equal(bridge.steps[1].runningAmount, "-0.2");
+  assert.equal(bridge.steps[2].runningAmount, "0");
+  assert.equal(bridge.steps[1].point.row.amount, "0.10");
+  rows[2].amount = "0.2000001";
+  assert.equal(bridgeFrom(rows, receipts), null, "No float tolerance may turn a mismatch into reconciliation");
+});
+
+test("cash bridge fails closed for incomplete, duplicate, differently based or wrong-period components", () => {
+  const { rows, receipts } = bridgeFixture();
+  assert.equal(bridgeFrom(rows.slice(1), receipts), null);
+  assert.equal(bridgeFrom(rows.filter((_, index) => index !== 1), receipts), null);
+  assert.equal(bridgeFrom([...rows, rows[1]], receipts), null);
+  assert.equal(bridgeFrom([...rows, { ...rows[1], id: "extra-component", version_id: "extra-v1" }], receipts), null);
+  for (const change of [
+    { amount: null }, { missing_reason: "Not reported." }, { amount: "NaN" }, { amount: "9007199254740993" },
+    { label: "Unrelated adjustment" }, { unit: "EUR" }, { basis: rows[1].basis + "; adjusted" },
+    { period: { label: "Other half", start: "2025-01-01", end: "2025-06-30" } },
+  ]) assert.equal(bridgeFrom(rows.map((item, index) => index === 1 ? { ...item, ...change } : item), receipts), null);
+});
+
+test("cash bridge requires unambiguous receipts and immutable common source content with grouped snapshots", () => {
+  const { rows, receipts } = bridgeFixture();
+  assert.equal(bridgeFrom(rows, []), null);
+  assert.equal(bridgeFrom(rows, receipts.slice(1)), null);
+  assert.equal(bridgeFrom(rows, [...receipts, receipts[1]]), null);
+  for (const change of [
+    { source_id: "different-source" }, { content_sha256: "b".repeat(64) }, { snapshot_id: "different-component-snapshot" },
+    { snapshot_id: "" }, { content_sha256: "" }, { available_at: "2031-02-02T00:00:00Z" },
+  ]) assert.equal(bridgeFrom(rows, receipts.map((item, index) => index === 1 ? { ...item, ...change } : item)), null);
+  assert.equal(bridgeFrom(rows, receipts.map((item, index) => index === 0 ? { ...item, snapshot_id: "different-endpoint-snapshot" } : item)), null);
+});
+
+test("cash bridge honors correction chains and rejects a stale selected endpoint version", () => {
+  const { rows, receipts } = bridgeFixture();
+  const stalePair = buildFinancialComparisons(rows, company).pairs[0];
+  const correction = { ...rows[0], version_id: "income-v2", revision_kind: "correction" as const, supersedes: rows[0].version_id,
+    available_at: "2031-02-02T00:00:00Z" };
+  const corrected = [...rows, correction];
+  assert.equal(bridgeFrom(corrected, receipts)?.steps[0].point.row.version_id, "income-v2");
+  assert.equal(buildOperatingCashBridge(corrected, receipts, company, stalePair), null);
+  assert.equal(bridgeFrom([...corrected, { ...correction, version_id: "fork-v2" }], receipts), null);
+  assert.equal(bridgeFrom([...rows, { ...rows[1], version_id: "bad-correction", revision_kind: "correction", supersedes: rows[1].version_id, basis: "Different basis" }], receipts), null);
+});
+
+test("cash bridge rejects unsafe cumulative geometry even when each input and final total are safe", () => {
+  const { rows, receipts } = bridgeFixture();
+  rows.forEach(item => { item.amount = "0"; });
+  rows[0].amount = String(Number.MAX_SAFE_INTEGER);
+  rows.at(-1)!.amount = String(Number.MAX_SAFE_INTEGER);
+  rows[1].amount = "1";
+  rows[2].amount = "-1";
+  assert.equal(bridgeFrom(rows, receipts), null);
+  rows.forEach(item => { item.amount = "0"; });
+  const zero = bridgeFrom(rows, receipts)!;
+  assert.ok(zero);
+  assert.deepEqual(cashBridgeScale(zero).geometry(zero.steps[0]), { x: 0, width: 0 });
 });

@@ -13,7 +13,7 @@ function type(node) {
   if (["string", "boolean", "null", "number", "integer"].includes(node.type)) return node.type === "integer" ? "number" : node.type;
   throw new Error("Unsupported contract node");
 }
-for (const [version, filename] of [["v0.2", "types.ts"], ["v0.3", "types.v0.3.ts"]]) {
+for (const [version, filename] of [["v0.2", "types.ts"], ["v0.3", "types.v0.3.ts"], ["v0.4", "types.v0.4.ts"]]) {
   const schema = JSON.parse(await readFile(new URL(`../contracts/mouthfolio-research.${version}.schema.json`, import.meta.url), "utf8"));
   const output = `// Generated from mouthfolio-research.${version}.schema.json. Do not edit.\n` +
     Object.entries(schema.$defs).map(([name,node]) => `export type ${name} = ${type(node)};`).join("\n\n") +

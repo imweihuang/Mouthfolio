@@ -26,8 +26,8 @@ their selected source is imported. There is no duplicate feature implementation
 mandate and no live Station cutover in this preparation.
 
 The client starts with a company Overview and a separate Commentary section.
-Overview contains reported figures, one compact financial comparison and selected
-source cards. Financials and Sources retain the complete reported evidence and
+Overview contains a dated company introduction when separately qualified, reported
+figures, two compact financial comparisons and readable source notes. Financials and Sources retain the complete reported evidence and
 receipt library. On desktop, company navigation and source context sit alongside
 the reading area; smaller screens use a source drawer. Author history is linked
 from commentary items rather than a sidebar roster.

@@ -107,6 +107,38 @@
       "mode": "unchanged",
       "source_sha256": "9131980bd55453c8dc64b20b9a0e60d391f10c3be2f711b561b921d633151d29",
       "license": "MIT"
+    },
+    {
+      "source_path": "docs/contracts/mouthfolio-research.v0.4.schema.json",
+      "source_revision": "1e55efe810978ba31a0a76513d513a3da4cccc0f",
+      "destination": "contracts/mouthfolio-research.v0.4.schema.json",
+      "mode": "unchanged",
+      "source_sha256": "5cd41c5af454b23d39b3d6b4ec2d304661a08202325b838e1f641da9d7332769",
+      "license": "MIT"
+    },
+    {
+      "source_path": "docs/contracts/mouthfolio-research.v0.4.ts",
+      "source_revision": "1e55efe810978ba31a0a76513d513a3da4cccc0f",
+      "destination": "contracts/types.v0.4.ts",
+      "mode": "unchanged",
+      "source_sha256": "6d0bbeee4f1fd18c6573b753c172eeabeb79b87cf8c4d8ff1bd1e979e0fe4397",
+      "license": "MIT"
+    },
+    {
+      "source_path": "docs/contracts/examples/mouthfolio-v0.4-initial.json",
+      "source_revision": "1e55efe810978ba31a0a76513d513a3da4cccc0f",
+      "destination": "fixtures/v0.4-initial.json",
+      "mode": "unchanged",
+      "source_sha256": "4280b8cd0ccc3667798ce8ffd42553085e78d2d1e66db636faf069455fd0704e",
+      "license": "MIT"
+    },
+    {
+      "source_path": "docs/contracts/examples/mouthfolio-v0.4-corrected.json",
+      "source_revision": "1e55efe810978ba31a0a76513d513a3da4cccc0f",
+      "destination": "fixtures/v0.4-corrected.json",
+      "mode": "unchanged",
+      "source_sha256": "41ce560cb0827bc904f909b1d8cc79e40ecbddadd225bfa912745670670de078",
+      "license": "MIT"
     }
   ],
   "excluded": [

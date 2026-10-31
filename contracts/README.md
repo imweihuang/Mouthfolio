@@ -9,7 +9,7 @@ evidence graph or an announcement of a hosted API.
 
 `mouthfolio-research.v0.2.schema.json` describes the response. `types.ts` is
 generated with `npm run contracts:generate`; `contracts:check` rejects drift.
-The v0.3 schema and `types.v0.3.ts` use the same generator and drift check.
+The v0.3 and v0.4 schemas and versioned types use the same generator and drift check.
 Both schemas and their synthetic examples are original project material under MIT.
 
 ## Meaning and compatibility
@@ -74,3 +74,22 @@ and exact source/snapshot qualification remain server responsibilities.
 
 The fictional default demo remains v0.2. The v0.3 examples are synthetic test
 fixtures; their presence does not activate or qualify a hosted summary service.
+
+
+## Company disclosures in v0.4
+
+The additive v0.4 response includes `company.context` with an explicit available,
+unavailable or revoked state. Available facts are narrowly typed as product,
+delivery channel or listing application. Each fact retains an immutable version,
+disclosure date, availability timestamp, receipt and correction reference.
+
+The client shows products and access methods as separately sourced disclosures.
+A listing application identifies the proposed venue and symbol at its disclosure
+date; it does not establish current listing status or a completed offering. Empty
+or revoked context never creates a substitute business description.
+
+Explicit server-only `ASOF_DATA_API_VERSION=v0.4` selects its endpoint and validator
+together. The development default remains v0.2. Earlier response versions remain
+unchanged and do not acquire company context. The v0.4 schema/types and two
+synthetic examples use a separate `contract.v0.4.lock.json`; the reviewed source
+commit and file hashes must be pinned before publication.

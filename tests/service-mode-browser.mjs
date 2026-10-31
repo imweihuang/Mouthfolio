@@ -6,12 +6,14 @@ import { checkVoiceReceiptScope } from "./voice-receipts-browser.mjs";
 import { checkFinancialComparisons } from "./financial-browser.mjs";
 import { checkCommentaryFeed } from "./commentary-browser.mjs";
 import { checkNavigationLoading } from "./navigation-loading-browser.mjs";
+import { checkCompanyOrientation } from "./orientation-browser.mjs";
 import { checkRecordTldr } from "./tldr-browser.mjs";
 import fixture from "../fixtures/initial.json" with { type: "json" };
 
 export async function checkServiceOnly(browser, basePath = "") {
   await checkServiceVersion(browser, basePath, "v0.2");
   await checkServiceVersion(browser, basePath, "v0.3");
+  await checkServiceVersion(browser, basePath, "v0.4");
 }
 export async function checkServiceVersion(browser, basePath, version) {
   const probe = createServer();
@@ -76,9 +78,10 @@ export async function checkServiceVersion(browser, basePath, version) {
     // A handled service outage retains the exact request, including the receipt.
     const recoveryUrl = origin + "/voices/demo-researcher?company=aster-compute&asof=2026-10-26T12%3A00%3A00Z&window=all&receipt=receipt-mention";
     const recovering = { ...structuredClone(fixture), data_mode: "authorized" };
-    if (version === "v0.3") {
-      recovering.schema_version = "asof.mouthfolio.research.v0.3";
+    if (version === "v0.3" || version === "v0.4") {
+      recovering.schema_version = `asof.mouthfolio.research.${version}`;
       recovering.receipts.forEach(receipt => { receipt.summary = null; });
+      if (version === "v0.4") recovering.company.context = { status: "unavailable", facts: [] };
     }
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 });
@@ -122,6 +125,11 @@ export async function checkServiceVersion(browser, basePath, version) {
       await page.locator("dialog").waitFor({ state: "detached" });
     }
     await checkVoiceReceiptScope(page, origin, recovering, value => { syntheticPayload = value; });
+    if (version === "v0.4") {
+      await checkCompanyOrientation(page, origin, value => { syntheticPayload = value; });
+      assert.deepEqual(errors, [], "v0.4 service browser console/page errors");
+      return;
+    }
     if (version === "v0.3") {
       assert.deepEqual(errors, [], "v0.3 initial journey console/page errors");
       await checkNavigationLoading(page, origin, value => { syntheticPayload = value; }, delay => { transportDelayMs = delay; }, () => transportRequests);
@@ -172,8 +180,8 @@ export async function checkServiceVersion(browser, basePath, version) {
     assert.equal(await page.locator(".metric-card").count(), 4);
     assert.equal(await page.locator(".evidence-table").count(), 0, "Overview keeps complete reporting history in Financials");
     assert.match(await page.locator("#evidence > .summary-note").textContent(), /Periods shown per measure/);
-    assert.equal(await page.locator(".metric-card .metric-period").getByText("Fictional latest period", { exact: true }).count(), 4);
-    assert.equal(await page.locator(".metric-card").getByText("Fictional earlier period", { exact: false }).count(), 0);
+    assert.equal(await page.locator('.metric-card .metric-period[title="2026-01-01 – 2026-06-30"]').getByText("Jan–Jun 2026", { exact: true }).count(), 4);
+    assert.equal(await page.locator(".metric-card").getByText("Full year 2025", { exact: true }).count(), 0);
     assert.equal(await page.locator("#question, a[href='#question']").count(), 0);
     assert.equal(await page.getByText(syntheticPayload.coverage.note, { exact: true }).count(), 0);
     assert.equal(await page.locator(".metric-card").getByText("$2.35B", { exact: true }).count(), 4);
@@ -250,8 +258,11 @@ export async function checkServiceVersion(browser, basePath, version) {
     await page.locator(".commentary-context > summary").first().waitFor();
     assert.equal(await page.locator("blockquote").count(), 0);
     await page.locator(".commentary-context > summary").first().click();
-    assert.ok(await page.getByText("Not provided in this record. See the original source.", { exact: true }).first().isVisible());
-    await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
+    const viewCard = page.locator('#commentary [data-source-receipt="receipt-view"]');
+    assert.ok(await viewCard.getByText("Retention remains undisclosed.", { exact: true }).isVisible());
+    assert.equal(await viewCard.getByText("Not provided in this record. See the original source.", { exact: true }).count(), 0, "Absent qualifiers add no invented context");
+    assert.equal(await viewCard.getByText("Horizon", { exact: true }).count(), 0);
+    await viewCard.getByRole("link", { name: "Source & context", exact: true }).click();
     await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
     assert.deepEqual(errors, [], `${version} service browser console/page errors`);
     console.log("Authorized-mode synthetic transport passed: 21 exact Financials rows, 4 dated overview cards, earlier missing reasons in table and inspector at both widths, preserved section/receipt history, plain view text, absent qualifiers and unavailable source copy.");

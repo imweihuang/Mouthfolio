@@ -5,6 +5,7 @@ import fixture from "../fixtures/v0.3-initial.json" with { type: "json" };
 export async function checkCommentaryFeed(page, origin, supply) {
   const value = { ...structuredClone(fixture), data_mode: "authorized" };
   const first = value.views[0];
+  value.receipts.find(receipt => receipt.id === first.receipt_id).summary.text = "Aster Compute revenue is useful context, but does not show whether customers will stay.";
   const secondVoice = { id: "fictional-second-voice", name: "Fictional second voice" };
   value.voices.push(secondVoice);
   value.views.push({ ...first, id: "fictional-second-statement", version_id: "fictional-second-statement", statement: "A separate fictional statement retained on the same source card.", conditions: null, horizon: null });
@@ -29,9 +30,7 @@ export async function checkCommentaryFeed(page, origin, supply) {
   assert.equal(await mixed.locator(".commentary-summary-text").textContent(), value.receipts.find(receipt => receipt.id === first.receipt_id).summary.text);
   const addedViewContext = viewContext.locator(".commentary-statements > li").last();
   const missingQualifiers = addedViewContext.getByText("Not provided in this record. See the original source.", { exact: true });
-  assert.equal(await missingQualifiers.count(), 2);
-  assert.ok(await missingQualifiers.nth(0).isVisible());
-  assert.ok(await missingQualifiers.nth(1).isVisible());
+  assert.equal(await missingQualifiers.count(), 0, "Absent qualifiers add no fake context");
 
   await feed.getByRole("navigation", { name: "Filter commentary by type" }).getByRole("link", { name: "Views", exact: true }).click();
   await page.waitForURL(url => url.searchParams.get("kind") === "views");
@@ -45,7 +44,7 @@ export async function checkCommentaryFeed(page, origin, supply) {
   await page.reload();
   assert.equal(await feed.locator("[data-commentary-card]").count(), 1);
   assert.equal(await feed.locator(".commentary-order [aria-current]").textContent(), "Oldest first");
-  await feed.getByRole("link", { name: "Read more · source & context" }).click();
+  await feed.getByRole("link", { name: "Source & context" }).click();
   await page.getByRole("dialog").waitFor();
   assert.equal(await page.getByTestId("snapshot").textContent(), value.receipts.find(receipt => receipt.id === first.receipt_id).snapshot_id);
   for (const [key, expected] of Object.entries({ company: "aster-compute", asof: "2026-10-26T12:00:00Z", window: "all", voice: secondVoice.id, kind: "views", order: "oldest", section: "commentary", receipt: first.receipt_id })) {
@@ -82,6 +81,14 @@ export async function checkCommentaryFeed(page, origin, supply) {
   await page.goto(company);
   const cards = feed.locator("[data-commentary-card]");
   const more = feed.locator(".commentary-more");
+  await more.getByText("Browse 23 more archived source cards", { exact: true }).waitFor();
+  assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 2, "Default reading shows substantive notes before the compact archive");
+  assert.equal(await cards.count(), 25, "Default archive retains every card");
+  await more.locator(":scope > summary").click();
+  assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 25);
+  await feed.getByRole("navigation", { name: "Order commentary" }).getByRole("link", { name: "Newest first", exact: true }).click();
+  await page.waitForURL(url => url.searchParams.get("order") === "newest");
+  await page.reload();
   await more.getByText("Show 5 more source cards", { exact: true }).waitFor();
   assert.equal(await cards.count(), 25, "All source groups remain in the document");
   assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 20);
@@ -116,5 +123,22 @@ export async function checkCommentaryFeed(page, origin, supply) {
   assert.equal(await feed.locator("[data-commentary-card]:visible").count(), 20);
   assert.equal(await more.getAttribute("open"), null, "Type filtering resets the local disclosure");
   assert.equal(await more.locator(":scope > summary").textContent(), "Show 4 more source cards");
+  const labelOnly = structuredClone(value);
+  const genericSource = { ...source, id: "fictional-label-source", source_id: "fictional-label-source", snapshot_id: "fictional-label-snapshot", title: "Fictional other-company note", summary: { ...source.summary, text: "Fictional Beta Systems increased its production capacity." } };
+  labelOnly.receipts.push(genericSource);
+  labelOnly.views.push({ ...first, id: "fictional-label-view", version_id: "fictional-label-view", receipt_id: genericSource.id, statement: "Mixed attributed view about Aster Compute. Read the source for its full context.", conditions: null, horizon: null });
+  supply(labelOnly);
+  await page.goto(company);
+  const labelCard = feed.locator(`[data-source-receipt="${genericSource.id}"]`);
+  assert.equal(await labelCard.isVisible(), false, "Labels stay in the compact archive by default");
+  await feed.locator(".commentary-more > summary").click();
+  assert.ok(await labelCard.isVisible());
+  assert.equal(await labelCard.locator(".commentary-context").count(), 0, "No repeated-label expander");
+  assert.equal(await labelCard.locator(".commentary-summary").count(), 0, "An unrelated source summary is not a company note");
+  await labelCard.getByRole("link", { name: "Available source" }).click();
+  await page.getByRole("dialog").getByText(genericSource.summary.text, { exact: true }).waitFor();
+  assert.equal(await page.getByTestId("snapshot").textContent(), genericSource.snapshot_id, "The original archived summary and identity remain available");
+  await page.goto(company.replace("&section=commentary", ""));
+  assert.equal(await page.locator(".commentary-preview").getByText(genericSource.summary.text, { exact: true }).count(), 0);
   console.log("Commentary browser checks passed: exact voice/source grouping, every statement, summary once/card, mixed evidence, URL filters/order, reload/history, scoped voice, mobile layouts.");
 }

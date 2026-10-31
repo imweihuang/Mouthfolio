@@ -11,7 +11,8 @@ export function overviewObservations(rows: Observation[], companyName: string): 
   const primary = [revenue?.row, result?.netIncome.row, result?.operatingCashFlow.row]
     .filter((row): row is Observation => row !== undefined);
   const selected = new Set(primary.map(row => row.version_id));
+  // Reconciliation adjustments belong in their bridge, not headline balance cards.
   // Remaining slots use the existing latest-date selection, with original labels
   // and periods. Unknown measures are never relabelled as cash or revenue.
-  return [...primary, ...summaryObservations(rows.filter(row => !selected.has(row.version_id)), 4)].slice(0, 4);
+  return [...primary, ...summaryObservations(rows.filter(row => !selected.has(row.version_id) && !row.basis.startsWith("gaap-operating-cash-flow-reconciliation-v1;")), 4)].slice(0, 4);
 }

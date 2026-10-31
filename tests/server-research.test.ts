@@ -56,3 +56,25 @@ test("server-only version configuration selects matching endpoint and rejects in
     if (previousVersion === undefined) delete process.env.ASOF_DATA_API_VERSION; else process.env.ASOF_DATA_API_VERSION = previousVersion;
   }
 });
+
+
+test("server-only v0.4 selection exposes only its admitted company facts", async () => {
+  const { default: profile } = await import("../fixtures/v0.4-initial.json", { with: { type: "json" } });
+  const previousOrigin = process.env.ASOF_DATA_ORIGIN, previousVersion = process.env.ASOF_DATA_API_VERSION;
+  const originalFetch = globalThis.fetch;
+  try {
+    process.env.ASOF_DATA_ORIGIN = "https://example.com";
+    process.env.ASOF_DATA_API_VERSION = "v0.4";
+    globalThis.fetch = async url => {
+      assert.ok(String(url).includes("/v0.4/companies/"));
+      return Response.json({ ...profile, data_mode: "authorized" });
+    };
+    const result = await readServiceResearch(query);
+    assert.equal(result.schema_version, "asof.mouthfolio.research.v0.4");
+    assert.ok("context" in result.company);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (previousOrigin === undefined) delete process.env.ASOF_DATA_ORIGIN; else process.env.ASOF_DATA_ORIGIN = previousOrigin;
+    if (previousVersion === undefined) delete process.env.ASOF_DATA_API_VERSION; else process.env.ASOF_DATA_API_VERSION = previousVersion;
+  }
+});

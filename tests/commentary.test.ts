@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fixture from "../fixtures/v0.3-initial.json" with { type: "json" };
 import type { AttributedView, Mention } from "../contracts/types.ts";
 import type { Receipt } from "../lib/contract.ts";
-import { commentaryGroups, selectCommentary } from "../lib/commentary.ts";
+import { commentaryGroups, commentaryReading, commentaryContextViews, companySummary, explicitlyNamesCompany, hasSubstantiveText, selectCommentary } from "../lib/commentary.ts";
 
 const view = fixture.views[0] as AttributedView;
 const mention = fixture.mentions[0] as Mention;
@@ -67,4 +67,46 @@ test("equal publication times have stable order, and voice scope cannot leak oth
   assert.deepEqual(selectCommentary(groups, { voice: other.voice_id, scopedVoiceId: view.voice_id }), []);
   assert.deepEqual(selectCommentary(groups, { voice: "fictional-missing-voice" }), []);
   assert.deepEqual(selectCommentary([]), []);
+});
+
+
+test("notes-first ordering preserves the complete archive and respects publication sorts and filters", () => {
+  const companyName = fixture.company.name;
+  const older = { ...receipt, id: "fictional-readable", published_at: "2026-10-20T12:00:00Z", summary: null, excerpt: null, display_policy: "link_only" } as Receipt;
+  const newer = { ...older, id: "fictional-label", published_at: "2026-10-25T12:00:00Z" };
+  const label = { ...view, receipt_id: newer.id, statement: `Mixed attributed view about ${companyName}. Read the source for its full context.`, conditions: null, horizon: null };
+  const groups = commentaryGroups([{ ...view, receipt_id: older.id }, label], [{ ...mention, receipt_id: newer.id }], [older, newer]);
+  const reading = selectCommentary(groups, { order: "readable", companyName });
+  assert.deepEqual(reading.map(group => group.receiptId), [older.id, newer.id]);
+  assert.equal(commentaryReading(reading[1], companyName), null);
+  assert.deepEqual(commentaryContextViews(reading[1], label.statement), [], "A repeated label provides no expandable context");
+  assert.deepEqual(new Set(reading), new Set(groups), "Nothing is removed or recreated");
+  assert.deepEqual(selectCommentary(groups, { order: "newest", companyName }).map(group => group.receiptId), [newer.id, older.id]);
+  assert.equal(selectCommentary(groups, { order: "readable", kind: "mentions", companyName })[0].views[0], label);
+  assert.deepEqual(selectCommentary(groups, { order: "readable", scopedVoiceId: "fictional-absent", companyName }), []);
+});
+
+test("reading selectors use only explicit source text and allowed excerpts", () => {
+  const companyName = fixture.company.name;
+  for (const label of ["Bullish", "Bearish", "Mixed", "Named Aster Compute", "Bullish on Aster Compute", "Mixed attributed view about Aster Compute. Read the source for its full context."]) {
+    assert.equal(hasSubstantiveText(label, companyName), false, label);
+  }
+  assert.equal(explicitlyNamesCompany("NotAster Compute has customers.", companyName), false);
+  assert.equal(explicitlyNamesCompany("ASTER COMPUTE’s customers.", companyName), true);
+  const unrelated = { ...receipt, summary: { ...(fixture.receipts.find(item => item.summary)!.summary!), text: "Fictional Beta Systems capacity increased." }, display_policy: "link_only", excerpt: null } as Receipt;
+  const [group] = commentaryGroups([], [{ ...mention, receipt_id: receipt.id }], [unrelated]);
+  assert.equal(companySummary(group, companyName), null);
+  assert.equal(commentaryReading(group, companyName), null);
+  assert.equal(commentaryReading({ ...group, receipt: { ...unrelated, display_policy: "excerpt", excerpt: "Aster Compute revenue rose as customer demand increased." } }, companyName)?.kind, "excerpt");
+  assert.equal(commentaryReading({ ...group, receipt: { ...unrelated, excerpt: "Aster Compute revenue rose." } }, companyName), null, "Link-only receipts never expose an excerpt");
+  const [withView] = commentaryGroups([view], [], [unrelated]);
+  assert.deepEqual(commentaryReading(withView, companyName), { kind: "view", text: view.statement });
+  assert.equal(commentaryContextViews(withView, view.statement)[0].conditions, view.conditions, "Real qualifiers remain accessible");
+});
+
+test("additional view text keeps meaningful units and punctuation", () => {
+  const base = commentaryGroups([fixture.views[0] as AttributedView], [], [receipt])[0];
+  const view = { ...base.views[0], statement: "Revenue was 10%.", conditions: null, horizon: null };
+  assert.equal(commentaryContextViews({ ...base, views: [view] }, "Revenue was $10.").length, 1);
+  assert.equal(commentaryContextViews({ ...base, views: [view] }, "Revenue   was 10%.").length, 0);
 });
