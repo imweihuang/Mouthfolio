@@ -25,12 +25,21 @@ Existing AsOf UI owners retain their frozen candidates and current work until
 their selected source is imported. There is no duplicate feature implementation
 mandate and no live Station cutover in this preparation.
 
-The client now includes original question-led financial comparisons and a
-chronological commentary feed. The charts use only compatible observations in
-the existing consumer response, and source cards group exact voice/receipt
-pairs without adding commentary or inferring a stance from mentions. See
-[JOURNEY](JOURNEY.md) for chart limits, exact-source links and URL filters.
-This presentation change adds no service data or deployment acceptance.
+The client starts with a company Overview and a separate Commentary section.
+Overview contains reported figures, one compact financial comparison and selected
+source cards. Financials and Sources retain the complete reported evidence and
+receipt library. On desktop, company navigation and source context sit alongside
+the reading area; smaller screens use a source drawer. Author history is linked
+from commentary items rather than a sidebar roster.
+
+The charts use only compatible observations in the existing consumer response.
+Compact metric and period controls resolve against available evidence; exact
+tables preserve original values. Source cards group exact voice/receipt pairs
+without adding commentary or inferring a stance from mentions. See
+[JOURNEY](JOURNEY.md) for chart limits, exact-source links and URL-backed sections
+and filters. This presentation change adds no service data or deployment
+acceptance. Anthropic is the first hosted company; further company entries need
+qualified facts and source coverage rather than placeholder metrics.
 
 ## Continue development
 

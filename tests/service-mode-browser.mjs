@@ -61,7 +61,8 @@ export async function checkServiceVersion(browser, basePath, version) {
     await page.goto(origin);
     await page.getByRole("heading", { name: "Anthropic", exact: true }).waitFor();
     await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
-    assert.equal(await page.locator(".sidebar-empty").textContent(), "Voices unavailable");
+    assert.equal(await page.locator(".sidebar a[href*='/voices/']").count(), 0, "Unavailable evidence must not expose author navigation");
+    assert.equal(await page.locator(".source-context-pane, .metric-card, [data-commentary-card]").count(), 0);
     await page.getByRole("button", { name: "Reload this page", exact: true }).click();
     await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
     assert.ok((await page.locator(".brand").getAttribute("href")).includes("/companies/anthropic"));
@@ -96,16 +97,19 @@ export async function checkServiceVersion(browser, basePath, version) {
       await page.waitForLoadState("networkidle");
       assert.equal(page.url(), recoveryUrl);
       assert.equal(await page.getByTestId("snapshot").textContent(), "snapshot-mention");
-      assert.equal(await page.getByLabel("Evidence cutoff").inputValue(), "2026-10-26T12:00:00Z");
       await page.getByRole("button", { name: "Close source" }).click();
       await page.locator("dialog").waitFor({ state: "detached" });
+      await page.locator(".context-controls > summary").click();
+      assert.ok(await page.getByLabel("Evidence cutoff").isVisible());
+      assert.equal(await page.getByLabel("Evidence cutoff").inputValue(), "2026-10-26T12:00:00Z");
     }
     await page.locator(".subject-link").click();
     await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
     syntheticPayload = { ...recovering, status: "no_record_found", observations: [], questions: [], voices: [], views: [], mentions: [], receipts: [] };
     await page.reload();
     await page.getByRole("heading", { name: "No record found", exact: true }).waitFor();
-    assert.equal(await page.locator(".sidebar-empty").textContent(), "No eligible voices");
+    assert.equal(await page.locator(".sidebar a[href*='/voices/']").count(), 0, "A successful empty response must not invent author navigation");
+    assert.equal(await page.locator(".metric-card, [data-commentary-card], .source-context-pane").count(), 0);
     assert.equal(await page.getByRole("button", { name: "Reload this page", exact: true }).count(), 0);
     for (const status of ["no_record_found", "revoked"]) {
       syntheticPayload = { ...recovering, status, observations: [], questions: [], voices: [], views: [], mentions: [], receipts: [] };
@@ -161,19 +165,27 @@ export async function checkServiceVersion(browser, basePath, version) {
         url: index === 0 ? "https://example.com/fictional-source" : null,
       });
     }
-    await page.goto(origin + "/companies/aster-compute");
+    const companyUrl = origin + "/companies/aster-compute";
+    await page.goto(companyUrl);
     await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
-    assert.equal(await page.locator(".record-tldr").count(), 0);
-    assert.equal(await page.locator(".metric-card").count(), 5);
-    assert.equal(await page.locator("tbody tr").count(), 21);
-    assert.match(await page.locator("#evidence > .summary-note").textContent(), /Latest reporting date: Jun 30, 2026/);
+    assert.equal(await page.locator(".record-tldr, .commentary-summary").count(), 0, "v0.2 does not acquire a generated summary");
+    assert.equal(await page.locator(".metric-card").count(), 4);
+    assert.equal(await page.locator(".evidence-table").count(), 0, "Overview keeps complete reporting history in Financials");
+    assert.match(await page.locator("#evidence > .summary-note").textContent(), /Periods shown per measure/);
+    assert.equal(await page.locator(".metric-card .metric-period").getByText("Fictional latest period", { exact: true }).count(), 4);
     assert.equal(await page.locator(".metric-card").getByText("Fictional earlier period", { exact: false }).count(), 0);
     assert.equal(await page.locator("#question, a[href='#question']").count(), 0);
     assert.equal(await page.getByText(syntheticPayload.coverage.note, { exact: true }).count(), 0);
-    assert.match(await page.getByTestId("commentary-coverage").innerText(), /Partial commentary archive:.*Latest commentary:/);
-    assert.equal(await page.locator(".metric-card").getByText("$2.35B", { exact: true }).count(), 5);
-    assert.equal(await page.locator(".metric-card").getByText("USD · rounded to 2 decimals; exact value below", { exact: true }).count(), 5);
+    assert.equal(await page.locator(".metric-card").getByText("$2.35B", { exact: true }).count(), 4);
+    assert.equal(await page.locator(".metric-card").getByText("USD · rounded", { exact: true }).count(), 4);
     assert.equal(await page.locator(".metric-card").getByText("fictional-basis-code", { exact: false }).count(), 0);
+    await page.locator(".sidebar").getByRole("link", { name: "Commentary", exact: true }).click();
+    await page.getByTestId("commentary-coverage").waitFor();
+    assert.match(await page.getByTestId("commentary-coverage").innerText(), /Partial commentary archive:.*Latest commentary:/);
+    await page.locator(".sidebar").getByRole("link", { name: "Financials", exact: true }).click();
+    await page.locator(".evidence-table").waitFor();
+    assert.equal(new URL(page.url()).searchParams.get("section"), "financials");
+    assert.equal(await page.locator("tbody tr").count(), 21);
     assert.equal(await page.locator("tbody tr").nth(16).getByText("2,345,678,901.23 USD", { exact: true }).count(), 1);
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 });
@@ -183,9 +195,11 @@ export async function checkServiceVersion(browser, basePath, version) {
       await page.locator(".metric-card").first().getByRole("link").click();
       const inspector = page.getByRole("dialog");
       await inspector.getByText("Reported value: 2,345,678,901.23 USD", { exact: true }).first().waitFor();
+      await inspector.getByText("Definition and reporting basis", { exact: true }).first().click();
       assert.ok(await inspector.getByText("Unit: USD · fictional-basis-code: see complete provenance", { exact: true }).first().isVisible());
       await page.screenshot({ path: `artifacts/reading-clarity-receipt-${width}.png` });
       const receiptUrl = page.url();
+      assert.equal(new URL(receiptUrl).searchParams.get("section"), "financials");
       await page.reload();
       await page.getByRole("dialog").getByText("Reported value: 2,345,678,901.23 USD", { exact: true }).first().waitFor();
       assert.equal(page.url(), receiptUrl);
@@ -211,15 +225,19 @@ export async function checkServiceVersion(browser, basePath, version) {
         const inspector = page.getByRole("dialog");
         await inspector.getByText(reason, { exact: true }).waitFor();
         assert.equal(new URL(page.url()).searchParams.get("receipt"), `fictional-missing-receipt-${index}`);
+        assert.equal(new URL(page.url()).searchParams.get("section"), "financials");
+        assert.ok(await inspector.getByText("Reported value: No value", { exact: true }).isVisible());
         assert.equal(await inspector.getByText("Not disclosed", { exact: true }).count(), 0);
+        await inspector.getByText("Record details", { exact: true }).click();
         assert.ok(await inspector.getByText("Receipt display", { exact: true }).isVisible());
+        assert.ok(await inspector.getByText("Link only", { exact: true }).isVisible());
         assert.equal(await inspector.getByText("Display permission", { exact: true }).count(), 0);
         assert.equal(await inspector.getByText("This source permits a link only.", { exact: false }).count(), 0);
+        assert.equal(await inspector.locator(".source-excerpt").count(), 0, "A link-only financial receipt must not invent source text");
         if (index === 0) {
-          await inspector.getByText("Open the original source for full context.", { exact: true }).waitFor();
           assert.equal(await inspector.getByRole("link", { name: "Open original source" }).getAttribute("href"), "https://example.com/fictional-source");
         } else {
-          await inspector.getByText("Source text is not displayed here.", { exact: true }).waitFor();
+          await inspector.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
           assert.equal(await inspector.getByRole("link", { name: "Open original source" }).count(), 0);
         }
         if (index === 0) await page.screenshot({ path: `artifacts/missing-observation-${width}.png` });
@@ -228,13 +246,15 @@ export async function checkServiceVersion(browser, basePath, version) {
       }
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.locator(".sidebar").getByRole("link", { name: "Commentary", exact: true }).click();
+    await page.locator(".commentary-context > summary").first().waitFor();
     assert.equal(await page.locator("blockquote").count(), 0);
     await page.locator(".commentary-context > summary").first().click();
     assert.ok(await page.getByText("Not provided in this record. See the original source.", { exact: true }).first().isVisible());
     await page.getByRole("link", { name: "Inspect supporting receipt" }).click();
     await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
     assert.deepEqual(errors, [], `${version} service browser console/page errors`);
-    console.log("Authorized-mode synthetic transport passed: 21 exact table rows, 5 latest-date summary cards, earlier missing reasons in table and inspector at both widths, plain view text, absent qualifiers and unavailable source copy.");
+    console.log("Authorized-mode synthetic transport passed: 21 exact Financials rows, 4 dated overview cards, earlier missing reasons in table and inspector at both widths, preserved section/receipt history, plain view text, absent qualifiers and unavailable source copy.");
     console.log("Service-only mode passed: Anthropic home, no demo adapter through company or voice routes, missing service stays unavailable.");
   } catch (error) {
     throw new Error(`${version}: ${error.message}; URL=${page?.url()}; errors=${JSON.stringify(errors)}`, { cause: error });

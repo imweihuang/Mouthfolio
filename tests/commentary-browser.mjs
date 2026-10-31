@@ -12,18 +12,22 @@ export async function checkCommentaryFeed(page, origin, supply) {
   value.mentions.push({ ...value.mentions[0], id: "fictional-mixed-mention", version_id: "fictional-mixed-mention", voice_id: first.voice_id, receipt_id: first.receipt_id });
   value.receipts.forEach(receipt => { receipt.display_policy = "link_only"; receipt.excerpt = null; receipt.url = "https://example.com/fictional-source"; });
   supply(value);
-  const company = origin + "/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all";
+  const company = origin + "/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all&section=commentary";
   await page.goto(company);
   const feed = page.locator("#commentary");
-  await feed.getByRole("heading", { name: "What have these voices said?" }).waitFor();
+  await feed.getByRole("heading", { name: "What people are saying" }).waitFor();
   assert.equal(await feed.locator("[data-commentary-card]").count(), 3);
   const mixed = feed.locator(`[data-source-receipt="${first.receipt_id}"][data-voice="${first.voice_id}"]`);
   assert.equal(await mixed.locator(".attributed-statement").count(), 2);
-  assert.equal(await mixed.locator(".record-tldr").count(), 1);
+  assert.equal(await mixed.locator(".commentary-summary").count(), 1);
   assert.equal(await mixed.getByText("1 mention", { exact: true }).count(), 1);
   assert.equal(await feed.locator("blockquote").count(), 0);
-  const addedViewContext = mixed.locator(".commentary-context").last();
-  await addedViewContext.getByText("View context", { exact: true }).click();
+  const viewContext = mixed.locator(".commentary-context");
+  await viewContext.getByText("Attributed views and context", { exact: true }).click();
+  assert.ok(await viewContext.getByText(first.statement, { exact: true }).isVisible());
+  assert.ok(await viewContext.getByText(first.conditions, { exact: true }).isVisible());
+  assert.equal(await mixed.locator(".commentary-summary-text").textContent(), value.receipts.find(receipt => receipt.id === first.receipt_id).summary.text);
+  const addedViewContext = viewContext.locator(".commentary-statements > li").last();
   const missingQualifiers = addedViewContext.getByText("Not provided in this record. See the original source.", { exact: true });
   assert.equal(await missingQualifiers.count(), 2);
   assert.ok(await missingQualifiers.nth(0).isVisible());
@@ -41,20 +45,23 @@ export async function checkCommentaryFeed(page, origin, supply) {
   await page.reload();
   assert.equal(await feed.locator("[data-commentary-card]").count(), 1);
   assert.equal(await feed.locator(".commentary-order [aria-current]").textContent(), "Oldest first");
-  await feed.getByRole("link", { name: "Inspect supporting receipt" }).click();
+  await feed.getByRole("link", { name: "Read more · source & context" }).click();
   await page.getByRole("dialog").waitFor();
-  for (const [key, expected] of Object.entries({ company: "aster-compute", asof: "2026-10-26T12:00:00Z", window: "all", voice: secondVoice.id, kind: "views", order: "oldest", receipt: first.receipt_id })) {
+  assert.equal(await page.getByTestId("snapshot").textContent(), value.receipts.find(receipt => receipt.id === first.receipt_id).snapshot_id);
+  for (const [key, expected] of Object.entries({ company: "aster-compute", asof: "2026-10-26T12:00:00Z", window: "all", voice: secondVoice.id, kind: "views", order: "oldest", section: "commentary", receipt: first.receipt_id })) {
     assert.equal(new URL(page.url()).searchParams.get(key), expected);
   }
   await page.keyboard.press("Escape");
   await page.locator("dialog").waitFor({ state: "detached" });
   assert.equal(new URL(page.url()).searchParams.get("voice"), secondVoice.id);
+  assert.equal(new URL(page.url()).searchParams.get("section"), "commentary");
   await page.goBack(); await page.getByRole("dialog").waitFor();
   await page.goForward(); await page.locator("dialog").waitFor({ state: "detached" });
   await feed.locator(".record-meta a").click();
   await page.getByRole("heading", { name: secondVoice.name, exact: true }).waitFor();
   assert.equal(await feed.locator("[data-commentary-card]").count(), 1);
   assert.equal(await feed.getByRole("navigation", { name: "Filter commentary by voice" }).count(), 0);
+  assert.equal(new URL(page.url()).searchParams.has("section"), false, "Voice profile owns its section");
   for (const width of [1440, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto(company);

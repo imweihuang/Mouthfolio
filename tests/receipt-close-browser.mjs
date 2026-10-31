@@ -58,7 +58,8 @@ export async function checkReceiptClose(browser, origin) {
         assert.equal(page.url(), selected, "URL remains the selected receipt until server navigation commits");
         assert.equal(await page.locator("dialog:modal").count(), 0, "Close immediately releases native modality");
         assert.equal(await page.locator(":focus").getAttribute("data-receipt"), "receipt-original", "Close immediately restores opener focus");
-        assert.equal(await page.locator(".reader-shell").evaluate(element => getComputedStyle(element).marginRight), "0px", "Close immediately restores desktop canvas");
+        assert.equal(await page.locator(".reader-shell").evaluate(element => getComputedStyle(element).marginRight), width > 1100 ? "340px" : "0px", "Close preserves the desktop evidence pane and releases the narrow-screen canvas");
+        await page.locator(".context-controls > summary").click();
         await page.getByLabel("Evidence cutoff").focus();
         assert.equal(await page.locator(":focus").getAttribute("name"), "asof", "The page is no longer inert");
         await page.setViewportSize({ width: width === 1440 ? 390 : 1440, height: 1000 });

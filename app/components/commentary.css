@@ -44,3 +44,35 @@
   .commentary-filter-label { flex-basis: 100%; }
 }
 @media (forced-colors: active) { .commentary-filter a[aria-current] { border-color: LinkText; }.commentary-timeline > li::before { border-color: CanvasText; } }
+
+/* A source remains a compact, attributable row with full text in context. */
+.commentary-feed .section-heading h2 { margin-bottom: calc(var(--unit) * 2); }
+.commentary-feed .section-heading > a { font-size: var(--text-sm); }
+.commentary-feed .section-intro { font-size: var(--text-sm); color: var(--v2-light-muted); margin-bottom: calc(var(--unit) * 3); }
+.commentary-timeline { border: 0; padding: 0; }
+.commentary-timeline > li::before { display: none; }
+.commentary-feed .commentary-card { border: 0; border-bottom: 1px solid var(--v2-light-line); border-radius: 0; padding: calc(var(--unit) * 4) 0; margin: 0; background: transparent; }
+.commentary-timeline > li:last-child .commentary-card { border-bottom: 0; }
+.commentary-card .record-meta { margin-bottom: var(--unit); gap: var(--unit) calc(var(--unit) * 3); }
+.commentary-source-title { font: var(--weight-medium) var(--text-sm)/var(--leading-body) var(--font-sans); margin: var(--unit) 0; }
+.commentary-type-labels { margin-bottom: var(--unit); font-size: var(--text-sm); }
+.commentary-summary p { margin-bottom: var(--unit); }
+.commentary-disclosure,.commentary-capture { font-size: var(--text-sm); color: var(--v2-light-muted); }
+.commentary-summary-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: var(--v2-light-text-body); line-height: var(--leading-reading); }
+.commentary-summary .commentary-capture { margin-top: calc(var(--unit) * 2); }
+.commentary-capture span { display: inline; }
+.commentary-source-actions { margin-top: calc(var(--unit) * 2); gap: calc(var(--unit) * 2) calc(var(--unit) * 4); }
+.commentary-context { margin-top: calc(var(--unit) * 2); }
+.commentary-context[open] > summary { margin-bottom: calc(var(--unit) * 3); }
+.commentary-preview { padding-top: calc(var(--unit) * 4); }
+.commentary-preview .commentary-type-labels,.commentary-preview .commentary-source-title { display: none; }
+.commentary-preview .commentary-summary-text { -webkit-line-clamp: 2; font-size: var(--text-sm); }
+.commentary-preview .commentary-capture span { display: none; }
+.commentary-preview .commentary-card { padding: calc(var(--unit) * 3) 0; }
+.commentary-preview .commentary-source-actions { margin-top: var(--unit); }
+.commentary-preview .commentary-capture { margin-top: var(--unit); }
+@media (max-width: 650px) {
+  .commentary-card .record-meta { display: flex; }
+  .commentary-feed .commentary-card,.commentary-feed .commentary-compact-mention { padding: calc(var(--unit) * 4) 0; }
+  .commentary-filter a { padding: calc(var(--unit) * 2); }
+}

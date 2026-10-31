@@ -7,11 +7,11 @@ export async function checkJourney(page, origin) {
   const company = `${origin}/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all`;
   await page.goto(company);
   await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
-  await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo researcher", exact: true }).click();
+  await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo researcher", exact: true }).first().click();
   await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
   assert.equal(new URL(page.url()).searchParams.get("asof"), "2026-10-26T12:00:00Z");
   assert.equal(new URL(page.url()).searchParams.get("window"), "all");
-  await page.getByRole("heading", { name: "What have these voices said?", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "What people are saying", exact: true }).waitFor();
   assert.equal(await page.locator(".commentary-record").count(), 1);
   assert.equal(await page.locator(".mention-record").count(), 1);
   await page.getByRole("link", { name: "Inspect mention receipt" }).click();
@@ -35,6 +35,7 @@ export async function checkJourney(page, origin) {
   await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
   await page.getByRole("link", { name: "Inspect reported revenue" }).click();
   const originalSnapshot = await page.getByTestId("snapshot").textContent();
+  await page.locator(".context-controls > summary").click();
   await page.getByLabel("Evidence cutoff").selectOption("2026-10-27T12:00:00Z");
   await page.getByRole("button", { name: "Apply", exact: true }).click();
   await page.getByRole("button", { name: "Close source" }).waitFor();
@@ -61,6 +62,8 @@ export async function checkJourney(page, origin) {
   for (const width of [1440,390,320]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto(company);
+    await page.locator(".coverage-note").waitFor();
+    assert.ok(await page.locator(".coverage-note").isVisible(), `Quiet partial coverage remains visible at ${width}`);
     await page.getByRole("link", { name: "Inspect reported revenue" }).click();
     await page.getByRole("button", { name: "Close source" }).waitFor();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Inspector overflow at ${width}`);
@@ -68,6 +71,8 @@ export async function checkJourney(page, origin) {
       assert.ok(await page.getByRole("dialog").evaluate(element => element.matches(":modal")));
       await page.keyboard.press("Shift+Tab");
       assert.ok(await page.getByRole("dialog").evaluate(element => element.contains(document.activeElement)), "Modal traps focus");
+      await page.keyboard.press("Tab");
+      assert.equal(await page.locator(":focus").getAttribute("aria-label"), "Close source", "Forward Tab wraps back to Close");
     } else {
       assert.equal(await page.getByRole("dialog").evaluate(element => element.matches(":modal")), false);
     }
@@ -75,8 +80,8 @@ export async function checkJourney(page, origin) {
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => !new URL(location.href).searchParams.has("receipt"));
     await page.waitForFunction(() => document.activeElement?.getAttribute("data-receipt") === "receipt-original");
-    assert.match(await page.locator(":focus").textContent(), /Inspect reported revenue/, "Escape returns focus to exact opener");
-    await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo researcher", exact: true }).click();
+    assert.equal(await page.locator(":focus").getAttribute("aria-label"), "Inspect reported revenue", "Escape returns focus to exact opener");
+    await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo researcher", exact: true }).first().click();
     await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Voice overflow at ${width}`);
     await page.screenshot({ path: `artifacts/voice-${width}.png`, fullPage: true });

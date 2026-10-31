@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import type { Observation } from "../contracts/types.ts";
-import { barScale, buildFinancialComparisons, chartNumber, classifyFinancialObservation } from "../lib/financial-comparisons.ts";
+import { barScale, buildFinancialComparisons, chartNumber, classifyFinancialObservation, financialSelection } from "../lib/financial-comparisons.ts";
 
 // Entirely synthetic values, identities and source references. These strings
 // exercise the narrow presentation contract without retaining service responses.
@@ -116,4 +116,36 @@ test("signed geometry has one shared zero and preserves the direction and relati
   assert.deepEqual(barScale(zero).geometry(0), { x: 0, width: 0 });
   const negative = buildFinancialComparisons([income(), cash({ amount: "-200" })], company).pairs[0];
   assert.equal(barScale([negative.netIncome, negative.operatingCashFlow]).zero, 100);
+});
+
+test("compact selection defaults to the latest eligible revenue family without combining durations", () => {
+  const half = row({ id: "newer-half", version_id: "newer-half-v1", basis: row().basis.replace("annual", "interim"),
+    period: { label: "Fictional H1 2031", start: "2031-01-01", end: "2031-06-30" } });
+  const comparisons = buildFinancialComparisons([row(), half, income(), cash()], company);
+  assert.deepEqual(financialSelection(comparisons), {
+    metrics: ["revenue", "result"], metric: "revenue", durations: ["annual", "firstHalf"], duration: "firstHalf",
+  });
+  assert.equal(financialSelection(comparisons, { metric: "revenue", duration: "annual" }).duration, "annual");
+  assert.equal(comparisons.revenue.annual.length, 1);
+  assert.equal(comparisons.revenue.firstHalf.length, 1);
+});
+
+test("compact controls cannot retain unavailable metrics or periods after an evidence change", () => {
+  const comparisons = buildFinancialComparisons([income(), cash()], company);
+  assert.deepEqual(financialSelection(comparisons, { metric: "revenue", duration: "firstHalf" }), {
+    metrics: ["result"], metric: "result", durations: ["annual"], duration: "annual",
+  });
+  assert.deepEqual(financialSelection(buildFinancialComparisons([], company), { metric: "result", duration: "annual" }), {
+    metrics: [], metric: undefined, durations: [], duration: undefined,
+  });
+});
+
+test("compact selection preserves missing evidence and never uses cash balances as cash flow", () => {
+  const missing = row({ amount: null, missing_reason: "Not reported." });
+  const cashBalance = cash({ label: "Cash and cash equivalents", basis: "Point-in-time balance", period: { label: "Year end", start: "2030-12-31", end: "2030-12-31" } });
+  const comparisons = buildFinancialComparisons([missing, income(), cashBalance], company);
+  assert.deepEqual(financialSelection(comparisons).metrics, ["revenue"]);
+  assert.equal(comparisons.revenue.annual[0].value, null);
+  assert.equal(comparisons.revenue.annual[0].unavailable, "Not reported.");
+  assert.equal(comparisons.pairs.length, 0);
 });

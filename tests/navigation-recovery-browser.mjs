@@ -48,7 +48,7 @@ export async function checkNavigationRecovery(browser, origin) {
         await interruptPageStream(page);
         let reloads = 0;
         page.on("request", request => { if (request.isNavigationRequest() && request.frame() === page.mainFrame()) reloads++; });
-        if (action === "voice") await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo researcher", exact: true }).click();
+        if (action === "voice") await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo researcher", exact: true }).first().click();
         if (action === "receipt") await page.getByRole("link", { name: "Inspect mention receipt" }).click();
         if (action === "close") await page.keyboard.press("Escape");
         await page.getByRole("heading", { name: "Research could not be displayed", exact: true }).waitFor();

@@ -1,8 +1,17 @@
-# Company, voice and source journey
+# Company-first research journey
 
-The company view starts with a maintained question when one is available, then
-asks how reported revenue is changing and how the reported result compares with
-operating cash flow. Revenue charts keep full years and first halves separate,
+Start with Anthropic's **Overview**: reported figures, one primary financial
+comparison and a short selection of commentary. **Commentary** opens the fuller
+dated feed. Financials and Sources support deeper reading. Author names link
+from individual commentary items to their history about the company; the sidebar
+stays focused on company navigation rather than an inventory of voices.
+
+Overview's compact financial chart defaults to revenue and the latest eligible
+reporting family. Controls offer only supported metrics and periods. Readers can
+switch between revenue and matched result/cash-flow evidence, choose full years
+or first halves where available, and open the exact table. Financials retains the
+complete reported-evidence table, detailed comparisons, and a maintained question
+when one is available. Revenue charts keep full years and first halves separate,
 with independent zero-based scales. The result and cash-flow chart compares the
 same reporting period, with negative values left of zero and positive values
 right. A period selector and exact-table controls support closer reading. Charts
@@ -14,15 +23,19 @@ accounting-to-cash difference is inferred.
 Chart labels and headline amounts may be rounded; exact tables retain the
 original values, units, reporting periods and financial basis. Each plotted
 observation and table source link opens its exact receipt. The headline summary
-selects the latest reporting end date,
-sorts deterministically, and is capped at six records. That exact date is labelled.
+prioritizes the latest recognized revenue and matched result/cash-flow pair,
+then fills remaining slots from other reported observations, up to four records.
+Each measure retains its own reporting period; dates can differ across measures.
 Different bases or durations are never merged; the complete reporting history
-remains in the table. Missing values retain their explanation.
+remains in Financials. Missing values retain their explanation. A cash balance is
+a point-in-time observation, not operating cash flow.
 
-Company and voice pages show commentary in source cards, ordered by publication
-date with newest first by default. Each card groups one exact voice and receipt,
-retains every attributed-view statement and shows its mention count separately.
-Company readers can filter by voice; both pages offer All, Views and Mentions
+Overview selects a small set of recent source cards, prioritizing available
+Record TLDRs. This is a selection of posts, not a voice's overall position.
+The full Commentary section and author pages order cards by publication date,
+newest first by default. Each card groups one exact voice and receipt, retains
+every attributed-view statement in its expandable context, and shows mentions
+separately. Company readers can filter by voice; both full feeds offer All, Views and Mentions
 filters and newest/oldest ordering. A type filter selects whole matching cards,
 so a mixed card retains both its views and mentions. Voice pages stay scoped to
 the selected voice and company. A named reference alone establishes no stance.
@@ -34,7 +47,7 @@ absence from this projection does not establish that the speaker stated none.
 ## Record TLDR
 
 A validated v0.3 receipt may include a **Record TLDR**, labelled
-**AI-authored · AI-reviewed**. It appears once per source card in a separate box
+**AI-authored · AI-reviewed**. It appears once per source card
 and in the exact source inspector, with source capture and summary
 availability dates. This is ASOF-authored summary text, not a source quote or a
 new stance. A mention remains a named reference. Null summaries and v0.2
@@ -48,6 +61,9 @@ directs readers to the original source for full context when its URL is present.
 
 - `/` and `/companies/aster-compute` open the fictional offline demo.
 - `/companies/anthropic` is the first service subject. It never reuses demo data.
+- Company sections use `section=commentary|financials|sources`; omitting it opens
+  Overview. Section links and source links preserve the evidence cutoff and
+  selected receipt. Chart controls are local display choices, not new evidence.
 - `/voices/{id}?company={company-id}` opens the selected company's voice context.
 - `asof`, `window=all` and `receipt` are URL-backed. A receipt selects an immutable
   identity, not the latest version of the clicked metric. Changing the cutoff
@@ -59,13 +75,20 @@ directs readers to the original source for full context when its URL is present.
   receipt. Entering a voice profile clears the company voice filter and makes
   the route's voice authoritative, while retaining type and order selections.
 
-The source inspector is alongside the page above 1100px and a modal drawer at
-narrow widths. Escape closes it and returns focus to the source opener. Back,
+On desktop, the company navigation, reading area and source-context pane sit
+alongside one another. Selecting a chart mark, value source or commentary source
+opens its exact receipt in that pane. It becomes a modal drawer at widths of
+1100px or less. Escape closes it and returns focus to the source opener. Back,
 Forward and reload restore URL context. The underlying page remains usable with
 an inspector open at wide desktop widths. A voice profile covers only records
 linked to its selected company; it does not claim complete commentary coverage.
 Publication dates are shown separately from ingestion and availability dates.
 Records do not imply a response to another publication.
+
+Coverage remains partial. The newest archived commentary date describes what is
+available, not complete reactions to a filing or a current-news feed. Anthropic
+is the first hosted company; subsequent companies need qualified observations,
+attribution and source coverage before they can offer the same journey.
 
 Company and voice links show a loading status as soon as navigation starts.
 The current page and URL remain in place until the destination's fresh service

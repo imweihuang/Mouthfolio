@@ -17,7 +17,7 @@ export async function checkNavigationLoading(page, origin, supply, setDelay, req
       const initialRequests = requestCount();
       setDelay(2500);
       const start = performance.now();
-      await page.getByRole("navigation", { name: "Research navigation" }).getByRole("link", { name: "Demo researcher", exact: true }).click();
+      await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo researcher", exact: true }).first().click();
       await page.locator(".navigation-pending").filter({ hasText: "Loading…" }).waitFor({ timeout: 1500 });
       const feedbackMs = Math.round(performance.now() - start);
       assert.ok(feedbackMs < 1500, `Navigation feedback took ${feedbackMs}ms at ${width}px`);

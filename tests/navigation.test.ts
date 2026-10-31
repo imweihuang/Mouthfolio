@@ -34,3 +34,26 @@ test("commentary filters survive receipts and history while profiles own their s
   assert.equal(profile.searchParams.get("kind"), "mentions");
   assert.equal(profile.searchParams.get("receipt"), context.receipt);
 });
+
+test("company sections retain the evidence context while company entry resets overview", async () => {
+  const { companySectionUrl } = await import("../lib/navigation.ts");
+  const filtered = { ...context, section: "commentary" as const, commentaryVoice: "demo-observer", commentaryKind: "mentions", commentaryOrder: "oldest" };
+  const section = new URL(companySectionUrl(filtered, "financials"), "https://example.test");
+  assert.equal(section.searchParams.get("section"), "financials");
+  for (const key of ["asof", "window", "receipt", "voice", "kind", "order"]) {
+    assert.equal(section.searchParams.get(key), new URL(journeyUrl("/companies/aster-compute", filtered), "https://example.test").searchParams.get(key));
+  }
+  assert.equal(new URL(companyUrl(filtered), "https://example.test").searchParams.has("section"), false);
+  assert.equal(new URL(voiceUrl("demo-researcher", filtered), "https://example.test").searchParams.has("section"), false);
+  assert.equal(new URL(journeyUrl("/companies/aster-compute", filtered, ""), "https://example.test").searchParams.get("section"), "commentary");
+});
+
+test("Latest clears only the historical cutoff and preserves receipt, filters and section", async () => {
+  const { latestUrl } = await import("../lib/navigation.ts");
+  const filtered = { ...context, section: "commentary" as const, commentaryVoice: "demo-observer", commentaryKind: "mentions", commentaryOrder: "oldest" };
+  const original = new URL(journeyUrl("/companies/aster-compute", filtered), "https://example.test");
+  const latest = new URL(latestUrl("/companies/aster-compute", filtered), "https://example.test");
+  assert.equal(latest.searchParams.has("asof"), false);
+  original.searchParams.delete("asof");
+  assert.equal(latest.href, original.href);
+});
