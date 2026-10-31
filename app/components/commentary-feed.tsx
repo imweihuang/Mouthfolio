@@ -68,12 +68,12 @@ export function CommentaryFeed({ views, mentions, voices, receipts, companyName,
     {!preview ? <div className="commentary-controls">
       {!scopedVoiceId ? <nav className="commentary-filter" aria-label="Filter commentary by voice">
         <span className="commentary-filter-label">Voice</span>
-        <Link prefetch={false} scroll={false} href={filterHref({ commentaryVoice: "all" })} aria-current={voice === "all" ? "true" : undefined}>All voices</Link>
-        {voices.filter(item => activeVoices.has(item.id)).map(item => <Link prefetch={false} scroll={false} key={item.id} href={filterHref({ commentaryVoice: item.id })} aria-current={voice === item.id ? "true" : undefined}>{item.name}</Link>)}
+        <ResearchLink scroll={false} href={filterHref({ commentaryVoice: "all" })} aria-current={voice === "all" ? "true" : undefined}>All voices</ResearchLink>
+        {voices.filter(item => activeVoices.has(item.id)).map(item => <ResearchLink scroll={false} key={item.id} href={filterHref({ commentaryVoice: item.id })} aria-current={voice === item.id ? "true" : undefined}>{item.name}</ResearchLink>)}
       </nav> : null}
       <div className="commentary-control-row">
-        <nav className="commentary-filter" aria-label="Filter commentary by type"><span className="commentary-filter-label">Type</span>{kinds.map(item => <Link prefetch={false} scroll={false} key={item.value} href={filterHref({ commentaryKind: item.value })} aria-current={kind === item.value ? "true" : undefined}>{item.label}</Link>)}</nav>
-        <nav className="commentary-filter commentary-order" aria-label="Order commentary"><span className="commentary-filter-label">Read</span>{orders.map(item => <Link prefetch={false} scroll={false} key={item.value} href={filterHref({ commentaryOrder: item.value })} aria-current={order === item.value ? "true" : undefined}>{item.label}</Link>)}</nav>
+        <nav className="commentary-filter" aria-label="Filter commentary by type"><span className="commentary-filter-label">Type</span>{kinds.map(item => <ResearchLink scroll={false} key={item.value} href={filterHref({ commentaryKind: item.value })} aria-current={kind === item.value ? "true" : undefined}>{item.label}</ResearchLink>)}</nav>
+        <nav className="commentary-filter commentary-order" aria-label="Order commentary"><span className="commentary-filter-label">Read</span>{orders.map(item => <ResearchLink scroll={false} key={item.value} href={filterHref({ commentaryOrder: item.value })} aria-current={order === item.value ? "true" : undefined}>{item.label}</ResearchLink>)}</nav>
       </div>
     </div> : null}
     {!preview ? <p className="commentary-result-count" role="status">{selected.length} {selected.length === 1 ? "source card" : "source cards"}{scopedVoiceId ? ` for ${voiceNames.get(scopedVoiceId) ?? "this voice"}` : ""} · {readingFirst ? `${mainCards.length} with readable notes · ${archiveCards.length} in the compact archive` : `${order === "newest" ? "newest" : "oldest"} publication first`}{kind !== "all" ? ". Matching cards retain all their views and mentions." : "."}</p> : null}

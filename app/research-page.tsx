@@ -1,3 +1,4 @@
+import { ReceiptDismissalProvider } from "./components/receipt-dismissal";
 import Link from "next/link";
 import { ResearchLink } from "./components/research-link";
 import { createDemoAdapter, DEMO_COMPANY, INITIAL_AS_OF, LATEST_AS_OF } from "../lib/demo-adapter";
@@ -66,7 +67,7 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
   // without opening a modal that makes the page recovery action inert.
   const showInspector = Boolean(receiptId) && (ready !== null || status !== "unavailable");
   const inspect = (id: string, label = "Inspect receipt", ariaLabel?: string) => <Link aria-label={ariaLabel} prefetch={false} scroll={false} data-receipt={id} href={href(id)}>{label} <span aria-hidden="true">↗</span></Link>;
-  return <>
+  return <ReceiptDismissalProvider>
     <div className={`reader-shell${ready ? " has-evidence-pane" : ""}${showInspector ? " has-inspector" : ""}`}>
       <a className="skip-link" href="#research">Skip to research</a>
       <div className="workspace">
@@ -118,5 +119,5 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
     </div>
     {ready && !showInspector ? <EvidenceContext path={path} receipts={sourceReceipts} observations={voiceId ? [] : ready.observations} companyName={companyName} context={context} coverage={ready.coverage} synthetic={synthetic}/> : null}
     {showInspector ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} facts={ready && "context" in ready.company ? ready.company.context.facts.filter(fact => fact.receipt_id === receiptId) : []} synthetic={synthetic}/> : null}
-  </>;
+  </ReceiptDismissalProvider>;
 }

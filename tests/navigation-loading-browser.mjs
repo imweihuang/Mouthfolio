@@ -43,8 +43,8 @@ export async function checkNavigationLoading(page, origin, supply, setDelay, req
       assert.equal(requestCount(), beforeRevoked + 1, "Returning to a previously viewed company rechecks eligibility");
 
       // Revocation may happen at the same cutoff while a close is still in
-      // flight. A competing navigation must retain its clicked receipt identity
-      // and display the current revoked result, without resurrecting old data.
+      // flight. A competing ordinary navigation must honor Close
+      // and display the current revoked result, without resurrecting the source.
       setDelay(0); supply(value);
       const receipt = value.views[0].receipt_id;
       await page.goto(`${voice}&receipt=${receipt}`);
@@ -59,10 +59,10 @@ export async function checkNavigationLoading(page, origin, supply, setDelay, req
       assert.equal(requestCount(), beforeClose + 1, "The close read is held before revocation");
       supply({ ...value, status: "revoked", voices: [], views: [], mentions: [], receipts: [], observations: [], questions: [] });
       const clicked = await page.locator(".subject-link").getAttribute("href");
-      assert.equal(new URL(clicked, origin).searchParams.get("receipt"), receipt);
+      assert.equal(new URL(clicked, origin).searchParams.has("receipt"), false);
       await page.locator(".subject-link").click();
       await page.getByRole("heading", { name: "Evidence revoked", exact: true }).waitFor();
-      await page.getByRole("heading", { name: "Source unavailable", exact: true }).waitFor();
+      assert.equal(await page.locator("dialog[open]").count(), 0);
       await page.waitForLoadState("networkidle");
       assert.equal(page.url(), new URL(clicked, origin).href, "The newer destination wins over the delayed close");
       assert.equal(await page.locator("[data-commentary-card], .metric-card, [data-testid=snapshot]").count(), 0);

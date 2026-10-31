@@ -1,5 +1,7 @@
 "use client";
 
+import { ResearchLink } from "./research-link";
+
 import { useState } from "react";
 import Link from "next/link";
 import type { Observation, Receipt } from "../../contracts/types";
@@ -160,7 +162,7 @@ function CompactFinancialComparisons({ observations, receipts = [], companyName,
   ] : [];
   return <div id="financial-comparisons" className="financial-comparisons financial-compact" data-testid="financial-comparisons">
     <div className="financial-overview-heading"><p className="eyebrow">Two questions for the reported figures</p>
-      <Link prefetch={false} href={companySectionUrl(context, "financials")} className="financial-detail-link">All financials ↗</Link>
+      <ResearchLink href={companySectionUrl(context, "financials")} className="financial-detail-link">All financials ↗</ResearchLink>
     </div>
     <div className="financial-overview-grid">
       <section className="financial-overview-panel" aria-labelledby="financial-overview-question" data-comparison="revenue">

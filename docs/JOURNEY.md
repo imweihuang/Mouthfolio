@@ -81,7 +81,9 @@ On desktop, the company navigation, reading area and source-context pane sit
 alongside one another. Selecting a chart mark, value source or commentary source
 opens its exact receipt in that pane. It becomes a modal drawer at widths of
 1100px or less. Escape closes it and returns focus to the source opener. Back,
-Forward and reload restore URL context. The underlying page remains usable with
+Forward and reload restore URL context. While a close is still loading, ordinary
+research links honor the dismissal; selecting another source explicitly opens
+that receipt. The underlying page remains usable with
 an inspector open at wide desktop widths. A voice profile covers only records
 linked to its selected company; it does not claim complete commentary coverage.
 Publication dates are shown separately from ingestion and availability dates.
