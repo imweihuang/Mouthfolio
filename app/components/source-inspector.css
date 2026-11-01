@@ -16,7 +16,7 @@
 .source-inspector .source-link { display: inline-block; color: var(--filing-blue-ink-light); margin: calc(var(--unit) * 4) 0; }
 .source-inspector .receipt-measure { margin: calc(var(--unit) * 5) 0; }
 .source-inspector .receipt-details { margin-top: calc(var(--unit) * 4); }
-@media (max-width: 1100px) { .source-context-pane { display: none; } }
+
 
 .evidence-additions { list-style: none; padding: 0; margin: calc(var(--unit) * 5) 0; }
 .evidence-additions li { border-left: 2px solid var(--v2-light-line); padding: 0 0 calc(var(--unit) * 5) calc(var(--unit) * 4); }
@@ -24,3 +24,10 @@
 .evidence-additions a { color: var(--filing-blue-ink-light); font-size: var(--text-sm); line-height: var(--leading-reading); }
 .addition-kind,.addition-source-date { font-size: var(--text-sm); color: var(--v2-light-muted); margin: 0 0 var(--unit); }
 .addition-source-date { margin-top: var(--unit); }
+
+/* The notebook shares the source slot and only reserves space while open. */
+.notebook-opener { margin-bottom: calc(var(--unit) * 5); }
+dialog.source-context-pane { margin: 0; max-height: none; max-width: 100%; border: 0; border-left: 1px solid var(--v2-light-line); color: var(--v2-light-text); }
+dialog.source-context-pane:not([open]) { display: none; }
+.source-context-pane::backdrop { background: var(--v2-light-line-strong); opacity: .65; }
+@media (max-width: 1100px) { dialog.source-context-pane { width: min(100%,420px); } }

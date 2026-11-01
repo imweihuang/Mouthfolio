@@ -1,9 +1,6 @@
 "use client";
-
 import { ResearchLink } from "./research-link";
-
 import { useState } from "react";
-import Link from "next/link";
 import type { Observation, Receipt } from "../../contracts/types";
 import { barScale, buildFinancialComparisons, buildOperatingCashBridge, cashBridgeScale, financialSelection, periodLabel, revenueYearOverYear } from "../../lib/financial-comparisons";
 import type { CashBridge, FinancialPoint, ReportingDuration } from "../../lib/financial-comparisons";
@@ -23,11 +20,11 @@ function DisplaySwitch({ display, setDisplay, label }: { display: Display; setDi
 }
 
 function SourceLink({ point, context, children }: { point: FinancialPoint; context: JourneyContext; children: React.ReactNode }) {
-  return <Link prefetch={false} scroll={false} data-receipt={point.row.receipt_id}
+  return <ResearchLink prefetch={false} scroll={false} data-receipt={point.row.receipt_id}
     href={companySectionUrl({ ...context, receipt: point.row.receipt_id }, context.section ?? "overview")} className="financial-source"
     aria-label={`Open source: ${point.row.label}, ${point.row.period.label}, ${formatAmount(point.row.amount, point.row.unit)}${point.unavailable ? `. ${point.unavailable}` : ""}${point.row.revision_kind === "correction" ? ". Corrected observation" : ""}`}>
     {children}<span className="financial-source-hint" aria-hidden="true">Source ↗</span>
-  </Link>;
+  </ResearchLink>;
 }
 
 function compact(point: FinancialPoint): string {

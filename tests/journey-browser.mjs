@@ -1,3 +1,4 @@
+import { checkOnDemandPane } from "./on-demand-pane-browser.mjs";
 import assert from "node:assert/strict";
 import { checkReceiptClose } from "./receipt-close-browser.mjs";
 import { checkNavigationRecovery } from "./navigation-recovery-browser.mjs";
@@ -7,6 +8,7 @@ export async function checkJourney(page, origin) {
   const company = `${origin}/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all`;
   await page.goto(company);
   await page.getByRole("heading", { name: "Aster Compute", exact: true }).waitFor();
+  await checkOnDemandPane(page);
   await page.locator("#commentary .record-meta").getByRole("link", { name: "Demo researcher", exact: true }).first().click();
   await page.getByRole("heading", { name: "Demo researcher", exact: true }).waitFor();
   assert.equal(new URL(page.url()).searchParams.get("asof"), "2026-10-26T12:00:00Z");
