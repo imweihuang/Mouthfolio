@@ -14,6 +14,16 @@ export async function checkRecordTldr(page, origin, supply) {
     await page.setViewportSize({ width, height: 1000 });
     await page.goto(company);
     await page.locator(".commentary-record .commentary-summary").waitFor();
+    await page.getByRole("button", { name: "What changed", exact: true }).click();
+    const notebook = page.getByRole("dialog", { name: "What changed", exact: true });
+    await notebook.waitFor();
+    assert.equal(await notebook.locator(".record-tldr").count(), 2);
+    assert.ok(await notebook.getByText(viewReceipt.summary.text, { exact: true }).isVisible());
+    assert.ok(await notebook.getByText("AI-authored · AI-reviewed", { exact: true }).first().isVisible());
+    assert.equal(await notebook.locator(".record-tldr .tldr-dates time").count(), 4);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Summary notebook overflow at ${width}`);
+    await page.screenshot({ path: `artifacts/notebook-summaries-${width}.png` });
+    await notebook.getByRole("button", { name: "Close notebook" }).click();
     assert.equal(await page.locator(".commentary-summary, .record-tldr").count(), 2);
     assert.equal(await page.locator("blockquote").count(), 0);
     assert.ok(await page.locator(".mention-record .commentary-type-labels").getByText("1 mention · no attributed view in this record", { exact: true }).isVisible());
@@ -54,9 +64,16 @@ export async function checkRecordTldr(page, origin, supply) {
     assert.ok(await dialog.getByText("Based on an ASOF capture.", { exact: false }).isVisible());
     await page.keyboard.press("Escape"); await page.locator("dialog").waitFor({ state: "detached" });
   }
-  const empty = structuredClone(value); empty.receipts.forEach(receipt => { receipt.summary = null; }); supply(empty);
+  const empty = structuredClone(value); empty.receipts.forEach(receipt => { receipt.summary = null; });
+  empty.observations = []; empty.questions = []; supply(empty);
   await page.goto(company); await page.locator(".commentary-record").waitFor();
   assert.equal(await page.locator(".commentary-summary, .record-tldr").count(), 0);
+  await page.getByRole("button", { name: "What changed", exact: true }).click();
+  assert.equal(await page.locator(".source-context-pane .record-tldr").count(), 0, "Null summaries do not acquire replacement narrative");
+  assert.equal(await page.locator(".source-context-pane .addition-measure").count(), 0);
+  assert.equal(await page.locator(".source-context-pane").getByRole("link", { name: "How is reported revenue changing?" }).count(), 0);
+  assert.equal(await page.locator(".source-context-pane").getByRole("link", { name: "What connects the result to cash flow?" }).count(), 0);
+  await page.getByRole("button", { name: "Close notebook" }).click();
   await page.getByRole("link", { name: "Source & context" }).click();
   await page.getByRole("dialog").getByText("Open the original source for full context.", { exact: true }).waitFor();
   assert.equal(await page.getByRole("dialog").getByText("Summary", { exact: true }).count(), 0);

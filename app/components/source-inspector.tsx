@@ -6,7 +6,7 @@ import type { Receipt } from "../../lib/contract";
 import { formatAmount } from "../../lib/format-amount";
 import { companyFactText, disclosureDate, type CompanyFact } from "../../lib/company-orientation";
 import { companySectionUrl, journeyUrl, type JourneyContext } from "../../lib/navigation";
-import { recentEvidence, readerPeriod } from "../../lib/reader-context";
+import { additionContext, recentEvidence, readerPeriod } from "../../lib/reader-context";
 import { RecordTldr } from "./record-tldr";
 import { ResearchLink } from "./research-link";
 import { useReceiptDismissal } from "./receipt-dismissal";
@@ -45,16 +45,26 @@ export function EvidenceContext({ receipts, observations, companyName, context, 
     <div className="inspector-top"><span className="eyebrow">Research notebook</span><button type="button" className="quiet-button" aria-label="Close notebook" onClick={close}>Close</button></div>
     {synthetic ? <p className="eyebrow">Fictional evidence</p> : null}
     <h2 id="evidence-context-heading">What changed</h2>
-    <p className="evidence-context-intro">Recent additions to the evidence available here. Older sources can become available later.</p>
-    <ol className="evidence-additions">{additions.map(event => <li key={event.receipt.id}>
-      <p className="addition-kind">{event.label} · <time dateTime={event.availableAt}>{readableDate(event.availableAt)}</time></p>
-      <ResearchLink prefetch={false} scroll={false} data-receipt={event.receipt.id} href={journeyUrl(path, context, event.receipt.id)}>{event.receipt.title}</ResearchLink>
-      <p className="addition-source-date">Source published {readableDate(event.receipt.published_at)}</p>
-    </li>)}</ol>
+    <p className="evidence-context-intro">Latest additions to this evidence archive, available by {readableDate(context.asOf)} UTC. These are archive updates, not changes since your last visit. Older sources can become available later.</p>
+    <ol className="evidence-additions">{additions.map(event => {
+      const detail = additionContext(event, receipts, observations, context.asOf);
+      return <li key={event.receipt.id}>
+        <p className="addition-kind">{event.label} · available <time dateTime={event.availableAt} title={event.availableAt}>{readableDate(event.availableAt)} UTC</time></p>
+        <h3 className="addition-title">{event.receipt.title}</h3>
+        <p className="addition-source-date">Source published <time dateTime={event.receipt.published_at} title={event.receipt.published_at}>{readableDate(event.receipt.published_at)} UTC</time></p>
+        <RecordTldr receipt={detail.summaryReceipt}/>
+        {detail.measures.map(row => <div className="addition-measure" key={row.version_id}>
+          <ResearchLink prefetch={false} scroll={false} data-receipt={row.receipt_id} href={journeyUrl(path, context, row.receipt_id)}>{row.label}</ResearchLink>
+          <p>{formatAmount(row.amount, row.unit)} · {readerPeriod(row)}{row.revision_kind === "correction" ? " · corrected" : ""}</p>
+          {row.missing_reason ? <p className="addition-source-date">{row.missing_reason}</p> : null}
+        </div>)}
+        <ResearchLink prefetch={false} scroll={false} data-receipt={event.receipt.id} href={journeyUrl(path, context, event.receipt.id)}>Open source &amp; context <span aria-hidden="true">↗</span></ResearchLink>
+      </li>;
+    })}</ol>
     <section className="evidence-context-section"><h3>Questions to follow</h3>
       <ul className="evidence-context-links">
-        <li><ResearchLink href={companySectionUrl(context, "financials")}>How is reported revenue changing?</ResearchLink></li>
-        <li><ResearchLink href={companySectionUrl(context, "financials")}>What connects the result to cash flow?</ResearchLink></li>
+        {observations.length ? <><li><ResearchLink href={companySectionUrl(context, "financials")}>How is reported revenue changing?</ResearchLink></li>
+        <li><ResearchLink href={companySectionUrl(context, "financials")}>What connects the result to cash flow?</ResearchLink></li></> : null}
         <li><ResearchLink href={companySectionUrl(context, "commentary")}>What are sources saying about {companyName}?</ResearchLink></li>
       </ul>
     </section>

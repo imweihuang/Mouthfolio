@@ -86,7 +86,7 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
           <div className="page-heading"><div><p className="eyebrow">{voiceId ? "Voice profile" : section === "overview" ? "Company overview" : section === "commentary" ? "Commentary" : section === "financials" ? "Company financials" : "Company sources"}{synthetic ? " · fictional" : ""}</p><h1>{voiceId ? voice?.name ?? "Voice unavailable" : companyName}</h1><p className="page-intro">{voiceId ? "Follow the dated record, from an attributed view to its original source." : section === "overview" ? "Reported figures and the conversation around them." : section === "commentary" ? "Follow what people said back to the dated source." : "Reported evidence, with its periods and sources."}</p></div></div>
           {ready && !showInspector ? <EvidenceContext key={`${path}:${asOf}:${section}`} path={path} receipts={sourceReceipts} observations={voiceId ? [] : ready.observations} companyName={companyName} context={context} coverage={ready.coverage} synthetic={synthetic}/> : null}
           {ready && !voiceId && section === "overview" ? <CompanyOrientation profile={"context" in ready.company ? ready.company.context : undefined} context={context}/> : null}
-          <details className="context-controls"><summary>Evidence available by: {dateLabel(asOf)} UTC <span>Change cutoff</span></summary>
+          <div className="cutoff-row"><details className="context-controls"><summary>Evidence available by: {dateLabel(asOf)} UTC <span>Change cutoff</span></summary>
           <form className="filters" method="get" action={`${process.env.MOUTHFOLIO_BASE_PATH ?? ""}${path}`} aria-label={synthetic ? "Demo examples" : "Research context"}>
             <input type="hidden" name="company" value={companyId}/>{!voiceId ? <input type="hidden" name="section" value={section}/> : null}<input type="hidden" name="window" value={window}/><input type="hidden" name="voice" value={context.commentaryVoice}/><input type="hidden" name="kind" value={context.commentaryKind}/><input type="hidden" name="order" value={context.commentaryOrder}/>{receiptId ? <input type="hidden" name="receipt" value={receiptId}/> : null}
             <label>Evidence cutoff{synthetic ? <select name="asof" defaultValue={asOf}>
@@ -94,8 +94,8 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
               <option value="2026-10-25T12:00:00Z">Before availability · Oct 25</option><option value={INITIAL_AS_OF}>Original edition · Oct 26</option><option value={LATEST_AS_OF}>Corrected edition · Oct 27</option>
             </select> : <input name="asof" defaultValue={asOf} aria-describedby="cutoff-help"/>}</label>
             {synthetic ? <label>Demo state<select name="state" defaultValue={state}><option value="available">Available</option><option value="revoked">Revoked</option><option value="unavailable">Service unavailable</option></select></label> : null}
-            <button type="submit">Apply</button><ResearchLink href={latestUrl(path, context)}>Latest evidence</ResearchLink><p className="filter-note" id="cutoff-help">Publication window: {window === "all" ? "all dates" : "unsupported"}<br/>Availability cutoff in UTC</p>
-          </form></details>
+            <button type="submit">Apply</button><p className="filter-note" id="cutoff-help">Publication window: {window === "all" ? "all dates" : "unsupported"}<br/>Availability cutoff in UTC</p>
+          </form></details><ResearchLink className="cutoff-latest" href={latestUrl(path, context)}>Latest evidence</ResearchLink></div>
           {ready && (!voiceId || voice) ? <>
             {voiceId || section === "commentary" ? <p className="summary-note" data-testid="commentary-coverage">{commentaryCoverage(views, mentions, ready.coverage.state === "partial")}</p> : null}
             {!voiceId && (section === "overview" || section === "financials") ? <>

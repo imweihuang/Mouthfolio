@@ -127,6 +127,9 @@ footer { padding-top: calc(var(--unit) * 7); font-size: var(--text-sm); }
 .context-controls > summary { cursor: pointer; padding: calc(var(--unit) * 3) 0; color: var(--v2-light-text-body); }
 .context-controls > summary span { color: var(--v2-light-muted); margin-left: calc(var(--unit) * 3); }
 .context-controls .filters { padding: calc(var(--unit) * 4) 0; border-bottom: 0; }
+.cutoff-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 calc(var(--unit) * 4); }
+.cutoff-row .context-controls { flex: 1; min-width: min(100%, 240px); }
+.cutoff-latest { padding: calc(var(--unit) * 3) 0; font-size: var(--text-sm); color: var(--filing-blue-ink-light); }
 .page-heading .page-intro { margin-bottom: calc(var(--unit) * 3); }
 .breadcrumb { margin-bottom: calc(var(--unit) * 5); }
 main > .summary-note { margin-top: calc(var(--unit) * 3); margin-bottom: 0; }
