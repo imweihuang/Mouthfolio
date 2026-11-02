@@ -55,3 +55,26 @@ export function recentEvidence(receipts: Receipt[], observations: Observation[],
     return left === right ? a.receipt.id.localeCompare(b.receipt.id) : left > right ? -1 : 1;
   }).slice(0, limit);
 }
+
+/** Reuse eligible records from this exact capture; never infer a business change. */
+export function additionContext(event: EvidenceAddition, receipts: Receipt[], observations: Observation[], cutoff: string): {
+  summaryReceipt?: Receipt; measures: Observation[];
+} {
+  const at = instant(cutoff);
+  const source = receipts.find(receipt => receipt.id === event.receipt.id &&
+    receipt.source_id === event.receipt.source_id && receipt.snapshot_id === event.receipt.snapshot_id);
+  if (!source || instant(source.available_at) > at || instant(event.availableAt) > at) return { measures: [] };
+  if (event.label !== "Figure corrected" && "summary" in source && source.summary &&
+      instant(source.summary.available_at) <= at && instant(source.summary.capture_observed_at) <= instant(source.summary.available_at)) {
+    return { summaryReceipt: source, measures: [] };
+  }
+  const receiptIds = new Set(receipts.filter(receipt => receipt.source_id === source.source_id &&
+    receipt.snapshot_id === source.snapshot_id && instant(receipt.available_at) <= at).map(receipt => receipt.id));
+  const measures = observations.filter(row => receiptIds.has(row.receipt_id) && instant(row.available_at) <= at &&
+    (event.label !== "Figure corrected" || row.revision_kind === "correction"));
+  measures.sort((a, b) => {
+    const left = instant(a.available_at), right = instant(b.available_at);
+    return left === right ? a.version_id.localeCompare(b.version_id) : left > right ? -1 : 1;
+  });
+  return { measures: measures.slice(0, 2) };
+}

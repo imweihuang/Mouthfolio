@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { recentEvidence, readerPeriod } from "../lib/reader-context.ts";
+import { additionContext, recentEvidence, readerPeriod } from "../lib/reader-context.ts";
 import type { Observation } from "../contracts/types.ts";
 import type { Receipt } from "../lib/contract.ts";
 
@@ -40,4 +40,53 @@ test("coincident source events retain correction meaning independent of input or
     assert.equal(event.label, "Figure corrected"); assert.equal(event.receipt.id, "b");
   }
   assert.equal(recentEvidence([b, a], [], "2026-10-02T00:00:00Z")[0].receipt.id, "a");
+});
+
+const measure = (id: string, receipt_id: string, available_at = "2026-01-01T00:00:00Z"): Observation => ({
+  id, version_id: id, receipt_id, available_at, label: "Fictional revenue", amount: "100.01", unit: "USD", missing_reason: null,
+  period: { start: "2025-01-01", end: "2025-12-31", label: "2025" }, basis: "Fictional reported revenue", revision_kind: "initial", supersedes: null,
+});
+
+test("addition context is bounded to eligible exact capture receipts and preserves measure receipt identities", () => {
+  const source = receipt("source", "2026-01-01T00:00:00Z");
+  const sibling = { ...source, id: "same-capture" };
+  const otherSnapshot = { ...source, id: "other-snapshot", snapshot_id: "different" };
+  const otherSource = { ...source, id: "other-source", source_id: "different" };
+  const future = { ...source, id: "future", available_at: "2026-01-02T00:00:00.000001Z" };
+  const receipts = [source, sibling, otherSnapshot, otherSource, future];
+  const event = recentEvidence([source], [], "2026-01-02T00:00:00Z")[0];
+  const rows = [measure("a", sibling.id), measure("b", source.id), measure("c", source.id),
+    measure("wrong-snapshot", otherSnapshot.id), measure("wrong-source", otherSource.id), measure("future-source", future.id),
+    measure("future-measure", source.id, "2026-01-02T00:00:00.000001Z"), measure("missing-receipt", "absent")];
+  assert.deepEqual(additionContext(event, receipts, rows, "2026-01-02T00:00:00Z").measures, rows.slice(0, 2));
+  assert.deepEqual(additionContext(event, [], rows, "2026-01-02T00:00:00Z"), { measures: [] });
+  assert.deepEqual(additionContext(event, receipts, rows, "2025-12-31T00:00:00Z"), { measures: [] });
+});
+
+test("addition context uses the stored eligible summary, never future text or a manufactured fallback", () => {
+  const source: Receipt = { ...receipt("source", "2026-01-01T00:00:00Z"), summary: {
+    id: "summary", version_id: "summary-1", text: "Fictional source summary.", generated_by: "ai",
+    capture_observed_at: "2026-01-01T00:00:00Z", available_at: "2026-01-02T00:00:00.000001Z", framing: "summary_from_asof_capture",
+  } };
+  const before = recentEvidence([source], [], "2026-01-02T00:00:00Z")[0];
+  assert.deepEqual(additionContext(before, [source], [], "2026-01-02T00:00:00Z"), { measures: [] });
+  const after = recentEvidence([source], [], "2026-01-03T00:00:00Z")[0];
+  assert.equal(after.label, "Summary added");
+  assert.equal(additionContext(after, [source], [], "2026-01-03T00:00:00Z").summaryReceipt, source);
+  const absent: Receipt = { ...source, summary: null };
+  assert.deepEqual(additionContext(after, [absent], [], "2026-01-03T00:00:00Z"), { measures: [] });
+  const invalidCapture: Receipt = { ...source, summary: { ...source.summary!, capture_observed_at: "2026-01-04T00:00:00Z" } };
+  assert.deepEqual(additionContext(after, [invalidCapture], [], "2026-01-03T00:00:00Z"), { measures: [] });
+});
+
+test("a correction shows its corrected value and preserves missing evidence rather than an older summary", () => {
+  const source: Receipt = { ...receipt("source", "2026-01-01T00:00:00Z"), summary: {
+    id: "summary", version_id: "summary-1", text: "Fictional older summary.", generated_by: "ai",
+    capture_observed_at: "2026-01-01T00:00:00Z", available_at: "2026-01-01T00:00:00Z", framing: "summary_current_source_live",
+  } };
+  const correction = { ...measure("correction", source.id, "2026-01-02T00:00:00Z"), revision_kind: "correction" as const, amount: null, missing_reason: "Fictional correction withdrew the value.", supersedes: "original" };
+  const rows = [measure("original", source.id), correction];
+  const event = recentEvidence([source], rows, "2026-01-03T00:00:00Z")[0];
+  assert.equal(event.label, "Figure corrected");
+  assert.deepEqual(additionContext(event, [source], rows, "2026-01-03T00:00:00Z"), { measures: [correction] });
 });

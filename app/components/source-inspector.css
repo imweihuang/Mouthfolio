@@ -24,6 +24,10 @@
 .evidence-additions a { color: var(--filing-blue-ink-light); font-size: var(--text-sm); line-height: var(--leading-reading); }
 .addition-kind,.addition-source-date { font-size: var(--text-sm); color: var(--v2-light-muted); margin: 0 0 var(--unit); }
 .addition-source-date { margin-top: var(--unit); }
+.addition-title { font-size: var(--text-base); font-weight: var(--weight-medium); line-height: var(--leading-reading); margin: calc(var(--unit) * 2) 0; }
+.addition-measure { margin: calc(var(--unit) * 3) 0; }
+.addition-measure p { font-size: var(--text-sm); margin: var(--unit) 0; }
+.evidence-additions .record-tldr { padding: calc(var(--unit) * 3); font-size: var(--text-sm); }
 
 /* The notebook shares the source slot and only reserves space while open. */
 .notebook-opener { margin-bottom: calc(var(--unit) * 5); }

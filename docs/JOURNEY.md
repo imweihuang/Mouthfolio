@@ -157,6 +157,12 @@ first” order puts source cards with substantive company text first; the comple
 archive remains available, including mention-only records. Explicit date orders
 remain chronological. “What changed” lists dated additions to this archive, not
 changes since a user's last visit or a claim of continuous source monitoring.
+The on-demand notebook shows an eligible stored summary with its AI and capture
+disclosures, or up to two reported figures from the same source snapshot. Corrected
+figures keep their correction label; missing values keep their reason. Each measure
+opens its own receipt. Availability and source publication dates remain distinct.
+The Latest evidence link beside the cutoff control is visible on small screens
+and clears the cutoff while preserving the current section, filters and receipt.
 
 Year-over-year revenue change uses consecutive equal-duration periods with the
 same reported basis. A conditional waterfall connects net income to operating
