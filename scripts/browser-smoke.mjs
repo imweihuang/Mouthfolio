@@ -1,3 +1,4 @@
+import { checkLanding } from "../tests/landing-browser.mjs";
 import { checkServiceOnly } from "../tests/service-mode-browser.mjs";
 import { checkJourney } from "../tests/journey-browser.mjs";
 import { chromium } from "playwright";
@@ -35,7 +36,8 @@ try {
     if (new URL(route.request().url()).origin !== serverOrigin) { external.push(route.request().url()); return route.abort(); }
     return route.continue();
   });
-  await page.goto(origin);
+  await checkLanding(page, origin);
+  await page.goto(origin + "/?window=all");
   assert.match(await page.title(), /^Mouthfolio/);
   await page.locator(".overview-question > summary").getByText("Is revenue growth becoming durable demand?", { exact: true }).waitFor();
   assert.ok(await page.getByText("94 million USD", { exact: true }).first().isVisible());
@@ -67,7 +69,7 @@ try {
   await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
   await mkdir("artifacts", { recursive: true });
   for (const width of [1440,390,320]) {
-    await page.setViewportSize({ width, height: 1000 }); await page.goto(origin);
+    await page.setViewportSize({ width, height: 1000 }); await page.goto(origin + "/companies/aster-compute");
     await page.getByText("94 million USD", { exact: true }).first().waitFor();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Document overflow at ${width}`);
     await page.screenshot({ path: `artifacts/demo-${width}.png`, fullPage: true });

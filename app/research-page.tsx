@@ -72,6 +72,7 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
       <div className="workspace">
         <nav className="sidebar" aria-label="Research navigation">
           <ResearchLink href={companyUrl(context)} className="brand">Mouthfolio<span className="brand-by">by ASOF</span></ResearchLink>
+          <ResearchLink className="sidebar-home" href="/" prefetch={false}>Home <span aria-hidden="true">↗</span></ResearchLink>
           <div className="sidebar-cutoff"><p>Evidence through<br/><time dateTime={asOf} title={asOf}>{dateLabel(asOf)} UTC</time></p><ResearchLink href={latestUrl(path, context)}>Latest evidence <span aria-hidden="true">↗</span></ResearchLink></div>
           <p className="nav-label">Company</p><ResearchLink className="nav-company" prefetch={false} href={companyUrl(context)}>{companyName}</ResearchLink>
           <div className="company-navigation"><ResearchLink href={sectionUrl("overview")} aria-current={!voiceId && section === "overview" ? "page" : undefined}>Overview</ResearchLink>

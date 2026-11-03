@@ -1,11 +1,7 @@
-import type { Metadata } from "next";
+import { siteMetadata } from "../lib/site-metadata";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Mouthfolio · Company and voice research",
-  description: "Company evidence, attributed views and dated source receipts.",
-  robots: { index: false, follow: false },
-};
+export const metadata = siteMetadata(process.env.MOUTHFOLIO_PUBLIC_ORIGIN, process.env.MOUTHFOLIO_BASE_PATH);
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en"><body>{children}</body></html>;
 }

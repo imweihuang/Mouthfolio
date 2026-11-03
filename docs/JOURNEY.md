@@ -61,7 +61,10 @@ directs readers to the original source for full context when its URL is present.
 
 ## Routes and context
 
-- `/` and `/companies/aster-compute` open the fictional offline demo.
+- `/` opens the landing page. Existing root URLs with research parameters retain
+  the reader, as described under Landing and public metadata below.
+- `/companies/aster-compute` opens the fictional offline demo when service-only
+  mode is off.
 - `/companies/anthropic` is the first service subject. It never reuses demo data.
 - Company sections use `section=commentary|financials|sources`; omitting it opens
   Overview. Section links and source links preserve the evidence cutoff and
@@ -72,8 +75,8 @@ directs readers to the original source for full context when its URL is present.
   does not silently replace a selected receipt. Unknown or revoked receipts show
   a source-unavailable notice without another source's content.
 - Commentary filters use `voice`, `kind=all|views|mentions` and
-  `order=newest|oldest`. Defaults are all voices, all record types and newest
-  first. Links and cutoff changes preserve the selected research context and
+  `order=readable|newest|oldest`. Defaults are all voices, all record types and
+  Notes first (`readable`). Links and cutoff changes preserve the selected research context and
   receipt. Entering a voice profile clears the company voice filter and makes
   the route's voice authoritative, while retaining type and order selections.
 
@@ -114,8 +117,9 @@ settings are never passed to client components.
 No service credentials or real response fixtures are included in this repository.
 Set `MOUTHFOLIO_SERVICE_ONLY=1` at runtime for a service-only deployment. It
 disables the synthetic adapter on every route, including voice query parameters,
-and makes the root default to Anthropic. Edge route restrictions alone do not
-disable demo selection.
+and makes legacy root research links default to Anthropic. The clean root remains
+the landing page, with its fictional-demo link hidden. Edge route restrictions
+alone do not disable demo selection.
 Missing configuration, transport errors and rejected payloads render **Research
 unavailable**. Only a successful validated empty result renders **No record
 found**. There is no demo fallback for service subjects.
@@ -175,3 +179,28 @@ channels and listing applications with exact receipts. It does not establish
 current trading status. Missing or revoked context adds no inferred company facts;
 older API versions remain supported. The source-code release includes only
 synthetic fixtures. Hosted facts require separate service qualification.
+
+## Landing and public metadata
+
+The clean root path presents Mouthfolio and links to `/companies/anthropic`.
+The local fictional demo remains at `/companies/aster-compute`, with a quiet
+landing link when service-only mode is off. Service-only mode hides this demo
+entry. A Home link in the reader returns to the landing. Existing root
+links with research parameters (`asof`, `window`, `state`, `receipt`, `company`,
+`section`, `voice`, `kind`, `order`) retain the research reader; unrelated tracking
+parameters leave the landing visible. Company and voice routes are unchanged.
+The landing's diagram is explicitly illustrative and contains no financial data.
+
+The landing, navigation, fonts and social image support both the empty base path
+and `/mouthfolio`. Optionally set `MOUTHFOLIO_PUBLIC_ORIGIN` at build time to an
+HTTPS origin, for example `https://example.com`. Paths, credentials, queries and
+fragments are rejected. With it set, social metadata points to the selected base
+path plus `/social-preview`, a locally generated 1200 × 630 PNG. Without it,
+metadata omits absolute social-image URLs rather than guessing a public host.
+No global canonical overrides dated company or voice links.
+
+All routes retain `noindex, nofollow` metadata and HTTP headers. Setting the public
+origin does not enable indexing, change research service access, or establish a
+hostname cutover. The landing footer links to the existing public client license,
+security guidance and client/data boundary; it introduces no account or data-use
+promises. Verify the chosen build prefix with the full browser suite before use.
