@@ -95,9 +95,9 @@ Publication dates are shown separately from ingestion and availability dates.
 Records do not imply a response to another publication.
 
 Coverage remains partial. The newest archived commentary date describes what is
-available, not complete reactions to a filing or a current-news feed. Anthropic
-is the first hosted company; subsequent companies need qualified observations,
-attribution and source coverage before they can offer the same journey.
+available, not complete reactions to a filing or a current-news feed. Each
+company needs qualified observations, attribution and source coverage before
+it can offer this journey.
 
 Company, voice and exact-source links (including charts) show a loading status as soon as navigation starts.
 The current page and URL remain in place until the destination's fresh service

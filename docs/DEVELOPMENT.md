@@ -37,9 +37,8 @@ Compact metric and period controls resolve against available evidence; exact
 tables preserve original values. Source cards group exact voice/receipt pairs
 without adding commentary or inferring a stance from mentions. See
 [JOURNEY](JOURNEY.md) for chart limits, exact-source links and URL-backed sections
-and filters. This presentation change adds no service data or deployment
-acceptance. Anthropic is the first hosted company; further company entries need
-qualified facts and source coverage rather than placeholder metrics.
+and filters. Each company entry requires qualified facts and source coverage.
+A client presentation change alone does not establish service coverage or deployment.
 
 ## Continue development
 
@@ -71,6 +70,6 @@ charges. Larger runners and storage have separate billing rules. See
 [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 
 Publishing source, publishing research, and deploying a service are separate
-decisions. Use the [source-release checklist](RELEASE.md) for the early alpha.
+decisions. Follow the [source-release checklist](RELEASE.md).
 The runnable synthetic foundation can be released before the full reading journey;
 that release grants no hosted-data access or deployment authority.

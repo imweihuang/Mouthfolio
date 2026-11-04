@@ -10,13 +10,13 @@ the maintainer to provide one before sharing sensitive details.
 
 Include the affected revision, impact and a minimal reproduction using synthetic
 data. Do not test against another user's account or a live service without its
-owner's permission. This alpha has no published response-time or supported-release
-commitment; reports should identify whether the issue affects current `main`.
+owner's permission. The project has no published response-time or supported-release
+commitment. Please indicate whether the issue affects the current `main` branch.
 
 ## Client boundary
 
 This repository contains a local synthetic research demo, consumer validation,
-an unconnected service adapter and development/publication tooling. It does not
+a server-side service adapter and development/publication tooling. It does not
 contain the private ASOF Data service. Service responses, source links and
 contributions must be treated as untrusted inputs.
 

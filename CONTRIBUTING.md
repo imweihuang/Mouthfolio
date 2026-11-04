@@ -1,9 +1,13 @@
 # Contributing
 
-Mouthfolio is an early-alpha research client with a runnable synthetic demo.
+Mouthfolio is a research client with a runnable fictional demo.
 See [README](README.md) for current capabilities and [progress](docs/PROGRESS.md)
 for remaining work. No private service or sibling checkout is needed to contribute.
-For copy changes, use the three [writing principles](AGENTS.md#writing-principles).
+For new pages and translations, write for the reader’s question in natural language.
+Keep the meaning of a Mouthfolio, who said what, relevant dates and source limits
+consistent across languages. Use a real example where it helps. Keep launch dates,
+coverage rosters and release status in dated project notes. See the
+[writing principles](AGENTS.md#writing-principles).
 
 Open a [GitHub issue](https://github.com/imweihuang/Mouthfolio/issues) for a bug or
 proposal. Include the revision, Node/npm versions and a minimal synthetic example.

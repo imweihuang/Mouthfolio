@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 
 export async function checkLanding(page, origin) {
-  const heading = page.getByRole("heading", { level: 1, name: "Understand the business. Follow the arguments. Inspect the evidence." });
+  const heading = page.getByRole("heading", { level: 1, name: "Track what people say about the companies you follow." });
   await page.goto(origin);
   await heading.waitFor();
   assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
@@ -12,7 +12,9 @@ export async function checkLanding(page, origin) {
     assert.equal(await socialImage.getAttribute("content"), new URL(`${prefix}/social-preview`, process.env.MOUTHFOLIO_PUBLIC_ORIGIN).href);
   } else assert.equal(await socialImage.count(), 0, "Unconfigured metadata must not guess an absolute image origin");
   assert.equal(await page.locator(".metric-card, .source-context-pane, dialog").count(), 0, "Landing does not manufacture company evidence or open a reader pane");
-  assert.match(await page.locator("figcaption").textContent(), /Illustrative reading flow — not live company data/);
+  assert.match(await page.locator("figcaption").textContent(), /^Illustration of a company page and its sources\./);
+  const voiceExample = page.getByRole("link", { name: "Read Jim Cramer’s remarks about Anthropic" });
+  assert.equal(await voiceExample.getAttribute("href"), new URL(origin).pathname.replace(/\/$/, "") + "/voices/jim-cramer?company=anthropic");
   assert.ok(await page.getByText("Powered by ASOF Data", { exact: true }).first().isVisible());
   await page.keyboard.press("Tab");
   assert.equal(await page.locator(":focus").textContent(), "Skip to introduction");
@@ -33,7 +35,7 @@ export async function checkLanding(page, origin) {
   await heading.waitFor();
   await page.getByRole("link", { name: "The idea", exact: true }).click();
   assert.equal(new URL(page.url()).hash, "#how-it-works");
-  assert.ok(await page.getByRole("heading", { name: "Keep the source in sight.", exact: true }).isVisible());
+  assert.ok(await page.getByRole("heading", { name: "Two ways to read the record.", exact: true }).isVisible());
   await page.goto(origin + "/?utm_source=example");
   await heading.waitFor();
   for (const link of await page.locator("a").all()) {
@@ -60,5 +62,5 @@ export async function checkLanding(page, origin) {
   assert.equal(png.readUInt32BE(20), 630);
   await writeFile("artifacts/social-preview.png", png);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  console.log("Landing passed: keyboard entry, company CTA, prefix-safe navigation, alpha labels, three widths, noindex and social PNG.");
+  console.log("Landing passed: keyboard entry, company CTA, prefix-safe navigation, fictional demo, three widths, noindex and social PNG.");
 }
