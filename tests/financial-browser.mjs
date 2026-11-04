@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { checkStreamedReader } from "./streamed-reader-browser.mjs";
 import fixture from "../fixtures/v0.3-initial.json" with { type: "json" };
 
 // Fictional data exercises the public contract without a real service or archive.
@@ -116,6 +117,7 @@ export async function checkCashBridge(page, origin, supply) {
 export async function checkFinancialComparisons(page, origin, supply) {
   const data = financialFixture();
   supply(data);
+  await checkStreamedReader(page.context().browser(), origin);
   const overview = `${origin}/companies/aster-compute?asof=2026-10-26T12%3A00%3A00Z&window=all`;
   const company = `${overview}&section=financials`;
   await page.setViewportSize({ width: 1440, height: 1000 });
