@@ -118,6 +118,6 @@ export async function ResearchPage({ searchParams, companyId = process.env.MOUTH
         </main>
       </div>
     </div>
-    {showInspector ? <SourceInspector receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} facts={ready && "context" in ready.company ? ready.company.context.facts.filter(fact => fact.receipt_id === receiptId) : []} synthetic={synthetic}/> : null}
+    {showInspector ? <SourceInspector key={href(receiptId)} receipt={selected} requestedId={receiptId} closeUrl={href("")} observations={ready?.observations.filter(row => row.receipt_id === receiptId) ?? []} facts={ready && "context" in ready.company ? ready.company.context.facts.filter(fact => fact.receipt_id === receiptId) : []} synthetic={synthetic}/> : null}
   </ReceiptDismissalProvider>;
 }

@@ -24,17 +24,21 @@ export function EvidenceContext({ receipts, observations, companyName, context, 
   const pane = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const close = () => { pane.current?.close(); setOpen(false); opener.current?.focus({ preventScroll: true }); };
+  const close = () => {
+    if (!pane.current?.isConnected) return;
+    pane.current.close();
+    setOpen(false);
+    if (opener.current?.isConnected) opener.current.focus({ preventScroll: true });
+  };
   useEffect(() => {
+    const node = pane.current;
+    if (!open || !node?.isConnected) return;
     const media = window.matchMedia("(max-width: 1100px)");
-    const dismiss = () => { if (!pane.current?.open) return; pane.current.close(); setOpen(false); opener.current?.focus({ preventScroll: true }); };
+    if (media.matches) node.showModal(); else node.show();
+    if (node.isConnected) node.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
+    const dismiss = () => { if (pane.current === node && node.open) close(); };
     media.addEventListener("change", dismiss);
     return () => media.removeEventListener("change", dismiss);
-  }, []);
-  useEffect(() => {
-    if (!open) return;
-    if (window.matchMedia("(max-width: 1100px)").matches) pane.current?.showModal(); else pane.current?.show();
-    pane.current?.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
   }, [open]);
   const additions = recentEvidence(receipts, observations, context.asOf);
   return <><button ref={opener} type="button" className="quiet-button notebook-opener" aria-expanded={open} aria-controls="research-notebook" onClick={() => {
@@ -104,19 +108,23 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     focusReceiptOpener(opener.current, requestedId);
   };
   const close = () => {
-    if (dismissed.current) return;
+    const pane = dialog.current;
+    if (dismissed.current || !pane?.isConnected) return;
     dismissed.current = true;
     const selectedUrl = new URL(closeUrl, location.href);
     selectedUrl.searchParams.set("receipt", requestedId);
     dismissalUrl.current = selectedUrl.href;
     dismiss(dismissalUrl.current);
-    dialog.current?.close();
-    restoreFocus();
+    pane.close();
+    if (dialog.current === pane && pane.isConnected) restoreFocus();
     startTransition(() => { router.push(closeUrl, { scroll: false }); });
   };
   useEffect(() => {
     const pane = dialog.current;
-    if (!pane) return;
+    if (!pane?.isConnected) return;
+    // History and resize events can arrive between DOM removal and effect cleanup.
+    let subscribed = true;
+    const ownsPane = () => subscribed && dialog.current === pane && pane.isConnected;
     const active = document.activeElement;
     if (active instanceof HTMLAnchorElement && active.dataset.receipt === requestedId) opener.current = active;
     const media = matchMedia("(max-width: 1100px)");
@@ -127,28 +135,35 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     defaults.set("order", defaults.get("order") ?? "readable");
     // Query ordering and percent encoding do not change research context. Keep
     // each parameter's full value list: duplicates must not become valid singles.
-    const currentContext = () => {
-      const url = new URL(location.href);
-      return JSON.stringify([url.pathname, ...["company", "asof", "window", "state", "receipt", "voice", "kind", "order", "section"].map(key => {
-        const values = url.searchParams.getAll(key);
-        return values.length ? values : defaults.getAll(key);
-      })]);
-    };
+    const contextAt = (url: URL) => JSON.stringify([url.pathname, ...["company", "asof", "window", "state", "receipt", "voice", "kind", "order", "section"].map(key => {
+      const values = url.searchParams.getAll(key);
+      return values.length ? values : defaults.getAll(key);
+    })]);
+    const currentContext = () => contextAt(new URL(location.href));
     const openedContext = currentContext();
+    const withoutReceipt = new URL(location.href);
+    withoutReceipt.searchParams.delete("receipt");
+    const closedContext = contextAt(withoutReceipt);
     dismissed.current = false;
     const show = () => {
-      if (dismissed.current) return;
+      if (!ownsPane() || dismissed.current || currentContext() !== openedContext) return;
+      if (pane.open && pane.matches(":modal") === media.matches) return;
       focusRestored.current = false;
-      pane.close();
+      if (pane.open) pane.close();
+      if (!ownsPane()) return;
       if (media.matches) pane.showModal(); else pane.show();
-      pane.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
+      if (ownsPane()) pane.querySelector<HTMLButtonElement>("button")?.focus({ preventScroll: true });
     };
     // History can restore this same mounted receipt while a close is still pending.
-    // A cancelled navigation must not leave its dialog permanently dismissed.
     const restoreFromHistory = () => {
+      if (!ownsPane()) return;
       if (dismissalUrl.current) clear(dismissalUrl.current);
-      dismissed.current = currentContext() !== openedContext;
-      if (dismissed.current) { pane.close(); restoreFocus(); } else show();
+      const context = currentContext();
+      dismissed.current = context !== openedContext;
+      if (dismissed.current) {
+        if (pane.open) pane.close();
+        if (ownsPane() && context === closedContext) restoreFocus();
+      } else show();
     };
     reopenIfCurrent.current = () => {
       if (dismissed.current && currentContext() === openedContext) restoreFromHistory();
@@ -157,15 +172,17 @@ export function SourceInspector({ receipt, requestedId, closeUrl, observations, 
     media.addEventListener("change", show);
     window.addEventListener("popstate", restoreFromHistory);
     return () => {
+      const stillOwnsPane = ownsPane();
+      subscribed = false;
       if (dismissalUrl.current) clear(dismissalUrl.current);
       dismissalUrl.current = null;
       media.removeEventListener("change", show);
       window.removeEventListener("popstate", restoreFromHistory);
       reopenIfCurrent.current = () => {};
       const focusAlreadyRestored = focusRestored.current;
-      pane.close();
+      if (stillOwnsPane && pane.open) pane.close();
       requestAnimationFrame(() => {
-        if (focusAlreadyRestored || new URL(location.href).searchParams.has("receipt")) return;
+        if (focusAlreadyRestored || currentContext() !== closedContext || document.activeElement !== document.body) return;
         focusReceiptOpener(opener.current, requestedId);
       });
     };
