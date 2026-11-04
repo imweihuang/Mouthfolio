@@ -1,5 +1,6 @@
 "use client";
 
+import { StreamedReaderChildren } from "./streamed-reader-children";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
 const ReceiptDismissalContext = createContext({
@@ -13,7 +14,7 @@ export function ReceiptDismissalProvider({ children }: { children: ReactNode }) 
   const dismiss = useCallback((url: string) => setDismissedUrl(url), []);
   // Cleanup for an older inspector must not clear a newer close intent.
   const clear = useCallback((url: string) => setDismissedUrl(current => current === url ? null : current), []);
-  return <ReceiptDismissalContext.Provider value={{ dismissedUrl, dismiss, clear }}>{children}</ReceiptDismissalContext.Provider>;
+  return <ReceiptDismissalContext.Provider value={{ dismissedUrl, dismiss, clear }}><StreamedReaderChildren>{children}</StreamedReaderChildren></ReceiptDismissalContext.Provider>;
 }
 
 export const useReceiptDismissal = () => useContext(ReceiptDismissalContext);
