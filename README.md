@@ -1,6 +1,6 @@
 # Mouthfolio
 
-**Market opinions, grounded in evidence.**
+**Understand the business. Follow the arguments. Inspect the evidence.**
 
 Start with a company. Explore its reported figures, read the commentary around
 them, and open the dated sources behind both. Anthropic is the first hosted
@@ -86,7 +86,9 @@ npm run guards:install
 npm run dev
 ```
 
-Open <http://127.0.0.1:3210>. No environment file, account, backend, provider or
+Open <http://127.0.0.1:3210> for the landing page, or
+<http://127.0.0.1:3210/companies/aster-compute> for the fictional demo.
+No environment file, account, backend, provider or
 credential is needed to run the demo. It includes an original edition, a later correction,
 a missing metric, and unavailable/revoked examples. Its fonts are local.
 
@@ -102,7 +104,7 @@ npm run test:browser
 ```
 
 The browser check starts and stops its own production preview on a free loopback port.
-It checks dates, evidence links, keyboard access, reload/Back, error states,
+It checks the landing and company entry, dates, evidence links, keyboard access, reload/Back, error states,
 320/390/1440px layouts and absence of external requests. Local screenshots go
 to ignored `artifacts/`. The same checks run on every PR and push to `main`.
 The required GitHub check is **CI passed**; no draft or path filter skips it.

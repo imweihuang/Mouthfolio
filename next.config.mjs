@@ -3,7 +3,7 @@ const basePath = process.env.MOUTHFOLIO_BASE_PATH ?? "";
 if (!["", "/mouthfolio"].includes(basePath)) throw new Error("Unsupported Mouthfolio base path");
 const config = {
   basePath,
-  env: { MOUTHFOLIO_BASE_PATH: basePath },
+  env: { MOUTHFOLIO_BASE_PATH: basePath, MOUTHFOLIO_PUBLIC_ORIGIN: process.env.MOUTHFOLIO_PUBLIC_ORIGIN ?? "" },
   poweredByHeader: false,
   output: "standalone",
   experimental: { cpus: 2 },

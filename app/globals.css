@@ -259,3 +259,5 @@ section { padding: calc(var(--unit) * 6) 0; }
 }
 .metric-card .metric-label { line-height: var(--leading-body); }
 .metric-card .metric-period { white-space: normal; }
+
+.sidebar .sidebar-home { justify-content: flex-start; gap: calc(var(--unit) * 2); padding-inline: calc(var(--unit) * 2); font-size: var(--text-sm); color: var(--v2-light-muted); }

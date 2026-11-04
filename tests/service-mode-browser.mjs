@@ -58,9 +58,13 @@ export async function checkServiceVersion(browser, basePath, version) {
     assert.equal((await fetch(origin + "/health", { method: "POST" })).status, 405);
     assert.equal(transportRequests, 0, "Liveness must not query the research service");
     page = await browser.newPage();
-    page.on("pageerror", error => errors.push(error.message));
+    page.on("pageerror", error => errors.push(`${error.message}; page=${page.url()}`));
     page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
     await page.goto(origin);
+    await page.getByRole("heading", { name: "Understand the business. Follow the arguments. Inspect the evidence.", exact: true }).waitFor();
+    assert.equal(transportRequests, 0, "The landing must not fetch or prefetch research");
+    assert.equal(await page.getByRole("link", { name: "Try the fictional demo" }).count(), 0, "Hosted service-only landing does not offer the local demo");
+    await page.getByRole("link", { name: "Explore Anthropic" }).click();
     await page.getByRole("heading", { name: "Anthropic", exact: true }).waitFor();
     await page.getByRole("heading", { name: "Research unavailable", exact: true }).waitFor();
     assert.equal(await page.locator(".sidebar a[href*='/voices/']").count(), 0, "Unavailable evidence must not expose author navigation");
@@ -266,7 +270,7 @@ export async function checkServiceVersion(browser, basePath, version) {
     await page.getByText("The original source link is unavailable. Source text is not displayed.", { exact: true }).waitFor();
     assert.deepEqual(errors, [], `${version} service browser console/page errors`);
     console.log("Authorized-mode synthetic transport passed: 21 exact Financials rows, 4 dated overview cards, earlier missing reasons in table and inspector at both widths, preserved section/receipt history, plain view text, absent qualifiers and unavailable source copy.");
-    console.log("Service-only mode passed: Anthropic home, no demo adapter through company or voice routes, missing service stays unavailable.");
+    console.log("Service-only mode passed: landing and Anthropic entry, no demo adapter through company or voice routes, missing service stays unavailable.");
   } catch (error) {
     throw new Error(`${version}: ${error.message}; URL=${page?.url()}; errors=${JSON.stringify(errors)}`, { cause: error });
   } finally {
