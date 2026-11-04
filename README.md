@@ -1,16 +1,17 @@
 # Mouthfolio
 
-**Understand the business. Follow the arguments. Inspect the evidence.**
+**What’s in a Mouthfolio?** A person’s public views on investments, with the dates and sources behind them.
 
-Start with a company. Explore its reported figures, read the commentary around
-them, and open the dated sources behind both. Anthropic is the first hosted
-company, with the AI economy as our starting focus.
+What has one person said about different investments? Who has discussed a
+company or asset you follow?
 
-A Mouthfolio is **a portfolio of public convictions**, built from what people
-say publicly. Follow an author's name from a commentary item to explore their
-history about the company. These are expressed views, not verified holdings.
+Start with Anthropic. Explore its reported numbers, see who’s talking about the
+company, and follow a voice back to what they said. In this alpha, each linked
+voice page shows that author’s remarks about Anthropic. A mention alone does
+not establish an author’s stance, and an expressed view is not a verified
+holding.
 
-[Explore Anthropic](https://asof.io/mouthfolio/companies/anthropic) · [Run the demo](#run-the-demo)
+[Explore Anthropic](https://mouthfolio.com/companies/anthropic) · [Run the demo](#run-the-demo)
 
 In the app, a **voice** is a person or account whose market commentary you can
 explore.
@@ -23,7 +24,7 @@ fictional.** It runs without an account, service connection or credentials.
 
 ### Hosted Anthropic alpha
 
-[Open Anthropic on Mouthfolio](https://asof.io/mouthfolio/companies/anthropic).
+[Open Anthropic on Mouthfolio](https://mouthfolio.com/companies/anthropic).
 The first hosted slice connects reported SEC filing figures with a partial
 archive of attributed views and mentions. Company evidence and commentary each
 lead to their original sources.

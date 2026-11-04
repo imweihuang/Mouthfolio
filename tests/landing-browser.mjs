@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 
 export async function checkLanding(page, origin) {
-  const heading = page.getByRole("heading", { level: 1, name: "Understand the business. Follow the arguments. Inspect the evidence." });
+  const heading = page.getByRole("heading", { level: 1, name: "What’s in a Mouthfolio?" });
   await page.goto(origin);
   await heading.waitFor();
   assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
@@ -33,7 +33,7 @@ export async function checkLanding(page, origin) {
   await heading.waitFor();
   await page.getByRole("link", { name: "The idea", exact: true }).click();
   assert.equal(new URL(page.url()).hash, "#how-it-works");
-  assert.ok(await page.getByRole("heading", { name: "Keep the source in sight.", exact: true }).isVisible());
+  assert.ok(await page.getByRole("heading", { name: "People and the investments they talk about.", exact: true }).isVisible());
   await page.goto(origin + "/?utm_source=example");
   await heading.waitFor();
   for (const link of await page.locator("a").all()) {

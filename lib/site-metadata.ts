@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-export const siteTitle = "Mouthfolio · Understand the business. Inspect the evidence.";
-export const siteDescription = "Company financials and dated market commentary, connected to the sources behind them. An early alpha, starting with Anthropic. Coverage is partial.";
+export const siteTitle = "Mouthfolio · Public views on investments";
+export const siteDescription = "A person’s public views on investments, with the dates and sources behind them. The early alpha starts with Anthropic.";
 
 export function siteMetadata(origin?: string, basePath = ""): Metadata {
   if (!["", "/mouthfolio"].includes(basePath)) throw new Error("Unsupported Mouthfolio base path");
@@ -19,7 +19,7 @@ export function siteMetadata(origin?: string, basePath = ""): Metadata {
     robots: { index: false, follow: false },
     ...(publicOrigin ? { metadataBase: publicOrigin } : {}),
     openGraph: { type: "website", siteName: "Mouthfolio", title: siteTitle, description: siteDescription,
-      ...(image ? { images: [{ url: image, width: 1200, height: 630, alt: "Mouthfolio. Understand the business. Follow the arguments. Inspect the evidence. Early alpha. Starting with Anthropic." }] } : {}) },
+      ...(image ? { images: [{ url: image, width: 1200, height: 630, alt: "Mouthfolio. What’s in a Mouthfolio? A person’s public views on investments, with the dates and sources behind them. Early alpha · Starting with Anthropic. Powered by ASOF Data." }] } : {}) },
     twitter: { card: image ? "summary_large_image" : "summary", title: siteTitle, description: siteDescription,
       ...(image ? { images: [image] } : {}) },
   };
