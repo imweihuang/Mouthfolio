@@ -61,7 +61,7 @@ export async function checkServiceVersion(browser, basePath, version) {
     page.on("pageerror", error => errors.push(`${error.message}; page=${page.url()}`));
     page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
     await page.goto(origin);
-    await page.getByRole("heading", { name: "What’s in a Mouthfolio?", exact: true }).waitFor();
+    await page.getByRole("heading", { name: "Track what people say about the companies you follow.", exact: true }).waitFor();
     assert.equal(transportRequests, 0, "The landing must not fetch or prefetch research");
     assert.equal(await page.getByRole("link", { name: "Try the fictional demo" }).count(), 0, "Hosted service-only landing does not offer the local demo");
     await page.getByRole("link", { name: "Explore Anthropic" }).click();

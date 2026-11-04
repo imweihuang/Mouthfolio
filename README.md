@@ -1,69 +1,32 @@
 # Mouthfolio
 
-**What’s in a Mouthfolio?** A person’s public views on investments, with the dates and sources behind them.
+**Track what people say about the companies you follow.**
 
-What has one person said about different investments? Who has discussed a
-company or asset you follow?
+A Mouthfolio brings together a person’s public investment views over time,
+with the dates and sources behind them. What has someone said about an
+investment? Who else has discussed a company or asset you follow?
 
-Start with Anthropic. Explore its reported numbers, see who’s talking about the
-company, and follow a voice back to what they said. In this alpha, each linked
-voice page shows that author’s remarks about Anthropic. A mention alone does
-not establish an author’s stance, and an expressed view is not a verified
-holding.
+[Explore Mouthfolio](https://mouthfolio.com/) · [Run the fictional demo](#run-the-demo)
 
-[Explore Anthropic](https://mouthfolio.com/companies/anthropic) · [Run the demo](#run-the-demo)
+<a id="early-alpha"></a>
 
-In the app, a **voice** is a person or account whose market commentary you can
-explore.
+## Reading a company page
 
-## Early alpha
+In **Overview**, explore reported figures alongside their reporting periods.
+In **Commentary**, select an author to read their remarks about that company
+over time. Open a source to check what they said and when. The client calls
+a person or account whose commentary appears here a **voice**.
 
-This repository contains the experimental, [MIT-licensed](LICENSE) client and a
-local demo. **All companies, voices, values and excerpts in the local demo are
-fictional.** It runs without an account, service connection or credentials.
+A mention alone doesn’t tell you where someone stands. Even when someone
+expresses a view, their words don’t tell you what they own. Coverage and
+dates on each page tell you which records are available.
 
-### Hosted Anthropic alpha
+## About the client
 
-[Open Anthropic on Mouthfolio](https://mouthfolio.com/companies/anthropic).
-The first hosted slice connects reported SEC filing figures with a partial
-archive of attributed views and mentions. Company evidence and commentary each
-lead to their original sources.
-
-See the company page for the latest archived commentary date. Coverage is partial
-and does not capture every reaction to company filings. This alpha is not a
-current-news feed.
-
-| Available in the client | Still to complete |
-|---|---|
-| Company Overview and Commentary sections, with author history linked from each source card | Additional companies with qualified facts and sources |
-| Revenue and cash-flow comparisons, a conditional reconciliation chart and exact-value tables | Broader comparable observations and a complete filing reader |
-| Dated commentary and an adjacent source-context pane on desktop, with a source drawer on small screens | Richer qualified commentary and summaries |
-| Dated sources, a later correction and visible missing-data and error states in the fictional demo | Reader trials of the complete journey |
-| A hosted Anthropic journey, plus a fictional demo that works locally | Broader hosted coverage |
-
-For contributors, the repository also includes selected visual foundations, a
-versioned client-service interface and automated checks. The default demo remains
-offline; see the [journey guide](docs/JOURNEY.md)
-for the separate service route and deployment-time connection.
-The company-first presentation uses qualified evidence from the service. Overview
-keeps dated company facts, reported figures, visual comparisons and readable notes together;
-Commentary opens the fuller dated feed. Author history is linked in the feed,
-while navigation stays focused on the company. This client change adds no data
-coverage and does not establish that this revision is deployed. Anthropic is the
-only hosted company described here; adding another requires qualified facts and
-source coverage.
-
-Interfaces and presentation may change during the alpha. There is no stable API
-or production-support commitment. Publishing this source is separate from
-deploying a service or publishing real research.
-
-See [progress and milestones](docs/PROGRESS.md) for the dated client status,
-what is in place and what completes the next research journey.
-
-The connected journey is integrated through [Mouthfolio #3](https://github.com/imweihuang/Mouthfolio/pull/3).
-A complete filing reader, full Storybook extraction, broader coverage and reader
-trials remain open. ASOF Research and ASOF Chat are separate product directions
-with no active development planned.
+This repository contains the [MIT-licensed](LICENSE) client, its documented
+service interface, and an offline demo. **All companies, voices, values and
+excerpts in the local demo are fictional.** See the [journey guide](docs/JOURNEY.md)
+for the service connection and [progress record](docs/PROGRESS.md) for milestones.
 
 ## Client and data boundary
 
@@ -122,7 +85,6 @@ For vulnerabilities, follow [SECURITY.md](SECURITY.md) and avoid public disclosu
 of sensitive details. Maintainers use the [source-release checklist](docs/RELEASE.md).
 
 The `private: true` setting in `package.json` prevents accidental npm publication.
-It does not control GitHub visibility; this alpha is a source checkout, not an npm package.
 
 Every displayed value or attributed view should be traceable. Keep publication
 time, evidence availability, reporting period and corrections distinct. Missing
