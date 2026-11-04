@@ -1,6 +1,6 @@
 # Source boundary
 
-This early-alpha client contains a synthetic demonstration and selected frontend
+The Mouthfolio client contains a synthetic demonstration and selected frontend
 foundations. Original code and synthetic fixtures are MIT-licensed. Further
 component imports, source publication and hosted-service qualification remain
 separate work. The [release checklist](RELEASE.md) defines the source-release gate;

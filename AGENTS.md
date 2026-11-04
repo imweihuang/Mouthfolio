@@ -1,7 +1,7 @@
 # Mouthfolio agent instructions
 
 Read README.md, CONTRIBUTING.md and docs/SOURCE_BOUNDARY.md before changing this
-repository. It contains the early-alpha Mouthfolio client, a synthetic demo and
+repository. It contains the Mouthfolio client, a synthetic demo and
 selected visual foundations. Do not infer GitHub visibility or release approval
 from the presence of these source files. Read SECURITY.md for reporting and boundaries;
 maintainers use docs/RELEASE.md before a separately authorized source release.
@@ -34,6 +34,8 @@ CLAUDE.md imports this file so the two instruction entry points stay consistent.
 Lead with Mouthfolio. Explain ASOF Data where it helps readers understand the
 service. Copy can improve through normal review; these principles add no word
 blacklist, punctuation ban, fixed slogan test or separate copy-approval gate.
+
+For new pages and translations, follow the evergreen copy guidance in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Delivery and publication boundary
 
