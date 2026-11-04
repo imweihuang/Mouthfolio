@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { checkDetachedReceiptHistory } from "./detached-receipt-browser.mjs";
 
 // Hold the next close response until the assertions finish. This proves the
 // dialog can dismiss without waiting for any server navigation to complete.
@@ -20,6 +21,7 @@ async function holdCloseResponse(page) {
 }
 
 export async function checkReceiptClose(browser, origin) {
+  await checkDetachedReceiptHistory(browser, origin);
   const company = `${origin}/companies/aster-compute?company=aster-compute&asof=2026-10-26T12%3A00%3A00Z&window=all`;
   const selected = `${company}&receipt=receipt-original`;
   for (const width of [1440, 390]) {
