@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 
 export async function checkLanding(page, origin) {
-  const heading = page.getByRole("heading", { level: 1, name: "Track what people say about the companies you follow." });
+  const heading = page.getByRole("heading", { level: 1, name: "Their words. Their Mouthfolio." });
   await page.goto(origin);
   await heading.waitFor();
   assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");

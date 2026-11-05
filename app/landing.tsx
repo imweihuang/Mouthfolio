@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { definition, headline } from "../lib/site-metadata";
+import { definition, headline, supportingCopy } from "../lib/site-metadata";
 import "./landing.css";
 
 const repository = "https://github.com/imweihuang/Mouthfolio";
@@ -14,13 +14,13 @@ export function Landing() {
     <main id="introduction" tabIndex={-1} className="landing-main">
       <section className="landing-hero" aria-labelledby="landing-title">
         <h1 id="landing-title">{headline}</h1>
-        <p className="landing-intro">{definition}</p>
+        <p className="landing-intro">{supportingCopy}</p>
         <div className="landing-actions"><Link className="landing-primary" href="/companies/anthropic" prefetch={false}>Explore Anthropic <span aria-hidden="true">↗</span></Link><a className="landing-secondary" href={repository}>View the open-source client <span aria-hidden="true">↗</span></a></div>
         <p className="landing-powered">Powered by ASOF Data</p>
         {process.env.MOUTHFOLIO_SERVICE_ONLY !== "1" ? <p className="landing-demo"><Link href="/companies/aster-compute" prefetch={false}>Try the fictional demo <span aria-hidden="true">↗</span></Link><span>No service connection needed.</span></p> : null}
       </section>
       <section id="how-it-works" className="landing-journey" aria-labelledby="journey-title">
-        <div className="landing-section-heading"><div><p className="landing-kicker">The idea</p><h2 id="journey-title">Two ways to read the record.</h2></div><p>What has one person said about an investment over time? Who else has discussed a company or asset you follow?</p></div>
+        <div className="landing-section-heading"><div><p className="landing-kicker">The idea</p><h2 id="journey-title">Two ways to read the record.</h2></div><p>{definition}</p></div>
         <figure className="landing-preview" aria-labelledby="preview-caption">
           <div className="preview-bar"><span>Mouthfolio</span><span>Company and commentary</span></div>
           <div className="preview-workspace">

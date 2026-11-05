@@ -1,10 +1,11 @@
 # Mouthfolio
 
-**Track what people say about the companies you follow.**
+**Their words. Their Mouthfolio.**
 
-A Mouthfolio brings together a person’s public investment views over time,
-with the dates and sources behind them. What has someone said about an
-investment? Who else has discussed a company or asset you follow?
+Explore a person’s public investment views across companies and over time.
+Or start with a company and discover what people are saying about it.
+
+A portfolio of views, with dates and original sources.
 
 [Explore Mouthfolio](https://mouthfolio.com/) · [Run the fictional demo](#run-the-demo)
 

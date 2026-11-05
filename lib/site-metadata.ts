@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 
-export const headline = "Track what people say about the companies you follow.";
-export const definition = "A Mouthfolio brings together a person’s public investment views over time, with the dates and sources behind them.";
-export const siteTitle = "Mouthfolio · Public investment views over time";
-export const siteDescription = headline + " " + definition;
+export const headline = "Their words. Their Mouthfolio.";
+export const definition = "A portfolio of views, with dates and original sources.";
+export const supportingCopy = "Explore a person’s public investment views across companies and over time. Or start with a company and discover what people are saying about it.";
+export const siteTitle = "Mouthfolio · A portfolio of views";
+export const siteDescription = supportingCopy + " " + definition;
 
 export function siteMetadata(origin?: string, basePath = ""): Metadata {
   if (!["", "/mouthfolio"].includes(basePath)) throw new Error("Unsupported Mouthfolio base path");
